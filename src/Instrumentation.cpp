@@ -247,7 +247,13 @@ bool FPInstrumentation::isUnwantedFunction(Function *f)
 	if (
 			f->getName().str().find("_FPC_INTERRUPT_") != std::string::npos ||
 			f->getName().str().find("_FPC_FP32_CHECK_ADD_") != std::string::npos ||
-			f->getName().str().find("_FPC_FP64_CHECK_ADD_") != std::string::npos
+			f->getName().str().find("_FPC_FP32_CHECK_SUB_") != std::string::npos ||
+			f->getName().str().find("_FPC_FP32_CHECK_MUL_") != std::string::npos ||
+			f->getName().str().find("_FPC_FP32_CHECK_DIV_") != std::string::npos ||
+			f->getName().str().find("_FPC_FP64_CHECK_ADD_") != std::string::npos ||
+			f->getName().str().find("_FPC_FP64_CHECK_SUB_") != std::string::npos ||
+			f->getName().str().find("_FPC_FP64_CHECK_MUL_") != std::string::npos ||
+			f->getName().str().find("_FPC_FP64_CHECK_DIV_") != std::string::npos
 			)
 		ret = true;
 
