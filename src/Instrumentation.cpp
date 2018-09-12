@@ -22,7 +22,13 @@ using namespace llvm;
 FPInstrumentation::FPInstrumentation(Module *M) :
 		mod(M),
 		fp32_check_add_function(nullptr),
-		fp64_check_add_function(nullptr)
+		fp32_check_sub_function(nullptr),
+		fp32_check_mul_function(nullptr),
+		fp32_check_div_function(nullptr),
+		fp64_check_add_function(nullptr),
+		fp64_check_sub_function(nullptr),
+		fp64_check_mul_function(nullptr),
+		fp64_check_div_function(nullptr)
 {
 
 	outs() << "Initializing FPInstrumentation\n";
@@ -40,6 +46,30 @@ FPInstrumentation::FPInstrumentation(Module *M) :
     		f->setLinkage(GlobalValue::LinkageTypes::LinkOnceODRLinkage);
     	fp32_check_add_function->setCallingConv(CallingConv::PTX_Device);
     }
+    else if (f->getName().str().find("_FPC_FP32_CHECK_SUB_") != std::string::npos)
+    {
+    	outs() << "====> Found _FPC_FP32_CHECK_SUB_\n";
+    	fp32_check_sub_function = f;
+    	if (f->getLinkage() != GlobalValue::LinkageTypes::LinkOnceODRLinkage)
+    		f->setLinkage(GlobalValue::LinkageTypes::LinkOnceODRLinkage);
+    	fp32_check_sub_function->setCallingConv(CallingConv::PTX_Device);
+    }
+    else if (f->getName().str().find("_FPC_FP32_CHECK_MUL_") != std::string::npos)
+    {
+    	outs() << "====> Found _FPC_FP32_CHECK_MUL_\n";
+    	fp32_check_mul_function = f;
+    	if (f->getLinkage() != GlobalValue::LinkageTypes::LinkOnceODRLinkage)
+    		f->setLinkage(GlobalValue::LinkageTypes::LinkOnceODRLinkage);
+    	fp32_check_mul_function->setCallingConv(CallingConv::PTX_Device);
+    }
+    else if (f->getName().str().find("_FPC_FP32_CHECK_DIV_") != std::string::npos)
+    {
+    	outs() << "====> Found _FPC_FP32_CHECK_DIV_\n";
+    	fp32_check_div_function = f;
+    	if (f->getLinkage() != GlobalValue::LinkageTypes::LinkOnceODRLinkage)
+    		f->setLinkage(GlobalValue::LinkageTypes::LinkOnceODRLinkage);
+    	fp32_check_div_function->setCallingConv(CallingConv::PTX_Device);
+    }
     else if (f->getName().str().find("_FPC_FP64_CHECK_ADD_") != std::string::npos)
     {
     	outs() << "====> Found _FPC_FP64_CHECK_ADD_\n";
@@ -47,6 +77,30 @@ FPInstrumentation::FPInstrumentation(Module *M) :
     	if (f->getLinkage() != GlobalValue::LinkageTypes::LinkOnceODRLinkage)
     		f->setLinkage(GlobalValue::LinkageTypes::LinkOnceODRLinkage);
     	fp64_check_add_function->setCallingConv(CallingConv::PTX_Device);
+    }
+    else if (f->getName().str().find("_FPC_FP64_CHECK_SUB_") != std::string::npos)
+    {
+    	outs() << "====> Found _FPC_FP64_CHECK_SUB_\n";
+    	fp64_check_sub_function = f;
+    	if (f->getLinkage() != GlobalValue::LinkageTypes::LinkOnceODRLinkage)
+    		f->setLinkage(GlobalValue::LinkageTypes::LinkOnceODRLinkage);
+    	fp64_check_sub_function->setCallingConv(CallingConv::PTX_Device);
+    }
+    else if (f->getName().str().find("_FPC_FP64_CHECK_MUL_") != std::string::npos)
+    {
+    	outs() << "====> Found _FPC_FP64_CHECK_MUL_\n";
+    	fp64_check_mul_function = f;
+    	if (f->getLinkage() != GlobalValue::LinkageTypes::LinkOnceODRLinkage)
+    		f->setLinkage(GlobalValue::LinkageTypes::LinkOnceODRLinkage);
+    	fp64_check_mul_function->setCallingConv(CallingConv::PTX_Device);
+    }
+    else if (f->getName().str().find("_FPC_FP64_CHECK_DIV_") != std::string::npos)
+    {
+    	outs() << "====> Found _FPC_FP64_CHECK_DIV_\n";
+    	fp64_check_div_function = f;
+    	if (f->getLinkage() != GlobalValue::LinkageTypes::LinkOnceODRLinkage)
+    		f->setLinkage(GlobalValue::LinkageTypes::LinkOnceODRLinkage);
+    	fp64_check_div_function->setCallingConv(CallingConv::PTX_Device);
     }
   }
 
@@ -98,6 +152,39 @@ void FPInstrumentation::instrumentFunction(Function *f)
 					else if (isDoubleFPOperation(inst))
 					{
 						callInst = builder.CreateCall(fp64_check_add_function, args_ref);
+					}
+				}
+				else if (inst->getOpcode() == Instruction::FSub)
+				{
+					if (isSingleFPOperation(inst))
+					{
+						callInst = builder.CreateCall(fp32_check_sub_function, args_ref);
+					}
+					else if (isDoubleFPOperation(inst))
+					{
+						callInst = builder.CreateCall(fp64_check_sub_function, args_ref);
+					}
+				}
+				else if (inst->getOpcode() == Instruction::FMul)
+				{
+					if (isSingleFPOperation(inst))
+					{
+						callInst = builder.CreateCall(fp32_check_mul_function, args_ref);
+					}
+					else if (isDoubleFPOperation(inst))
+					{
+						callInst = builder.CreateCall(fp64_check_mul_function, args_ref);
+					}
+				}
+				else if (inst->getOpcode() == Instruction::FDiv)
+				{
+					if (isSingleFPOperation(inst))
+					{
+						callInst = builder.CreateCall(fp32_check_div_function, args_ref);
+					}
+					else if (isDoubleFPOperation(inst))
+					{
+						callInst = builder.CreateCall(fp64_check_div_function, args_ref);
 					}
 				}
 

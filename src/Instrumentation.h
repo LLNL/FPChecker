@@ -20,8 +20,16 @@ class FPInstrumentation
 private:
 
   Module *mod;
+
   Function *fp32_check_add_function;
+  Function *fp32_check_sub_function;
+  Function *fp32_check_mul_function;
+  Function *fp32_check_div_function;
+
   Function *fp64_check_add_function;
+  Function *fp64_check_sub_function;
+  Function *fp64_check_mul_function;
+  Function *fp64_check_div_function;
 
   IRBuilder<> createBuilderAfter(Instruction *inst);
   IRBuilder<> createBuilderBefore(Instruction *inst);

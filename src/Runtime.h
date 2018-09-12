@@ -29,7 +29,34 @@ void _FPC_FP32_CHECK_ADD_(float x, float y, float z, int loc)
 {
 	if (isnan(x))
 	{
-	_FPC_INTERRUPT_(loc);
+		_FPC_INTERRUPT_(loc);
+	}
+}
+
+__device__
+void _FPC_FP32_CHECK_SUB_(float x, float y, float z, int loc)
+{
+	if (isnan(x))
+	{
+		_FPC_INTERRUPT_(loc);
+	}
+}
+
+__device__
+void _FPC_FP32_CHECK_MUL_(float x, float y, float z, int loc)
+{
+	if (isnan(x))
+	{
+		_FPC_INTERRUPT_(loc);
+	}
+}
+
+__device__
+void _FPC_FP32_CHECK_DIV_(float x, float y, float z, int loc)
+{
+	if (isnan(x))
+	{
+		_FPC_INTERRUPT_(loc);
 	}
 }
 
@@ -40,7 +67,34 @@ void _FPC_FP64_CHECK_ADD_(double x, double y, double z, int loc)
 {
 	if (isnan(x))
 	{
-	_FPC_INTERRUPT_(loc);
+		_FPC_INTERRUPT_(loc);
+	}
+}
+
+__device__
+void _FPC_FP64_CHECK_SUB_(double x, double y, double z, int loc)
+{
+	if (isnan(x))
+	{
+		_FPC_INTERRUPT_(loc);
+	}
+}
+
+__device__
+void _FPC_FP64_CHECK_MUL_(double x, double y, double z, int loc)
+{
+	if (isnan(x))
+	{
+		_FPC_INTERRUPT_(loc);
+	}
+}
+
+__device__
+void _FPC_FP64_CHECK_DIV_(double x, double y, double z, int loc)
+{
+	if (isnan(x))
+	{
+		_FPC_INTERRUPT_(loc);
 	}
 }
 
