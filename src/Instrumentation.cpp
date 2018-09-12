@@ -330,7 +330,8 @@ void FPInstrumentation::generateCodeForInterruption()
 	IRBuilder<> builder(i);
 
 	errs() << "created builder\n";
-	std::string fileName = getFileName(i);
+	//std::string fileName = getFileNameFromInstruction(i);
+	std::string fileName = getFileNameFromModule(mod);
 	Constant *c = builder.CreateGlobalStringPtr(fileName);
 	values.push_back(c);
 	//c = builder.CreateGlobalStringPtr("value_2");

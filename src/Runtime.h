@@ -18,8 +18,8 @@ __device__ char *_FPC_FILE_NAME_[1];
 __device__
 void _FPC_INTERRUPT_(int loc)
 {
-	//asm("trap;");
-	printf("File: %s, Line: %d\n", _FPC_FILE_NAME_[0], loc);
+	printf("Error: File: %s, Line: %d\n", _FPC_FILE_NAME_[0], loc);
+	asm("trap;");
 }
 
 /* ------------------------ FP32 Functions --------------------------------- */

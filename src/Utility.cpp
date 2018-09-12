@@ -66,7 +66,7 @@ int getLineOfCode(const Instruction *i)
   return ret;
 }
 
-std::string getFileName(const Instruction *i)
+std::string getFileNameFromInstruction(const Instruction *i)
 {
   std::stringstream lineStr("");
 
@@ -82,6 +82,11 @@ std::string getFileName(const Instruction *i)
   }
 
   return lineStr.str().c_str();
+}
+
+std::string getFileNameFromModule(const Module *mod)
+{
+	return mod->getModuleIdentifier();
 }
 
 bool mayModifyMemory(const Instruction *i)

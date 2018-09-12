@@ -32,7 +32,9 @@ std::string getInstructionInformation(const Instruction *i);
 
 int getLineOfCode(const Instruction *i);
 
-std::string getFileName(const Instruction *i);
+std::string getFileNameFromInstruction(const Instruction *i);
+
+std::string getFileNameFromModule(const Module *mod);
 
 void stop();
 
