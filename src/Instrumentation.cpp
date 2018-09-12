@@ -130,9 +130,10 @@ void FPInstrumentation::instrumentFunction(Function *f)
 
 				// Push parameters
 				std::vector<Value *> args;
+				args.push_back(inst);
 				args.push_back(inst->getOperand(0));
 				args.push_back(inst->getOperand(1));
-				args.push_back(ConstantFP::get(builder.getDoubleTy(), 999.0));
+				//args.push_back(ConstantFP::get(builder.getDoubleTy(), 999.0));
 
 				// Push location parameter (line number)
 				int lineNumber = getLineOfCode(inst);
