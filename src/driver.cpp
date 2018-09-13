@@ -121,6 +121,8 @@ static void registerPass(const PassManagerBuilder &, legacy::PassManagerBase &PM
 }
 
 static RegisterStandardPasses
+    RegisterMyPass(PassManagerBuilder::EP_EnabledOnOptLevel0,registerPass);
+static RegisterStandardPasses
     RegisterMyPass(PassManagerBuilder::EP_OptimizerLast,registerPass);
 }
 
