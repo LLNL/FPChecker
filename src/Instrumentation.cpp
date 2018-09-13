@@ -102,6 +102,24 @@ FPInstrumentation::FPInstrumentation(Module *M) :
     		f->setLinkage(GlobalValue::LinkageTypes::LinkOnceODRLinkage);
     	fp64_check_div_function->setCallingConv(CallingConv::PTX_Device);
     }
+    else if (f->getName().str().find("_FPC_INTERRUPT_") != std::string::npos)
+    {
+    	outs() << "====> Found _FPC_INTERRUPT_\n";
+    	if (f->getLinkage() != GlobalValue::LinkageTypes::LinkOnceODRLinkage)
+    		f->setLinkage(GlobalValue::LinkageTypes::LinkOnceODRLinkage);
+    }
+    else if (f->getName().str().find("_FPC_FP32_IS_SUBNORMAL") != std::string::npos)
+    {
+    	outs() << "====> Found _FPC_FP32_IS_SUBNORMAL\n";
+    	if (f->getLinkage() != GlobalValue::LinkageTypes::LinkOnceODRLinkage)
+    		f->setLinkage(GlobalValue::LinkageTypes::LinkOnceODRLinkage);
+    }
+    else if (f->getName().str().find("_FPC_FP64_IS_SUBNORMAL") != std::string::npos)
+    {
+    	outs() << "====> Found _FPC_FP64_IS_SUBNORMAL\n";
+    	if (f->getLinkage() != GlobalValue::LinkageTypes::LinkOnceODRLinkage)
+    		f->setLinkage(GlobalValue::LinkageTypes::LinkOnceODRLinkage);
+    }
   }
 
   printf("Value:  %p\n", fp32_check_add_function);
