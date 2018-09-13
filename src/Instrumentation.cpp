@@ -254,7 +254,9 @@ bool FPInstrumentation::isUnwantedFunction(Function *f)
 			f->getName().str().find("_FPC_FP64_CHECK_ADD_") != std::string::npos ||
 			f->getName().str().find("_FPC_FP64_CHECK_SUB_") != std::string::npos ||
 			f->getName().str().find("_FPC_FP64_CHECK_MUL_") != std::string::npos ||
-			f->getName().str().find("_FPC_FP64_CHECK_DIV_") != std::string::npos
+			f->getName().str().find("_FPC_FP64_CHECK_DIV_") != std::string::npos ||
+			f->getName().str().find("_FPC_FP32_IS_SUBNORMAL") != std::string::npos ||
+			f->getName().str().find("_FPC_FP64_IS_SUBNORMAL") != std::string::npos
 			)
 		ret = true;
 
