@@ -53,17 +53,17 @@ void _FPC_FP32_CHECK_ADD_(float x, float y, float z, int loc)
 {
 	if (isinf(x))
 	{
-		puts("ERROR: infinite value!");
+		printf("ERROR: infinite value!");
 		_FPC_INTERRUPT_(loc);
 	}
 	else if (isnan(x))
 	{
-		puts("ERROR: NaN value!");
+		printf("ERROR: NaN value!");
 		_FPC_INTERRUPT_(loc);
 	}
 	else if (_FPC_FP32_IS_SUBNORMAL(x))
 	{
-		puts("ERROR: Subnormal value!");
+		printf("ERROR: Subnormal value!");
 		_FPC_INTERRUPT_(loc);
 	}
 }
@@ -73,17 +73,17 @@ void _FPC_FP32_CHECK_SUB_(float x, float y, float z, int loc)
 {
 	if (isinf(x))
 	{
-		puts("ERROR: infinite value!");
+		printf("ERROR: infinite value!");
 		_FPC_INTERRUPT_(loc);
 	}
 	else if (isnan(x))
 	{
-		puts("ERROR: NaN value!");
+		printf("ERROR: NaN value!");
 		_FPC_INTERRUPT_(loc);
 	}
 	else if (_FPC_FP32_IS_SUBNORMAL(x))
 	{
-		puts("ERROR: Subnormal value!");
+		printf("ERROR: Subnormal value!");
 		_FPC_INTERRUPT_(loc);
 	}
 }
@@ -93,17 +93,17 @@ void _FPC_FP32_CHECK_MUL_(float x, float y, float z, int loc)
 {
 	if (isinf(x))
 	{
-		puts("ERROR: infinite value!");
+		printf("ERROR: infinite value!");
 		_FPC_INTERRUPT_(loc);
 	}
 	else if (isnan(x))
 	{
-		puts("ERROR: NaN value!");
+		printf("ERROR: NaN value!");
 		_FPC_INTERRUPT_(loc);
 	}
 	else if (_FPC_FP32_IS_SUBNORMAL(x))
 	{
-		puts("ERROR: Subnormal value!");
+		printf("ERROR: Subnormal value!");
 		_FPC_INTERRUPT_(loc);
 	}
 }
@@ -113,17 +113,17 @@ void _FPC_FP32_CHECK_DIV_(float x, float y, float z, int loc)
 {
 	if (isinf(x))
 	{
-		puts("ERROR: infinite value!");
+		printf("ERROR: infinite value!");
 		_FPC_INTERRUPT_(loc);
 	}
 	else if (isnan(x))
 	{
-		puts("ERROR: NaN value!");
+		printf("ERROR: NaN value!");
 		_FPC_INTERRUPT_(loc);
 	}
 	else if (_FPC_FP32_IS_SUBNORMAL(x))
 	{
-		puts("ERROR: Subnormal value!");
+		printf("ERROR: Subnormal value!");
 		_FPC_INTERRUPT_(loc);
 	}
 }
@@ -152,17 +152,17 @@ void _FPC_FP64_CHECK_ADD_(double x, double y, double z, int loc)
 {
 	if (isinf(x))
 	{
-		puts("ERROR: infinite value!");
+		printf("ERROR: infinite value!");
 		_FPC_INTERRUPT_(loc);
 	}
 	else if (isnan(x))
 	{
-		puts("ERROR: NaN value!");
+		printf("ERROR: NaN value!");
 		_FPC_INTERRUPT_(loc);
 	}
 	else if (_FPC_FP64_IS_SUBNORMAL(x))
 	{
-		puts("ERROR: Subnormal value!");
+		printf("ERROR: Subnormal value!");
 		_FPC_INTERRUPT_(loc);
 	}
 }
@@ -172,17 +172,17 @@ void _FPC_FP64_CHECK_SUB_(double x, double y, double z, int loc)
 {
 	if (isinf(x))
 	{
-		puts("ERROR: infinite value!");
+		printf("ERROR: infinite value!");
 		_FPC_INTERRUPT_(loc);
 	}
 	else if (isnan(x))
 	{
-		puts("ERROR: NaN value!");
+		printf("ERROR: NaN value!");
 		_FPC_INTERRUPT_(loc);
 	}
 	else if (_FPC_FP64_IS_SUBNORMAL(x))
 	{
-		puts("ERROR: Subnormal value!");
+		printf("ERROR: Subnormal value!");
 		_FPC_INTERRUPT_(loc);
 	}
 }
@@ -192,17 +192,17 @@ void _FPC_FP64_CHECK_MUL_(double x, double y, double z, int loc)
 {
 	if (isinf(x))
 	{
-		puts("ERROR: infinite value!");
+		printf("ERROR: infinite value!");
 		_FPC_INTERRUPT_(loc);
 	}
 	else if (isnan(x))
 	{
-		puts("ERROR: NaN value!");
+		printf("ERROR: NaN value!");
 		_FPC_INTERRUPT_(loc);
 	}
 	else if (_FPC_FP64_IS_SUBNORMAL(x))
 	{
-		puts("ERROR: Subnormal value!");
+		printf("ERROR: Subnormal value!");
 		_FPC_INTERRUPT_(loc);
 	}
 }
@@ -212,17 +212,17 @@ void _FPC_FP64_CHECK_DIV_(double x, double y, double z, int loc)
 {
 	if (isinf(x))
 	{
-		puts("ERROR: infinite value!");
+		printf("ERROR: infinite value!");
 		_FPC_INTERRUPT_(loc);
 	}
 	else if (isnan(x))
 	{
-		puts("ERROR: NaN value!");
+		printf("ERROR: NaN value!");
 		_FPC_INTERRUPT_(loc);
 	}
 	else if (_FPC_FP64_IS_SUBNORMAL(x))
 	{
-		puts("ERROR: Subnormal value!");
+		printf("ERROR: Subnormal value!");
 		_FPC_INTERRUPT_(loc);
 	}
 }
