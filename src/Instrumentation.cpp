@@ -1,6 +1,7 @@
 
 #include "Instrumentation.h"
 #include "Utility.h"
+#include "CodeMatching.h"
 
 #include <llvm/IR/Type.h>
 #include "llvm/Pass.h"
@@ -120,6 +121,12 @@ FPInstrumentation::FPInstrumentation(Module *M) :
     	if (f->getLinkage() != GlobalValue::LinkageTypes::LinkOnceODRLinkage)
     		f->setLinkage(GlobalValue::LinkageTypes::LinkOnceODRLinkage);
     }
+    else if (f->getName().str().find("_FPC_DEVICE_CODE_FUNC_") != std::string::npos)
+    {
+    	outs() << "====> Found _FPC_DEVICE_CODE_FUNC_\n";
+    	if (f->getLinkage() != GlobalValue::LinkageTypes::LinkOnceODRLinkage)
+    		f->setLinkage(GlobalValue::LinkageTypes::LinkOnceODRLinkage);
+    }
   }
 
   printf("Value:  %p\n", fp32_check_add_function);
@@ -127,7 +134,7 @@ FPInstrumentation::FPInstrumentation(Module *M) :
 
 void FPInstrumentation::instrumentFunction(Function *f)
 {
-	if (isUnwantedFunction(f))
+	if (CodeMatching::isUnwantedFunction(f))
 		return;
 
   assert((fp32_check_add_function!=NULL) && "Function not initialized!");
@@ -258,32 +265,6 @@ IRBuilder<> FPInstrumentation::createBuilderBefore(Instruction *inst)
 	IRBuilder<> builder(inst);
 
 	return builder;
-}
-
-bool FPInstrumentation::isUnwantedFunction(Function *f)
-{
-	bool ret = false;
-	if (
-			f->getName().str().find("_FPC_INTERRUPT_") != std::string::npos ||
-			f->getName().str().find("_FPC_FP32_CHECK_ADD_") != std::string::npos ||
-			f->getName().str().find("_FPC_FP32_CHECK_SUB_") != std::string::npos ||
-			f->getName().str().find("_FPC_FP32_CHECK_MUL_") != std::string::npos ||
-			f->getName().str().find("_FPC_FP32_CHECK_DIV_") != std::string::npos ||
-			f->getName().str().find("_FPC_FP64_CHECK_ADD_") != std::string::npos ||
-			f->getName().str().find("_FPC_FP64_CHECK_SUB_") != std::string::npos ||
-			f->getName().str().find("_FPC_FP64_CHECK_MUL_") != std::string::npos ||
-			f->getName().str().find("_FPC_FP64_CHECK_DIV_") != std::string::npos ||
-			f->getName().str().find("_FPC_FP32_IS_SUBNORMAL") != std::string::npos ||
-			f->getName().str().find("_FPC_FP64_IS_SUBNORMAL") != std::string::npos
-			)
-		ret = true;
-
-	return ret;
-}
-
-bool FPInstrumentation::isMainFunction(Function *f)
-{
-	return (f->getName().str().compare("main") == 0);
 }
 
 void FPInstrumentation::setFakeDebugLocation(Function *f, Instruction *inst)

@@ -22,6 +22,11 @@
 /// (3) We need to add this function to the list of unwanted functions, i.e.,
 ///     functions we do not instrument in the pass.
 
+#ifdef __CUDA_ARCH__
+/// Symbol used to determine whether we are compiling device code or not
+__device__ void _FPC_DEVICE_CODE_FUNC_(){};
+#endif
+
 __device__ void	_FPC_INTERRUPT_(int loc);
 __device__ int	_FPC_FP32_IS_SUBNORMAL(double x);
 __device__ void _FPC_FP32_CHECK_ADD_(float x, float y, float z, int loc);
@@ -38,6 +43,7 @@ __device__ void _FPC_FP64_CHECK_DIV_(float x, float y, float z, int loc);
 
 #define TOOL_NAME "[FPChecker] "
 
+/// We store the file name and directory in this variable
 //char *_FPC_LOCATIONS_TABLE_[100];// = {"NONE1"};
 __device__ char *_FPC_FILE_NAME_[1];
 

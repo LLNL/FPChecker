@@ -43,11 +43,11 @@ public:
   void generateCodeForInterruption();
 
   /* Helper functions */
-  static bool isUnwantedFunction(Function *f);
+  //static bool isUnwantedFunction(Function *f);
   static bool isFPOperation(const Instruction *inst);
   static bool isDoubleFPOperation(const Instruction *inst);
   static bool isSingleFPOperation(const Instruction *inst);
-  static bool isMainFunction(Function *f);
+  //static bool isMainFunction(Function *f);
 };
 
 }
