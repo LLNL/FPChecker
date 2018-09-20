@@ -161,16 +161,16 @@ void _FPC_INTERRUPT_(int errorType, int op, int loc)
 				char o[64]; o[0] = '\0';
 				char l[64]; l[0] = '\0';
 
-				if 			(errorType == 0) strcpy(e, "NaN");
-				else if	(errorType == 1) strcpy(e, "INF");
-				else if	(errorType == 2) strcpy(e, "Underflow");
-				else strcpy(e, "NONE");
+				if 			(errorType == 0) _FPC_CPY_(e, "NaN");
+				else if	(errorType == 1) _FPC_CPY_(e, "INF");
+				else if	(errorType == 2) _FPC_CPY_(e, "Underflow");
+				else _FPC_CPY_(e, "NONE");
 
-				if 			(op == 0) strcpy(o, "ADD");
-				else if	(op == 1) strcpy(o, "SUB");
-				else if	(op == 2) strcpy(o, "MUL");
-				else if	(op == 3) strcpy(o, "DIV");
-				else strcpy(o, "NONE");
+				if 			(op == 0) _FPC_CPY_(o, "ADD");
+				else if	(op == 1) _FPC_CPY_(o, "SUB");
+				else if	(op == 2) _FPC_CPY_(o, "MUL");
+				else if	(op == 3) _FPC_CPY_(o, "DIV");
+				else _FPC_CPY_(o, "NONE");
 
 				sprintf(l, "%d", loc);
 
