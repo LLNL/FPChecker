@@ -39,44 +39,6 @@ public:
 
   CUDAKernelAnalysis() : ModulePass(ID) {}
 
-  /*bool isFunctionAKernel(Function *f)
-  {
-  	Module *m = f->getParent();
-  	NamedMDNode *NMD = m->getNamedMetadata("nvvm.annotations");
-		if (!NMD)
-			return false;
-
-		for (unsigned i = 0, e = NMD->getNumOperands(); i != e; ++i)
-		{
-			const MDNode *md = NMD->getOperand(i);
-
-			GlobalValue *entity =
-					mdconst::dyn_extract_or_null<GlobalValue>(md->getOperand(0));
-			// entity may be null due to DCE
-			if (!entity)
-				continue;
-			if (entity != f)
-				continue;
-
-		  assert(md && "Invalid mdnode for annotation");
-		  assert((md->getNumOperands() % 2) == 1 && "Invalid number of operands");
-			for (unsigned i = 1, e = md->getNumOperands(); i != e; i += 2) {
-			    // property
-			    const MDString *prop = dyn_cast<MDString>(md->getOperand(i));
-			    assert(prop && "Annotation property not a string");
-
-			    ConstantInt *Val = mdconst::dyn_extract<ConstantInt>(md->getOperand(i + 1));
-			    unsigned v = Val->getZExtValue();
-			    std::string keyname = prop->getString().str();
-			    if (keyname.find("kernel") != std::string::npos)
-			    	return (v == 1);
-			}
-		}
-
-		// Last resort: check the calling convention
-		return (f->getCallingConv() == CallingConv::PTX_Kernel || f->getCallingConv() == CallingConv::PTX_Device);
-  }*/
-
 	virtual bool runOnModule(Module &M)
 	{
 		Module *m = &M;

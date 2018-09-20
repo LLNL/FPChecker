@@ -28,27 +28,34 @@ __device__ void _FPC_DEVICE_CODE_FUNC_(){};
 #endif
 
 __device__ void	_FPC_INTERRUPT_(int loc);
-__device__ int	_FPC_FP32_IS_SUBNORMAL(double x);
+__device__ int	_FPC_FP32_IS_SUBNORMAL(float x);
+__device__ int 	_FPC_FP32_IS_ALMOST_OVERFLOW(float x);
+__device__ int 	_FPC_FP32_IS_ALMOST_SUBNORMAL(float x);
 __device__ void _FPC_FP32_CHECK_ADD_(float x, float y, float z, int loc);
 __device__ void _FPC_FP32_CHECK_SUB_(float x, float y, float z, int loc);
 __device__ void _FPC_FP32_CHECK_MUL_(float x, float y, float z, int loc);
 __device__ void _FPC_FP32_CHECK_DIV_(float x, float y, float z, int loc);
 __device__ int	_FPC_FP64_IS_SUBNORMAL(double x);
+__device__ int 	_FPC_FP64_IS_ALMOST_OVERFLOW(double x);
+__device__ int 	_FPC_FP64_IS_ALMOST_SUBNORMAL(double x);
 __device__ void _FPC_FP64_CHECK_ADD_(float x, float y, float z, int loc);
 __device__ void _FPC_FP64_CHECK_SUB_(float x, float y, float z, int loc);
 __device__ void _FPC_FP64_CHECK_MUL_(float x, float y, float z, int loc);
 __device__ void _FPC_FP64_CHECK_DIV_(float x, float y, float z, int loc);
 
-/* ----------------------------- Global Data ------------------------------- */
 
 #define REPORT_LINE_SIZE 80
 #define REPORT_COL1_SIZE 15
 #define REPORT_COL2_SIZE REPORT_LINE_SIZE-REPORT_COL1_SIZE-1
+#define DANGER_ZONE_PERCENTAGE 10.0
+
+/* ----------------------------- Global Data ------------------------------- */
 
 /// We store the file name and directory in this variable
 //char *_FPC_LOCATIONS_TABLE_[100];// = {"NONE1"};
 __device__ char *_FPC_FILE_NAME_[1];
 
+/// Lock to print from one thread only
 __device__ static int lock_state = 0;
 
 /* ------------------------ Generic Functions ------------------------------ */
@@ -178,7 +185,6 @@ void _FPC_INTERRUPT_(int errorType, int op, int loc)
 
 				char e[64]; e[0] = '\0';
 				char o[64]; o[0] = '\0';
-				//char l[64]; l[0] = '\0';
 
 				if 			(errorType == 0) _FPC_CPY_(e, "NaN");
 				else if	(errorType == 1) _FPC_CPY_(e, "INF");
@@ -190,8 +196,6 @@ void _FPC_INTERRUPT_(int errorType, int op, int loc)
 				else if	(op == 2) _FPC_CPY_(o, "MUL");
 				else if	(op == 3) _FPC_CPY_(o, "DIV");
 				else _FPC_CPY_(o, "NONE");
-
-				//sprintf(l, "%d", loc);
 
 				_FPC_PRINT_REPORT_HEADER_(0);
 				_FPC_PRINT_REPORT_ROW_("Error", REPORT_COL1_SIZE, 0);
@@ -205,12 +209,49 @@ void _FPC_INTERRUPT_(int errorType, int op, int loc)
 				_FPC_PRINT_REPORT_ROW_(loc, REPORT_COL2_SIZE, 1);
 				_FPC_PRINT_REPORT_LINE_('+');
 
-				//printf(TOOL_NAME "File: %s, Line: %d\n", _FPC_FILE_NAME_[0], loc);
+				asm("trap;");
+		}
+	}
+}
+
+__device__
+void _FPC_WARNING_(int errorType, int op, int loc)
+{
+	bool blocked = true;
+  	while(blocked) {
+			if(0 == atomicCAS(&lock_state, 0, 1)) {
+
+				char e[64]; e[0] = '\0';
+				char o[64]; o[0] = '\0';
+
+				if 			(errorType == 0) _FPC_CPY_(e, "NaN");
+				else if	(errorType == 1) _FPC_CPY_(e, "INF");
+				else if	(errorType == 2) _FPC_CPY_(e, "Underflow");
+				else _FPC_CPY_(e, "NONE");
+
+				if 			(op == 0) _FPC_CPY_(o, "ADD");
+				else if	(op == 1) _FPC_CPY_(o, "SUB");
+				else if	(op == 2) _FPC_CPY_(o, "MUL");
+				else if	(op == 3) _FPC_CPY_(o, "DIV");
+				else _FPC_CPY_(o, "NONE");
+
+				_FPC_PRINT_REPORT_HEADER_(1);
+				_FPC_PRINT_REPORT_ROW_("Error", REPORT_COL1_SIZE, 0);
+				_FPC_PRINT_REPORT_ROW_(e, REPORT_COL2_SIZE, 1);
+				_FPC_PRINT_REPORT_ROW_("Operation", REPORT_COL1_SIZE, 0);
+				_FPC_PRINT_REPORT_ROW_(o, REPORT_COL2_SIZE, 1);
+				_FPC_PRINT_REPORT_ROW_("File", REPORT_COL1_SIZE, 0);
+				_FPC_PRINT_REPORT_ROW_(_FPC_FILE_NAME_[0], REPORT_COL2_SIZE, 1);
+				_FPC_PRINT_REPORT_ROW_("Line", REPORT_COL1_SIZE, 0);
+				//_FPC_PRINT_REPORT_ROW_(l, REPORT_COL2_SIZE, 1);
+				_FPC_PRINT_REPORT_ROW_(loc, REPORT_COL2_SIZE, 1);
+				_FPC_PRINT_REPORT_LINE_('+');
 
 				asm("trap;");
 		}
 	}
 }
+
 
 /// Check the operation.
 /// type: 0 for float, 1 for double
@@ -221,28 +262,40 @@ static void _FPC_CHECK_OPERATION_(int type, float x, float y, float z, int loc)
 {
 	if (isinf(x))
 	{
-		//printf(TOOL_NAME "ERROR: infinite value!");
 		_FPC_INTERRUPT_(1, 0, loc);
 	}
 	else if (isnan(x))
 	{
-		//printf(TOOL_NAME "ERROR: NaN value!");
 		_FPC_INTERRUPT_(0, 0, loc);
 	}
 	else if (type == 0) /// subnormals check
 	{
 		if (_FPC_FP32_IS_SUBNORMAL(x))
 		{
-			//printf(TOOL_NAME "ERROR: Subnormal value!");
 			_FPC_INTERRUPT_(2, 0, loc);
+		}
+		else if (_FPC_FP32_IS_ALMOST_SUBNORMAL(x))
+		{
+			_FPC_WARNING_(2, 0, loc);
+		}
+		else if (_FPC_FP32_IS_ALMOST_OVERFLOW(x))
+		{
+			_FPC_WARNING_(2, 0, loc);
 		}
 	}
 	else if (type == 1) /// subnormals check
 	{
 		if (_FPC_FP64_IS_SUBNORMAL(x))
 		{
-			//printf(TOOL_NAME "ERROR: Subnormal value!");
 			_FPC_INTERRUPT_(2, 0, loc);
+		}
+		else if (_FPC_FP64_IS_ALMOST_SUBNORMAL(x))
+		{
+			_FPC_WARNING_(2, 0, loc);
+		}
+		else if (_FPC_FP64_IS_ALMOST_OVERFLOW(x))
+		{
+			_FPC_WARNING_(2, 0, loc);
 		}
 	}
 }
@@ -251,7 +304,7 @@ static void _FPC_CHECK_OPERATION_(int type, float x, float y, float z, int loc)
 
 //// Returns non-zero value if FP argument is a sub-normal
 __device__
-int _FPC_FP32_IS_SUBNORMAL(double x)
+int _FPC_FP32_IS_SUBNORMAL(float x)
 {
 	int ret = 0;
 	uint32_t val;
@@ -261,6 +314,40 @@ int _FPC_FP32_IS_SUBNORMAL(double x)
   if (x != 0.0 && x != -0.0)
   {
   	if (val == 0)
+  		ret = 1;
+  }
+  return ret;
+}
+
+__device__
+int _FPC_FP32_IS_ALMOST_OVERFLOW(float x)
+{
+	int ret = 0;
+	uint32_t val;
+  memcpy((void *) &val, (void *) &x, sizeof(val));
+  val = val << 1; 	// get rid of sign bit
+  val = val >> 24; 	// get rid of the mantissa bits
+  if (x != 0.0 && x != -0.0)
+  {
+  	int maxVal = 256 - (int)(DANGER_ZONE_PERCENTAGE*256.0);
+  	if (val >= maxVal)
+  		ret = 1;
+  }
+  return ret;
+}
+
+__device__
+int _FPC_FP32_IS_ALMOST_SUBNORMAL(float x)
+{
+	int ret = 0;
+	uint32_t val;
+  memcpy((void *) &val, (void *) &x, sizeof(val));
+  val = val << 1; 	// get rid of sign bit
+  val = val >> 24; 	// get rid of the mantissa bits
+  if (x != 0.0 && x != -0.0)
+  {
+  	int minVal = (int)(DANGER_ZONE_PERCENTAGE*256.0);
+  	if (val <= minVal)
   		ret = 1;
   }
   return ret;
@@ -305,6 +392,40 @@ int _FPC_FP64_IS_SUBNORMAL(double x)
   if (x != 0.0 && x != -0.0)
   {
   	if (val == 0)
+  		ret = 1;
+  }
+  return ret;
+}
+
+__device__
+int _FPC_FP64_IS_ALMOST_OVERFLOW(double x)
+{
+	int ret = 0;
+	uint64_t val;
+  memcpy((void *) &val, (void *) &x, sizeof(val));
+  val = val << 1; 	// get rid of sign bit
+  val = val >> 53; 	// get rid of the mantissa bits
+  if (x != 0.0 && x != -0.0)
+  {
+  	int maxVal = 2048 - (int)(DANGER_ZONE_PERCENTAGE*2048.0);
+  	if (val >= maxVal)
+  		ret = 1;
+  }
+  return ret;
+}
+
+__device__
+int _FPC_FP64_IS_ALMOST_SUBNORMAL(double x)
+{
+	int ret = 0;
+	uint64_t val;
+  memcpy((void *) &val, (void *) &x, sizeof(val));
+  val = val << 1; 	// get rid of sign bit
+  val = val >> 53; 	// get rid of the mantissa bits
+  if (x != 0.0 && x != -0.0)
+  {
+  	int minVal = (int)(DANGER_ZONE_PERCENTAGE*2048.0);
+  	if (val <= minVal)
   		ret = 1;
   }
   return ret;
