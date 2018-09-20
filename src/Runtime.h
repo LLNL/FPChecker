@@ -63,6 +63,37 @@ __device__ static int lock_state = 0;
 /// +----------------------------------------------------------+
 
 __device__
+static int _FPC_LEN_(const char *s)
+{
+	int maxLen = 1024; // to check correctness and avid infinite loop
+	int i = 0;
+	while(s[i] != '\0' && i < maxLen)
+		i++;
+	return i;
+}
+
+__device__
+static void _FPC_CPY_(char *d, const char *s)
+{
+	int len = _FPC_LEN_(s);
+	int i=0;
+	for (i=0; i < len; ++i)
+		d[i] = s[i];
+	d[i] = '\0';
+}
+
+__device__
+static void _FPC_CAT_(char *d, const char *s)
+{
+	int lenS = _FPC_LEN_(s);
+	int lenD = _FPC_LEN_(d);
+	int i=0;
+	for (i=0; i < lenS; ++i)
+		d[i+lenD] = s[i];
+	d[i+lenD] = '\0';
+}
+
+__device__
 static void _FPC_PRINT_REPORT_LINE_(const char border)
 {
 	printf("%c",border);
@@ -79,23 +110,23 @@ static void _FPC_PRINT_REPORT_HEADER_(int type)
 	char msg[255];
 	msg[0] = '\0';
 	if (type == 0)
-		strcpy(msg," FPChecker Error Report ");
+		_FPC_CPY_(msg," FPChecker Error Report ");
 	else
-		strcpy(msg," FPChecker Warning Report ");
+		_FPC_CPY_(msg," FPChecker Warning Report ");
 
-	int l = strlen(msg);
+	int l = _FPC_LEN_(msg);
 	l = REPORT_LINE_SIZE-l-2;
 	char line[255];
 	line[0] = '\0';
-	strcat(line,"+");
+	_FPC_CAT_(line,"+");
 	for (int i=0; i < l/2; ++i)
-			strcat(line,"-");
+		_FPC_CAT_(line,"-");
 	if (l%2)
-		strcat(line,"-");
-	strcat(line,msg);
+		_FPC_CAT_(line,"-");
+	_FPC_CAT_(line,msg);
 	for (int i=0; i < l/2; ++i)
-			strcat(line,"-");
-	strcat(line,"+");
+		_FPC_CAT_(line,"-");
+	_FPC_CAT_(line,"+");
 	printf("%s\n",line);
 }
 
@@ -104,11 +135,11 @@ static void _FPC_PRINT_REPORT_ROW_(const char *val, int space, int last)
 {
 	char msg[255];
 	msg[0] = '\0';
-	strcpy(msg," ");
-	strcat(msg, val);
-	int rem = strlen(msg);
+	_FPC_CPY_(msg," ");
+	_FPC_CAT_(msg, val);
+	int rem = _FPC_LEN_(msg);
 	for (int i=0; i < space-rem; ++i)
-		strcat(msg," ");
+		_FPC_CAT_(msg," ");
 	printf("%s",msg);
 
 	if (last==0)
