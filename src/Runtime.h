@@ -221,28 +221,28 @@ static void _FPC_CHECK_OPERATION_(int type, float x, float y, float z, int loc)
 {
 	if (isinf(x))
 	{
-		printf(TOOL_NAME "ERROR: infinite value!");
-		_FPC_INTERRUPT_(loc);
+		//printf(TOOL_NAME "ERROR: infinite value!");
+		_FPC_INTERRUPT_(1, 0, loc);
 	}
 	else if (isnan(x))
 	{
 		//printf(TOOL_NAME "ERROR: NaN value!");
-		_FPC_INTERRUPT_(loc);
+		_FPC_INTERRUPT_(0, 0, loc);
 	}
 	else if (type == 0) /// subnormals check
 	{
 		if (_FPC_FP32_IS_SUBNORMAL(x))
 		{
-			printf(TOOL_NAME "ERROR: Subnormal value!");
-			_FPC_INTERRUPT_(loc);
+			//printf(TOOL_NAME "ERROR: Subnormal value!");
+			_FPC_INTERRUPT_(2, 0, loc);
 		}
 	}
 	else if (type == 1) /// subnormals check
 	{
 		if (_FPC_FP64_IS_SUBNORMAL(x))
 		{
-			printf(TOOL_NAME "ERROR: Subnormal value!");
-			_FPC_INTERRUPT_(loc);
+			//printf(TOOL_NAME "ERROR: Subnormal value!");
+			_FPC_INTERRUPT_(2, 0, loc);
 		}
 	}
 }
