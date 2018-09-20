@@ -100,7 +100,6 @@ public:
 
 				outs() << "Instrumenting func: " << f->getName().str() << "\n";
 				fpInstrumentation->instrumentFunction(F);
-
 			}
 		}
 
