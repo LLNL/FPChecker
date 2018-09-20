@@ -6,7 +6,7 @@ CC	=	/usr/workspace/wsa/laguna/latest_llvm/install/bin/clang++
 LLVM_PASS       = -Xclang -load -Xclang /usr/workspace/wsa/laguna/fpchecker/FPChecker/src/libcudakernels.so \
 -include Runtime.h -I/usr/workspace/wsa/laguna/fpchecker/FPChecker/src
 #OP	= -arch=sm_60 -O0 
-OP	= $(LLVM_PASS) -O0  -x cuda --cuda-gpu-arch=sm_60
+OP	= $(LLVM_PASS) -O0  -x cuda --cuda-gpu-arch=sm_60 -g
 LINK	= -L${CUDA_PATH}/lib64/ -lcuda -lcudart
 
 

@@ -4,7 +4,8 @@
 __device__
 double power(double x)
 {
-  return x*x + 2.0;
+  double y = (x-x)/(x-x);
+  return x*x + 2.0 + y;
 }
 
 __global__
