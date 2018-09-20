@@ -148,6 +148,25 @@ static void _FPC_PRINT_REPORT_ROW_(const char *val, int space, int last)
 		printf("\n");
 }
 
+__device__
+static void _FPC_PRINT_REPORT_ROW_(int val, int space, int last)
+{
+	int numChars = floor(log10 (abs (val))) + 1;
+	printf(" %d", val);
+
+	char msg[255];
+	msg[0] = '\0';
+	int rem = numChars + 1;
+	for (int i=0; i < space-rem; ++i)
+		_FPC_CAT_(msg," ");
+	printf("%s",msg);
+
+	if (last==0)
+		printf(":");
+	else
+		printf("\n");
+}
+
 /// errorType: 0:NaN, 1:INF, 2:Underflow
 /// op: 0:ADD, 1:SUB, 2:MUL, 3:DIV
 __device__
@@ -159,7 +178,7 @@ void _FPC_INTERRUPT_(int errorType, int op, int loc)
 
 				char e[64]; e[0] = '\0';
 				char o[64]; o[0] = '\0';
-				char l[64]; l[0] = '\0';
+				//char l[64]; l[0] = '\0';
 
 				if 			(errorType == 0) _FPC_CPY_(e, "NaN");
 				else if	(errorType == 1) _FPC_CPY_(e, "INF");
@@ -172,7 +191,7 @@ void _FPC_INTERRUPT_(int errorType, int op, int loc)
 				else if	(op == 3) _FPC_CPY_(o, "DIV");
 				else _FPC_CPY_(o, "NONE");
 
-				sprintf(l, "%d", loc);
+				//sprintf(l, "%d", loc);
 
 				_FPC_PRINT_REPORT_HEADER_(0);
 				_FPC_PRINT_REPORT_ROW_("Error", REPORT_COL1_SIZE, 0);
@@ -182,7 +201,8 @@ void _FPC_INTERRUPT_(int errorType, int op, int loc)
 				_FPC_PRINT_REPORT_ROW_("File", REPORT_COL1_SIZE, 0);
 				_FPC_PRINT_REPORT_ROW_(_FPC_FILE_NAME_[0], REPORT_COL2_SIZE, 1);
 				_FPC_PRINT_REPORT_ROW_("Line", REPORT_COL1_SIZE, 0);
-				_FPC_PRINT_REPORT_ROW_(l, REPORT_COL2_SIZE, 1);
+				//_FPC_PRINT_REPORT_ROW_(l, REPORT_COL2_SIZE, 1);
+				_FPC_PRINT_REPORT_ROW_(loc, REPORT_COL2_SIZE, 1);
 				_FPC_PRINT_REPORT_LINE_('+');
 
 				//printf(TOOL_NAME "File: %s, Line: %d\n", _FPC_FILE_NAME_[0], loc);
