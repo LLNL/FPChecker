@@ -47,15 +47,25 @@ __device__ void _FPC_FP64_CHECK_DIV_(float x, float y, float z, int loc);
 //char *_FPC_LOCATIONS_TABLE_[100];// = {"NONE1"};
 __device__ char *_FPC_FILE_NAME_[1];
 
+__device__ static int lock_state = 0;
+//__device__ static void lock(void) { while (atomicCAS(&lock_state, 0, 1) != 0); }
+__device__ static void unlock(void) { atomicExch(&lock_state, 0); }
 
 /* ------------------------ Generic Functions ------------------------------ */
 
 __device__
 void _FPC_INTERRUPT_(int loc)
 {
-	printf(TOOL_NAME "File: %s, Line: %d\n", _FPC_FILE_NAME_[0], loc);
-	//fflush(stdout);
-	asm("trap;");
+	//lock();
+	bool blocked = true;
+  	while(blocked) {
+    		if(0 == atomicCAS(&lock_state, 0, 1)) {
+		printf(TOOL_NAME "File: %s, Line: %d\n", _FPC_FILE_NAME_[0], loc);
+		//fflush(stdout);
+		asm("trap;");
+		}
+	}
+	//unlock(); // never reached
 }
 
 /// Check the operation.
@@ -72,7 +82,7 @@ static void _FPC_CHECK_OPERATION_(int type, float x, float y, float z, int loc)
 	}
 	else if (isnan(x))
 	{
-		printf(TOOL_NAME "ERROR: NaN value!");
+		//printf(TOOL_NAME "ERROR: NaN value!");
 		_FPC_INTERRUPT_(loc);
 	}
 	else if (type == 0) /// subnormals check
