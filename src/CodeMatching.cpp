@@ -41,7 +41,14 @@ bool CodeMatching::isUnwantedFunction(Function *f)
 			f->getName().str().find("_FPC_FP64_CHECK_MUL_") != std::string::npos ||
 			f->getName().str().find("_FPC_FP64_CHECK_DIV_") != std::string::npos ||
 			f->getName().str().find("_FPC_FP32_IS_SUBNORMAL") != std::string::npos ||
-			f->getName().str().find("_FPC_FP64_IS_SUBNORMAL") != std::string::npos
+			f->getName().str().find("_FPC_FP64_IS_SUBNORMAL") != std::string::npos ||
+			f->getName().str().find("_FPC_LEN_") != std::string::npos ||
+			f->getName().str().find("_FPC_CPY_") != std::string::npos ||
+			f->getName().str().find("_FPC_CAT_") != std::string::npos ||
+			f->getName().str().find("_FPC_PRINT_REPORT_LINE_") != std::string::npos ||
+			f->getName().str().find("_FPC_PRINT_REPORT_HEADER_") != std::string::npos ||
+			f->getName().str().find("_FPC_PRINT_REPORT_ROW_") != std::string::npos
+
 			)
 		ret = true;
 
