@@ -127,6 +127,36 @@ FPInstrumentation::FPInstrumentation(Module *M) :
     	if (f->getLinkage() != GlobalValue::LinkageTypes::LinkOnceODRLinkage)
     		f->setLinkage(GlobalValue::LinkageTypes::LinkOnceODRLinkage);
     }
+    else if (f->getName().str().find("_FPC_WARNING_") != std::string::npos)
+    {
+    	outs() << "====> Found _FPC_WARNING_\n";
+    	if (f->getLinkage() != GlobalValue::LinkageTypes::LinkOnceODRLinkage)
+    		f->setLinkage(GlobalValue::LinkageTypes::LinkOnceODRLinkage);
+    }
+    else if (f->getName().str().find("_FPC_FP32_IS_ALMOST_OVERFLOW") != std::string::npos)
+    {
+    	outs() << "====> Found _FPC_FP32_IS_ALMOST_OVERFLOW\n";
+    	if (f->getLinkage() != GlobalValue::LinkageTypes::LinkOnceODRLinkage)
+    		f->setLinkage(GlobalValue::LinkageTypes::LinkOnceODRLinkage);
+    }
+    else if (f->getName().str().find("_FPC_FP32_IS_ALMOST_SUBNORMAL") != std::string::npos)
+    {
+    	outs() << "====> Found _FPC_FP32_IS_ALMOST_SUBNORMAL\n";
+    	if (f->getLinkage() != GlobalValue::LinkageTypes::LinkOnceODRLinkage)
+    		f->setLinkage(GlobalValue::LinkageTypes::LinkOnceODRLinkage);
+    }
+    else if (f->getName().str().find("_FPC_FP64_IS_ALMOST_OVERFLOW") != std::string::npos)
+    {
+    	outs() << "====> Found _FPC_FP64_IS_ALMOST_OVERFLOW\n";
+    	if (f->getLinkage() != GlobalValue::LinkageTypes::LinkOnceODRLinkage)
+    		f->setLinkage(GlobalValue::LinkageTypes::LinkOnceODRLinkage);
+    }
+    else if (f->getName().str().find("_FPC_FP64_IS_ALMOST_SUBNORMAL") != std::string::npos)
+    {
+    	outs() << "====> Found _FPC_FP64_IS_ALMOST_SUBNORMAL\n";
+    	if (f->getLinkage() != GlobalValue::LinkageTypes::LinkOnceODRLinkage)
+    		f->setLinkage(GlobalValue::LinkageTypes::LinkOnceODRLinkage);
+    }
   }
 
   printf("Value:  %p\n", fp32_check_add_function);
