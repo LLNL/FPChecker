@@ -43,119 +43,119 @@ FPInstrumentation::FPInstrumentation(Module *M) :
     {
     	outs() << "====> Found _FPC_FP32_CHECK_ADD_\n";
     	fp32_check_add_function = f;
-    	if (f->getLinkage() != GlobalValue::LinkageTypes::LinkOnceODRLinkage)
-    		f->setLinkage(GlobalValue::LinkageTypes::LinkOnceODRLinkage);
+    	//if (f->getLinkage() != GlobalValue::LinkageTypes::LinkOnceODRLinkage)
+    	//	f->setLinkage(GlobalValue::LinkageTypes::LinkOnceODRLinkage);
     	fp32_check_add_function->setCallingConv(CallingConv::PTX_Device);
     }
     else if (f->getName().str().find("_FPC_FP32_CHECK_SUB_") != std::string::npos)
     {
     	outs() << "====> Found _FPC_FP32_CHECK_SUB_\n";
     	fp32_check_sub_function = f;
-    	if (f->getLinkage() != GlobalValue::LinkageTypes::LinkOnceODRLinkage)
-    		f->setLinkage(GlobalValue::LinkageTypes::LinkOnceODRLinkage);
+    	//if (f->getLinkage() != GlobalValue::LinkageTypes::LinkOnceODRLinkage)
+    	//	f->setLinkage(GlobalValue::LinkageTypes::LinkOnceODRLinkage);
     	fp32_check_sub_function->setCallingConv(CallingConv::PTX_Device);
     }
     else if (f->getName().str().find("_FPC_FP32_CHECK_MUL_") != std::string::npos)
     {
     	outs() << "====> Found _FPC_FP32_CHECK_MUL_\n";
     	fp32_check_mul_function = f;
-    	if (f->getLinkage() != GlobalValue::LinkageTypes::LinkOnceODRLinkage)
-    		f->setLinkage(GlobalValue::LinkageTypes::LinkOnceODRLinkage);
+    	//if (f->getLinkage() != GlobalValue::LinkageTypes::LinkOnceODRLinkage)
+    	//	f->setLinkage(GlobalValue::LinkageTypes::LinkOnceODRLinkage);
     	fp32_check_mul_function->setCallingConv(CallingConv::PTX_Device);
     }
     else if (f->getName().str().find("_FPC_FP32_CHECK_DIV_") != std::string::npos)
     {
     	outs() << "====> Found _FPC_FP32_CHECK_DIV_\n";
     	fp32_check_div_function = f;
-    	if (f->getLinkage() != GlobalValue::LinkageTypes::LinkOnceODRLinkage)
-    		f->setLinkage(GlobalValue::LinkageTypes::LinkOnceODRLinkage);
+    	//if (f->getLinkage() != GlobalValue::LinkageTypes::LinkOnceODRLinkage)
+    	//	f->setLinkage(GlobalValue::LinkageTypes::LinkOnceODRLinkage);
     	fp32_check_div_function->setCallingConv(CallingConv::PTX_Device);
     }
     else if (f->getName().str().find("_FPC_FP64_CHECK_ADD_") != std::string::npos)
     {
     	outs() << "====> Found _FPC_FP64_CHECK_ADD_\n";
     	fp64_check_add_function = f;
-    	if (f->getLinkage() != GlobalValue::LinkageTypes::LinkOnceODRLinkage)
-    		f->setLinkage(GlobalValue::LinkageTypes::LinkOnceODRLinkage);
+    	//if (f->getLinkage() != GlobalValue::LinkageTypes::LinkOnceODRLinkage)
+    	//	f->setLinkage(GlobalValue::LinkageTypes::LinkOnceODRLinkage);
     	fp64_check_add_function->setCallingConv(CallingConv::PTX_Device);
     }
     else if (f->getName().str().find("_FPC_FP64_CHECK_SUB_") != std::string::npos)
     {
     	outs() << "====> Found _FPC_FP64_CHECK_SUB_\n";
     	fp64_check_sub_function = f;
-    	if (f->getLinkage() != GlobalValue::LinkageTypes::LinkOnceODRLinkage)
-    		f->setLinkage(GlobalValue::LinkageTypes::LinkOnceODRLinkage);
+    	//if (f->getLinkage() != GlobalValue::LinkageTypes::LinkOnceODRLinkage)
+    	//	f->setLinkage(GlobalValue::LinkageTypes::LinkOnceODRLinkage);
     	fp64_check_sub_function->setCallingConv(CallingConv::PTX_Device);
     }
     else if (f->getName().str().find("_FPC_FP64_CHECK_MUL_") != std::string::npos)
     {
     	outs() << "====> Found _FPC_FP64_CHECK_MUL_\n";
     	fp64_check_mul_function = f;
-    	if (f->getLinkage() != GlobalValue::LinkageTypes::LinkOnceODRLinkage)
-    		f->setLinkage(GlobalValue::LinkageTypes::LinkOnceODRLinkage);
+    	//if (f->getLinkage() != GlobalValue::LinkageTypes::LinkOnceODRLinkage)
+    	//	f->setLinkage(GlobalValue::LinkageTypes::LinkOnceODRLinkage);
     	fp64_check_mul_function->setCallingConv(CallingConv::PTX_Device);
     }
     else if (f->getName().str().find("_FPC_FP64_CHECK_DIV_") != std::string::npos)
     {
     	outs() << "====> Found _FPC_FP64_CHECK_DIV_\n";
     	fp64_check_div_function = f;
-    	if (f->getLinkage() != GlobalValue::LinkageTypes::LinkOnceODRLinkage)
-    		f->setLinkage(GlobalValue::LinkageTypes::LinkOnceODRLinkage);
+    	//if (f->getLinkage() != GlobalValue::LinkageTypes::LinkOnceODRLinkage)
+    	//	f->setLinkage(GlobalValue::LinkageTypes::LinkOnceODRLinkage);
     	fp64_check_div_function->setCallingConv(CallingConv::PTX_Device);
     }
     else if (f->getName().str().find("_FPC_INTERRUPT_") != std::string::npos)
     {
     	outs() << "====> Found _FPC_INTERRUPT_\n";
-    	if (f->getLinkage() != GlobalValue::LinkageTypes::LinkOnceODRLinkage)
-    		f->setLinkage(GlobalValue::LinkageTypes::LinkOnceODRLinkage);
+    	//if (f->getLinkage() != GlobalValue::LinkageTypes::LinkOnceODRLinkage)
+    	//	f->setLinkage(GlobalValue::LinkageTypes::LinkOnceODRLinkage);
     }
     else if (f->getName().str().find("_FPC_FP32_IS_SUBNORMAL") != std::string::npos)
     {
     	outs() << "====> Found _FPC_FP32_IS_SUBNORMAL\n";
-    	if (f->getLinkage() != GlobalValue::LinkageTypes::LinkOnceODRLinkage)
-    		f->setLinkage(GlobalValue::LinkageTypes::LinkOnceODRLinkage);
+    	//if (f->getLinkage() != GlobalValue::LinkageTypes::LinkOnceODRLinkage)
+    	//	f->setLinkage(GlobalValue::LinkageTypes::LinkOnceODRLinkage);
     }
     else if (f->getName().str().find("_FPC_FP64_IS_SUBNORMAL") != std::string::npos)
     {
     	outs() << "====> Found _FPC_FP64_IS_SUBNORMAL\n";
-    	if (f->getLinkage() != GlobalValue::LinkageTypes::LinkOnceODRLinkage)
-    		f->setLinkage(GlobalValue::LinkageTypes::LinkOnceODRLinkage);
+    	//if (f->getLinkage() != GlobalValue::LinkageTypes::LinkOnceODRLinkage)
+    	//	f->setLinkage(GlobalValue::LinkageTypes::LinkOnceODRLinkage);
     }
     else if (f->getName().str().find("_FPC_DEVICE_CODE_FUNC_") != std::string::npos)
     {
     	outs() << "====> Found _FPC_DEVICE_CODE_FUNC_\n";
-    	if (f->getLinkage() != GlobalValue::LinkageTypes::LinkOnceODRLinkage)
-    		f->setLinkage(GlobalValue::LinkageTypes::LinkOnceODRLinkage);
+    	//if (f->getLinkage() != GlobalValue::LinkageTypes::LinkOnceODRLinkage)
+    	//	f->setLinkage(GlobalValue::LinkageTypes::LinkOnceODRLinkage);
     }
     else if (f->getName().str().find("_FPC_WARNING_") != std::string::npos)
     {
     	outs() << "====> Found _FPC_WARNING_\n";
-    	if (f->getLinkage() != GlobalValue::LinkageTypes::LinkOnceODRLinkage)
-    		f->setLinkage(GlobalValue::LinkageTypes::LinkOnceODRLinkage);
+    	//if (f->getLinkage() != GlobalValue::LinkageTypes::LinkOnceODRLinkage)
+    	//	f->setLinkage(GlobalValue::LinkageTypes::LinkOnceODRLinkage);
     }
     else if (f->getName().str().find("_FPC_FP32_IS_ALMOST_OVERFLOW") != std::string::npos)
     {
     	outs() << "====> Found _FPC_FP32_IS_ALMOST_OVERFLOW\n";
-    	if (f->getLinkage() != GlobalValue::LinkageTypes::LinkOnceODRLinkage)
-    		f->setLinkage(GlobalValue::LinkageTypes::LinkOnceODRLinkage);
+    	//if (f->getLinkage() != GlobalValue::LinkageTypes::LinkOnceODRLinkage)
+    	//	f->setLinkage(GlobalValue::LinkageTypes::LinkOnceODRLinkage);
     }
     else if (f->getName().str().find("_FPC_FP32_IS_ALMOST_SUBNORMAL") != std::string::npos)
     {
     	outs() << "====> Found _FPC_FP32_IS_ALMOST_SUBNORMAL\n";
-    	if (f->getLinkage() != GlobalValue::LinkageTypes::LinkOnceODRLinkage)
-    		f->setLinkage(GlobalValue::LinkageTypes::LinkOnceODRLinkage);
+    	//if (f->getLinkage() != GlobalValue::LinkageTypes::LinkOnceODRLinkage)
+    	//	f->setLinkage(GlobalValue::LinkageTypes::LinkOnceODRLinkage);
     }
     else if (f->getName().str().find("_FPC_FP64_IS_ALMOST_OVERFLOW") != std::string::npos)
     {
     	outs() << "====> Found _FPC_FP64_IS_ALMOST_OVERFLOW\n";
-    	if (f->getLinkage() != GlobalValue::LinkageTypes::LinkOnceODRLinkage)
-    		f->setLinkage(GlobalValue::LinkageTypes::LinkOnceODRLinkage);
+    	//if (f->getLinkage() != GlobalValue::LinkageTypes::LinkOnceODRLinkage)
+    	//	f->setLinkage(GlobalValue::LinkageTypes::LinkOnceODRLinkage);
     }
     else if (f->getName().str().find("_FPC_FP64_IS_ALMOST_SUBNORMAL") != std::string::npos)
     {
     	outs() << "====> Found _FPC_FP64_IS_ALMOST_SUBNORMAL\n";
-    	if (f->getLinkage() != GlobalValue::LinkageTypes::LinkOnceODRLinkage)
-    		f->setLinkage(GlobalValue::LinkageTypes::LinkOnceODRLinkage);
+    	//if (f->getLinkage() != GlobalValue::LinkageTypes::LinkOnceODRLinkage)
+    	//	f->setLinkage(GlobalValue::LinkageTypes::LinkOnceODRLinkage);
     }
   }
 

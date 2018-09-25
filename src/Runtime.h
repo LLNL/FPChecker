@@ -27,21 +27,21 @@
 __device__ void _FPC_DEVICE_CODE_FUNC_(){};
 #endif
 
-__device__ void	_FPC_INTERRUPT_(int loc);
-__device__ int	_FPC_FP32_IS_SUBNORMAL(float x);
-__device__ int 	_FPC_FP32_IS_ALMOST_OVERFLOW(float x);
-__device__ int 	_FPC_FP32_IS_ALMOST_SUBNORMAL(float x);
-__device__ void _FPC_FP32_CHECK_ADD_(float x, float y, float z, int loc);
-__device__ void _FPC_FP32_CHECK_SUB_(float x, float y, float z, int loc);
-__device__ void _FPC_FP32_CHECK_MUL_(float x, float y, float z, int loc);
-__device__ void _FPC_FP32_CHECK_DIV_(float x, float y, float z, int loc);
-__device__ int	_FPC_FP64_IS_SUBNORMAL(double x);
-__device__ int 	_FPC_FP64_IS_ALMOST_OVERFLOW(double x);
-__device__ int 	_FPC_FP64_IS_ALMOST_SUBNORMAL(double x);
-__device__ void _FPC_FP64_CHECK_ADD_(float x, float y, float z, int loc);
-__device__ void _FPC_FP64_CHECK_SUB_(float x, float y, float z, int loc);
-__device__ void _FPC_FP64_CHECK_MUL_(float x, float y, float z, int loc);
-__device__ void _FPC_FP64_CHECK_DIV_(float x, float y, float z, int loc);
+__device__ static void	_FPC_INTERRUPT_(int loc);
+__device__ static int	_FPC_FP32_IS_SUBNORMAL(float x);
+__device__ static int 	_FPC_FP32_IS_ALMOST_OVERFLOW(float x);
+__device__ static int 	_FPC_FP32_IS_ALMOST_SUBNORMAL(float x);
+__device__ static void 	_FPC_FP32_CHECK_ADD_(float x, float y, float z, int loc);
+__device__ static void 	_FPC_FP32_CHECK_SUB_(float x, float y, float z, int loc);
+__device__ static void 	_FPC_FP32_CHECK_MUL_(float x, float y, float z, int loc);
+__device__ static void 	_FPC_FP32_CHECK_DIV_(float x, float y, float z, int loc);
+__device__ static int	_FPC_FP64_IS_SUBNORMAL(double x);
+__device__ static int 	_FPC_FP64_IS_ALMOST_OVERFLOW(double x);
+__device__ static int 	_FPC_FP64_IS_ALMOST_SUBNORMAL(double x);
+__device__ static void 	_FPC_FP64_CHECK_ADD_(float x, float y, float z, int loc);
+__device__ static void 	_FPC_FP64_CHECK_SUB_(float x, float y, float z, int loc);
+__device__ static void 	_FPC_FP64_CHECK_MUL_(float x, float y, float z, int loc);
+__device__ static void 	_FPC_FP64_CHECK_DIV_(float x, float y, float z, int loc);
 
 
 #define REPORT_LINE_SIZE 80
@@ -53,7 +53,7 @@ __device__ void _FPC_FP64_CHECK_DIV_(float x, float y, float z, int loc);
 
 /// We store the file name and directory in this variable
 //char *_FPC_LOCATIONS_TABLE_[100];// = {"NONE1"};
-__device__ char *_FPC_FILE_NAME_[1];
+__device__ static char *_FPC_FILE_NAME_[1];
 
 /// Lock to print from one thread only
 __device__ static int lock_state = 0;
@@ -177,7 +177,7 @@ static void _FPC_PRINT_REPORT_ROW_(int val, int space, int last)
 /// errorType: 0:NaN, 1:INF, 2:Underflow
 /// op: 0:ADD, 1:SUB, 2:MUL, 3:DIV
 __device__
-void _FPC_INTERRUPT_(int errorType, int op, int loc)
+static void _FPC_INTERRUPT_(int errorType, int op, int loc)
 {
 	bool blocked = true;
   	while(blocked) {
@@ -215,7 +215,7 @@ void _FPC_INTERRUPT_(int errorType, int op, int loc)
 }
 
 __device__
-void _FPC_WARNING_(int errorType, int op, int loc)
+static void _FPC_WARNING_(int errorType, int op, int loc)
 {
 	bool blocked = true;
   	while(blocked) {
@@ -304,7 +304,7 @@ static void _FPC_CHECK_OPERATION_(int type, float x, float y, float z, int loc)
 
 //// Returns non-zero value if FP argument is a sub-normal
 __device__
-int _FPC_FP32_IS_SUBNORMAL(float x)
+static int _FPC_FP32_IS_SUBNORMAL(float x)
 {
 	int ret = 0;
 	uint32_t val;
@@ -320,7 +320,7 @@ int _FPC_FP32_IS_SUBNORMAL(float x)
 }
 
 __device__
-int _FPC_FP32_IS_ALMOST_OVERFLOW(float x)
+static int _FPC_FP32_IS_ALMOST_OVERFLOW(float x)
 {
 	int ret = 0;
 	uint32_t val;
@@ -337,7 +337,7 @@ int _FPC_FP32_IS_ALMOST_OVERFLOW(float x)
 }
 
 __device__
-int _FPC_FP32_IS_ALMOST_SUBNORMAL(float x)
+static int _FPC_FP32_IS_ALMOST_SUBNORMAL(float x)
 {
 	int ret = 0;
 	uint32_t val;
@@ -354,25 +354,25 @@ int _FPC_FP32_IS_ALMOST_SUBNORMAL(float x)
 }
 
 __device__
-void _FPC_FP32_CHECK_ADD_(float x, float y, float z, int loc)
+static void _FPC_FP32_CHECK_ADD_(float x, float y, float z, int loc)
 {
 	_FPC_CHECK_OPERATION_(0, x, y, z, loc);
 }
 
 __device__
-void _FPC_FP32_CHECK_SUB_(float x, float y, float z, int loc)
+static void _FPC_FP32_CHECK_SUB_(float x, float y, float z, int loc)
 {
 	_FPC_CHECK_OPERATION_(0, x, y, z, loc);
 }
 
 __device__
-void _FPC_FP32_CHECK_MUL_(float x, float y, float z, int loc)
+static void _FPC_FP32_CHECK_MUL_(float x, float y, float z, int loc)
 {
 	_FPC_CHECK_OPERATION_(0, x, y, z, loc);
 }
 
 __device__
-void _FPC_FP32_CHECK_DIV_(float x, float y, float z, int loc)
+static void _FPC_FP32_CHECK_DIV_(float x, float y, float z, int loc)
 {
 	_FPC_CHECK_OPERATION_(0, x, y, z, loc);
 }
@@ -382,7 +382,7 @@ void _FPC_FP32_CHECK_DIV_(float x, float y, float z, int loc)
 /// Returns non-zero value if FP argument is a sub-normal.
 /// Check that the exponent bits are zero.
 __device__
-int _FPC_FP64_IS_SUBNORMAL(double x)
+static int _FPC_FP64_IS_SUBNORMAL(double x)
 {
 	int ret = 0;
 	uint64_t val;
@@ -398,7 +398,7 @@ int _FPC_FP64_IS_SUBNORMAL(double x)
 }
 
 __device__
-int _FPC_FP64_IS_ALMOST_OVERFLOW(double x)
+static int _FPC_FP64_IS_ALMOST_OVERFLOW(double x)
 {
 	int ret = 0;
 	uint64_t val;
@@ -415,7 +415,7 @@ int _FPC_FP64_IS_ALMOST_OVERFLOW(double x)
 }
 
 __device__
-int _FPC_FP64_IS_ALMOST_SUBNORMAL(double x)
+static int _FPC_FP64_IS_ALMOST_SUBNORMAL(double x)
 {
 	int ret = 0;
 	uint64_t val;
@@ -432,25 +432,25 @@ int _FPC_FP64_IS_ALMOST_SUBNORMAL(double x)
 }
 
 __device__
-void _FPC_FP64_CHECK_ADD_(double x, double y, double z, int loc)
+static void _FPC_FP64_CHECK_ADD_(double x, double y, double z, int loc)
 {
 	_FPC_CHECK_OPERATION_(1, x, y, z, loc);
 }
 
 __device__
-void _FPC_FP64_CHECK_SUB_(double x, double y, double z, int loc)
+static void _FPC_FP64_CHECK_SUB_(double x, double y, double z, int loc)
 {
 	_FPC_CHECK_OPERATION_(1, x, y, z, loc);
 }
 
 __device__
-void _FPC_FP64_CHECK_MUL_(double x, double y, double z, int loc)
+static void _FPC_FP64_CHECK_MUL_(double x, double y, double z, int loc)
 {
 	_FPC_CHECK_OPERATION_(1, x, y, z, loc);
 }
 
 __device__
-void _FPC_FP64_CHECK_DIV_(double x, double y, double z, int loc)
+static void _FPC_FP64_CHECK_DIV_(double x, double y, double z, int loc)
 {
 	_FPC_CHECK_OPERATION_(1, x, y, z, loc);
 }
