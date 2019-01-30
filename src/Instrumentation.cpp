@@ -46,6 +46,7 @@ FPInstrumentation::FPInstrumentation(Module *M) :
     	//if (f->getLinkage() != GlobalValue::LinkageTypes::LinkOnceODRLinkage)
     	//	f->setLinkage(GlobalValue::LinkageTypes::LinkOnceODRLinkage);
     	fp32_check_add_function->setCallingConv(CallingConv::PTX_Device);
+	f->setLinkage(GlobalValue::LinkageTypes::InternalLinkage);
     }
     else if (f->getName().str().find("_FPC_FP32_CHECK_SUB_") != std::string::npos)
     {
@@ -54,6 +55,7 @@ FPInstrumentation::FPInstrumentation(Module *M) :
     	//if (f->getLinkage() != GlobalValue::LinkageTypes::LinkOnceODRLinkage)
     	//	f->setLinkage(GlobalValue::LinkageTypes::LinkOnceODRLinkage);
     	fp32_check_sub_function->setCallingConv(CallingConv::PTX_Device);
+	f->setLinkage(GlobalValue::LinkageTypes::InternalLinkage);
     }
     else if (f->getName().str().find("_FPC_FP32_CHECK_MUL_") != std::string::npos)
     {
@@ -62,6 +64,7 @@ FPInstrumentation::FPInstrumentation(Module *M) :
     	//if (f->getLinkage() != GlobalValue::LinkageTypes::LinkOnceODRLinkage)
     	//	f->setLinkage(GlobalValue::LinkageTypes::LinkOnceODRLinkage);
     	fp32_check_mul_function->setCallingConv(CallingConv::PTX_Device);
+	f->setLinkage(GlobalValue::LinkageTypes::InternalLinkage);
     }
     else if (f->getName().str().find("_FPC_FP32_CHECK_DIV_") != std::string::npos)
     {
@@ -70,6 +73,7 @@ FPInstrumentation::FPInstrumentation(Module *M) :
     	//if (f->getLinkage() != GlobalValue::LinkageTypes::LinkOnceODRLinkage)
     	//	f->setLinkage(GlobalValue::LinkageTypes::LinkOnceODRLinkage);
     	fp32_check_div_function->setCallingConv(CallingConv::PTX_Device);
+	f->setLinkage(GlobalValue::LinkageTypes::InternalLinkage);
     }
     else if (f->getName().str().find("_FPC_FP64_CHECK_ADD_") != std::string::npos)
     {
@@ -78,6 +82,7 @@ FPInstrumentation::FPInstrumentation(Module *M) :
     	//if (f->getLinkage() != GlobalValue::LinkageTypes::LinkOnceODRLinkage)
     	//	f->setLinkage(GlobalValue::LinkageTypes::LinkOnceODRLinkage);
     	fp64_check_add_function->setCallingConv(CallingConv::PTX_Device);
+	f->setLinkage(GlobalValue::LinkageTypes::InternalLinkage);
     }
     else if (f->getName().str().find("_FPC_FP64_CHECK_SUB_") != std::string::npos)
     {
@@ -86,6 +91,7 @@ FPInstrumentation::FPInstrumentation(Module *M) :
     	//if (f->getLinkage() != GlobalValue::LinkageTypes::LinkOnceODRLinkage)
     	//	f->setLinkage(GlobalValue::LinkageTypes::LinkOnceODRLinkage);
     	fp64_check_sub_function->setCallingConv(CallingConv::PTX_Device);
+	f->setLinkage(GlobalValue::LinkageTypes::InternalLinkage);
     }
     else if (f->getName().str().find("_FPC_FP64_CHECK_MUL_") != std::string::npos)
     {
@@ -94,6 +100,7 @@ FPInstrumentation::FPInstrumentation(Module *M) :
     	//if (f->getLinkage() != GlobalValue::LinkageTypes::LinkOnceODRLinkage)
     	//	f->setLinkage(GlobalValue::LinkageTypes::LinkOnceODRLinkage);
     	fp64_check_mul_function->setCallingConv(CallingConv::PTX_Device);
+	f->setLinkage(GlobalValue::LinkageTypes::InternalLinkage);
     }
     else if (f->getName().str().find("_FPC_FP64_CHECK_DIV_") != std::string::npos)
     {
@@ -102,6 +109,7 @@ FPInstrumentation::FPInstrumentation(Module *M) :
     	//if (f->getLinkage() != GlobalValue::LinkageTypes::LinkOnceODRLinkage)
     	//	f->setLinkage(GlobalValue::LinkageTypes::LinkOnceODRLinkage);
     	fp64_check_div_function->setCallingConv(CallingConv::PTX_Device);
+	f->setLinkage(GlobalValue::LinkageTypes::InternalLinkage);
     }
     else if (f->getName().str().find("_FPC_INTERRUPT_") != std::string::npos)
     {
@@ -124,8 +132,8 @@ FPInstrumentation::FPInstrumentation(Module *M) :
     else if (f->getName().str().find("_FPC_DEVICE_CODE_FUNC_") != std::string::npos)
     {
     	outs() << "====> Found _FPC_DEVICE_CODE_FUNC_\n";
-    	//if (f->getLinkage() != GlobalValue::LinkageTypes::LinkOnceODRLinkage)
-    	//	f->setLinkage(GlobalValue::LinkageTypes::LinkOnceODRLinkage);
+    	if (f->getLinkage() != GlobalValue::LinkageTypes::LinkOnceODRLinkage)
+    		f->setLinkage(GlobalValue::LinkageTypes::LinkOnceODRLinkage);
     }
     else if (f->getName().str().find("_FPC_WARNING_") != std::string::npos)
     {
@@ -343,9 +351,16 @@ Instruction* FPInstrumentation::firstInstrution()
 
 void FPInstrumentation::generateCodeForInterruption()
 {
+
+	for (auto i = mod->global_begin(), end = mod->global_end(); i != end; ++i)
+	{
+	//	outs() << "Global: " << *i << "\n";
+	}
+
 	errs() << "in generteCodeForInterruption\n";
 	GlobalVariable *gArray = nullptr;
-	gArray = mod->getNamedGlobal("_FPC_FILE_NAME_");
+	//gArray = mod->getNamedGlobal("_FPC_FILE_NAME_");
+	gArray = mod->getGlobalVariable ("_ZL15_FPC_FILE_NAME_", true);
 	assert((gArray!=nullptr) && "Global array not found");
 	errs() << "setting linkage\n";
 	gArray->setLinkage(GlobalValue::LinkageTypes::InternalLinkage);

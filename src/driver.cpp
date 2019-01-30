@@ -64,8 +64,9 @@ public:
 				fpInstrumentation->instrumentFunction(F);
 			}
 		}
-
-		fpInstrumentation->generateCodeForInterruption();
+		
+		if (CodeMatching::isDeviceCode(m))
+			fpInstrumentation->generateCodeForInterruption();
 
 		delete fpInstrumentation;
 		return false;

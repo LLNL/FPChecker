@@ -31,23 +31,23 @@ __device__ static void	_FPC_INTERRUPT_(int loc);
 __device__ static int	_FPC_FP32_IS_SUBNORMAL(float x);
 __device__ static int 	_FPC_FP32_IS_ALMOST_OVERFLOW(float x);
 __device__ static int 	_FPC_FP32_IS_ALMOST_SUBNORMAL(float x);
-__device__ static void 	_FPC_FP32_CHECK_ADD_(float x, float y, float z, int loc);
-__device__ static void 	_FPC_FP32_CHECK_SUB_(float x, float y, float z, int loc);
-__device__ static void 	_FPC_FP32_CHECK_MUL_(float x, float y, float z, int loc);
-__device__ static void 	_FPC_FP32_CHECK_DIV_(float x, float y, float z, int loc);
+__device__ void 	_FPC_FP32_CHECK_ADD_(float x, float y, float z, int loc);
+__device__ void 	_FPC_FP32_CHECK_SUB_(float x, float y, float z, int loc);
+__device__ void 	_FPC_FP32_CHECK_MUL_(float x, float y, float z, int loc);
+__device__ void 	_FPC_FP32_CHECK_DIV_(float x, float y, float z, int loc);
 __device__ static int	_FPC_FP64_IS_SUBNORMAL(double x);
 __device__ static int 	_FPC_FP64_IS_ALMOST_OVERFLOW(double x);
 __device__ static int 	_FPC_FP64_IS_ALMOST_SUBNORMAL(double x);
-__device__ static void 	_FPC_FP64_CHECK_ADD_(float x, float y, float z, int loc);
-__device__ static void 	_FPC_FP64_CHECK_SUB_(float x, float y, float z, int loc);
-__device__ static void 	_FPC_FP64_CHECK_MUL_(float x, float y, float z, int loc);
-__device__ static void 	_FPC_FP64_CHECK_DIV_(float x, float y, float z, int loc);
+__device__ void 	_FPC_FP64_CHECK_ADD_(float x, float y, float z, int loc);
+__device__ void 	_FPC_FP64_CHECK_SUB_(float x, float y, float z, int loc);
+__device__ void 	_FPC_FP64_CHECK_MUL_(float x, float y, float z, int loc);
+__device__ void 	_FPC_FP64_CHECK_DIV_(float x, float y, float z, int loc);
 
 
 #define REPORT_LINE_SIZE 80
 #define REPORT_COL1_SIZE 15
 #define REPORT_COL2_SIZE REPORT_LINE_SIZE-REPORT_COL1_SIZE-1
-#define DANGER_ZONE_PERCENTAGE 10.0
+#define DANGER_ZONE_PERCENTAGE 0.10
 
 /* ----------------------------- Global Data ------------------------------- */
 
@@ -179,6 +179,7 @@ static void _FPC_PRINT_REPORT_ROW_(int val, int space, int last)
 __device__
 static void _FPC_INTERRUPT_(int errorType, int op, int loc)
 {
+	//asm("trap;");
 	bool blocked = true;
   	while(blocked) {
 			if(0 == atomicCAS(&lock_state, 0, 1)) {
@@ -354,25 +355,25 @@ static int _FPC_FP32_IS_ALMOST_SUBNORMAL(float x)
 }
 
 __device__
-static void _FPC_FP32_CHECK_ADD_(float x, float y, float z, int loc)
+void _FPC_FP32_CHECK_ADD_(float x, float y, float z, int loc)
 {
 	_FPC_CHECK_OPERATION_(0, x, y, z, loc);
 }
 
 __device__
-static void _FPC_FP32_CHECK_SUB_(float x, float y, float z, int loc)
+void _FPC_FP32_CHECK_SUB_(float x, float y, float z, int loc)
 {
 	_FPC_CHECK_OPERATION_(0, x, y, z, loc);
 }
 
 __device__
-static void _FPC_FP32_CHECK_MUL_(float x, float y, float z, int loc)
+void _FPC_FP32_CHECK_MUL_(float x, float y, float z, int loc)
 {
 	_FPC_CHECK_OPERATION_(0, x, y, z, loc);
 }
 
 __device__
-static void _FPC_FP32_CHECK_DIV_(float x, float y, float z, int loc)
+void _FPC_FP32_CHECK_DIV_(float x, float y, float z, int loc)
 {
 	_FPC_CHECK_OPERATION_(0, x, y, z, loc);
 }
@@ -432,25 +433,25 @@ static int _FPC_FP64_IS_ALMOST_SUBNORMAL(double x)
 }
 
 __device__
-static void _FPC_FP64_CHECK_ADD_(double x, double y, double z, int loc)
+void _FPC_FP64_CHECK_ADD_(double x, double y, double z, int loc)
 {
 	_FPC_CHECK_OPERATION_(1, x, y, z, loc);
 }
 
 __device__
-static void _FPC_FP64_CHECK_SUB_(double x, double y, double z, int loc)
+void _FPC_FP64_CHECK_SUB_(double x, double y, double z, int loc)
 {
 	_FPC_CHECK_OPERATION_(1, x, y, z, loc);
 }
 
 __device__
-static void _FPC_FP64_CHECK_MUL_(double x, double y, double z, int loc)
+void _FPC_FP64_CHECK_MUL_(double x, double y, double z, int loc)
 {
 	_FPC_CHECK_OPERATION_(1, x, y, z, loc);
 }
 
 __device__
-static void _FPC_FP64_CHECK_DIV_(double x, double y, double z, int loc)
+void _FPC_FP64_CHECK_DIV_(double x, double y, double z, int loc)
 {
 	_FPC_CHECK_OPERATION_(1, x, y, z, loc);
 }
