@@ -43,7 +43,6 @@ __device__ void 	_FPC_FP64_CHECK_SUB_(float x, float y, float z, int loc);
 __device__ void 	_FPC_FP64_CHECK_MUL_(float x, float y, float z, int loc);
 __device__ void 	_FPC_FP64_CHECK_DIV_(float x, float y, float z, int loc);
 
-
 #define REPORT_LINE_SIZE 80
 #define REPORT_COL1_SIZE 15
 #define REPORT_COL2_SIZE REPORT_LINE_SIZE-REPORT_COL1_SIZE-1
