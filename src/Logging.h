@@ -8,8 +8,6 @@
 #ifndef SRC_LOGGING_H_
 #define SRC_LOGGING_H_
 
-using namespace llvm;
-
 namespace CUDAAnalysis {
 
 #define FPC_PREFIX "#FPCHECKER: "

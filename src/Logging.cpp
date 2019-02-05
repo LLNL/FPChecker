@@ -11,6 +11,7 @@
 #include <stdlib.h>
 
 using namespace CUDAAnalysis;
+using namespace llvm;
 
 void Logging::info(const char *msg)
 {
