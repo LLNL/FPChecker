@@ -239,6 +239,7 @@ void FPInstrumentation::instrumentFunction(Function *f)
 	Logging::info("Entering main loop in instrumentFunction");
 	// ---------------------------------------------
 
+	int instrumentedOps = 0;
 	for (auto bb=f->begin(), end=f->end(); bb != end; ++bb)
 	{
 		for (auto i=bb->begin(), bend=bb->end(); i != bend; ++i)
@@ -271,10 +272,12 @@ void FPInstrumentation::instrumentFunction(Function *f)
 					if (isSingleFPOperation(inst))
 					{
 						callInst = builder.CreateCall(fp32_check_add_function, args_ref);
+						instrumentedOps++;
 					}
 					else if (isDoubleFPOperation(inst))
 					{
 						callInst = builder.CreateCall(fp64_check_add_function, args_ref);
+						instrumentedOps++;
 					}
 				}
 				else if (inst->getOpcode() == Instruction::FSub)
@@ -282,10 +285,12 @@ void FPInstrumentation::instrumentFunction(Function *f)
 					if (isSingleFPOperation(inst))
 					{
 						callInst = builder.CreateCall(fp32_check_sub_function, args_ref);
+						instrumentedOps++;
 					}
 					else if (isDoubleFPOperation(inst))
 					{
 						callInst = builder.CreateCall(fp64_check_sub_function, args_ref);
+						instrumentedOps++;
 					}
 				}
 				else if (inst->getOpcode() == Instruction::FMul)
@@ -293,10 +298,12 @@ void FPInstrumentation::instrumentFunction(Function *f)
 					if (isSingleFPOperation(inst))
 					{
 						callInst = builder.CreateCall(fp32_check_mul_function, args_ref);
+						instrumentedOps++;
 					}
 					else if (isDoubleFPOperation(inst))
 					{
 						callInst = builder.CreateCall(fp64_check_mul_function, args_ref);
+						instrumentedOps++;
 					}
 				}
 				else if (inst->getOpcode() == Instruction::FDiv)
@@ -304,10 +311,12 @@ void FPInstrumentation::instrumentFunction(Function *f)
 					if (isSingleFPOperation(inst))
 					{
 						callInst = builder.CreateCall(fp32_check_div_function, args_ref);
+						instrumentedOps++;
 					}
 					else if (isDoubleFPOperation(inst))
 					{
 						callInst = builder.CreateCall(fp64_check_div_function, args_ref);
+						instrumentedOps++;
 					}
 				}
 
@@ -318,6 +327,10 @@ void FPInstrumentation::instrumentFunction(Function *f)
 	}
 
 	// ------------- Logging -----------------------
+	std::stringstream out;
+	out << "Instrumented operations: " << instrumentedOps;
+	Logging::info(out.str().c_str());
+
 	Logging::info("Leaving main loop in instrumentFunction");
 	// ---------------------------------------------
 }

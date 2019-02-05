@@ -2,6 +2,7 @@
 #include "Utility.h"
 #include "Instrumentation.h"
 #include "CodeMatching.h"
+#include "Logging.h"
 //#include "CommonTypes.h"
 //#include "ProgressBar.h"
 
@@ -60,7 +61,12 @@ public:
 				if (CodeMatching::isUnwantedFunction(F))
 						continue;
 
-				outs() << "Instrumenting func: " << f->getName().str() << "\n";
+				//outs() << "Instrumenting func: " << f->getName().str() << "\n";
+				// ------------- Logging -----------------------
+				std::stringstream out;
+				out << "Instrumenting function: " << f->getName().str();
+				Logging::info(out.str().c_str());
+				// ---------------------------------------------
 				fpInstrumentation->instrumentFunction(F);
 			}
 		}
