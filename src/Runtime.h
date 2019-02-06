@@ -178,10 +178,48 @@ static void _FPC_PRINT_REPORT_ROW_(int val, int space, int last)
 		printf("\n");
 }
 
+__device__
+static void _FPC_PRINT_REPORT_ROW_(float val, int space, int last)
+{
+	int numChars = 17;
+	printf(" %1.9e", val);
+
+	char msg[255];
+	msg[0] = '\0';
+	int rem = numChars + 1;
+	for (int i=0; i < space-rem; ++i)
+		_FPC_CAT_(msg," ");
+	printf("%s",msg);
+
+	if (last==0)
+		printf(":");
+	else
+		printf("\n");
+}
+
+__device__
+static void _FPC_PRINT_REPORT_ROW_(double val, int space, int last)
+{
+	int numChars = 17;
+	printf(" %1.9e", val);
+
+	char msg[255];
+	msg[0] = '\0';
+	int rem = numChars + 1;
+	for (int i=0; i < space-rem; ++i)
+		_FPC_CAT_(msg," ");
+	printf("%s",msg);
+
+	if (last==0)
+		printf(":");
+	else
+		printf("\n");
+}
+
 /// errorType: 0:NaN, 1:INF, 2:Underflow
 /// op: 0:ADD, 1:SUB, 2:MUL, 3:DIV
 __device__
-static void _FPC_INTERRUPT_(int errorType, int op, int loc)
+static void _FPC_INTERRUPT_(int errorType, int op, int loc, float fp32_val, double fp64_val)
 {
 	//asm("trap;");
 	bool blocked = true;
@@ -206,7 +244,11 @@ static void _FPC_INTERRUPT_(int errorType, int op, int loc)
 				_FPC_PRINT_REPORT_ROW_("Error", REPORT_COL1_SIZE, 0);
 				_FPC_PRINT_REPORT_ROW_(e, REPORT_COL2_SIZE, 1);
 				_FPC_PRINT_REPORT_ROW_("Operation", REPORT_COL1_SIZE, 0);
-				_FPC_PRINT_REPORT_ROW_(o, REPORT_COL2_SIZE, 1);
+				_FPC_PRINT_REPORT_ROW_(o, REPORT_COL2_SIZE, 0);
+				if (fp32_val != 0)
+					_FPC_PRINT_REPORT_ROW_(fp32_val, REPORT_COL2_SIZE, 1);
+				else
+					_FPC_PRINT_REPORT_ROW_(fp64_val, REPORT_COL2_SIZE, 1);
 				_FPC_PRINT_REPORT_ROW_("File", REPORT_COL1_SIZE, 0);
 				_FPC_PRINT_REPORT_ROW_(_FPC_FILE_NAME_[0], REPORT_COL2_SIZE, 1);
 				_FPC_PRINT_REPORT_ROW_("Line", REPORT_COL1_SIZE, 0);
@@ -304,29 +346,29 @@ static void _FPC_CHECK_OPERATION_(int type, double x, double y, double z, int lo
 /* ------------------------ FP32 Functions --------------------------------- */
 
 __device__
-static void _FPC_FP32_CHECK_OPERATION_(float x, float y, float z, int loc)
+static void _FPC_FP32_CHECK_OPERATION_(float x, float y, float z, int loc, int op)
 {
 	if (isinf(x))
 	{
-		_FPC_INTERRUPT_(1, 0, loc);
+		_FPC_INTERRUPT_(1, op, loc, x, 0);
 	}
 	else if (isnan(x))
 	{
-		_FPC_INTERRUPT_(0, 0, loc);
+		_FPC_INTERRUPT_(0, op, loc, x, 0);
 	}
 	else /// subnormals check
 	{
 		if (_FPC_FP32_IS_SUBNORMAL(x))
 		{
-			_FPC_INTERRUPT_(2, 0, loc);
+			_FPC_INTERRUPT_(2, op, loc, x, 0);
 		}
 		else if (_FPC_FP32_IS_ALMOST_SUBNORMAL(x))
 		{
-			_FPC_WARNING_(2, 0, loc);
+			_FPC_WARNING_(2, op, loc);
 		}
 		else if (_FPC_FP32_IS_ALMOST_OVERFLOW(x))
 		{
-			_FPC_WARNING_(1, 0, loc);
+			_FPC_WARNING_(1, op, loc);
 		}
 	}
 }
@@ -385,53 +427,53 @@ static int _FPC_FP32_IS_ALMOST_SUBNORMAL(float x)
 __device__
 void _FPC_FP32_CHECK_ADD_(float x, float y, float z, int loc)
 {
-	_FPC_FP32_CHECK_OPERATION_(x, y, z, loc);
+	_FPC_FP32_CHECK_OPERATION_(x, y, z, loc, 0);
 }
 
 __device__
 void _FPC_FP32_CHECK_SUB_(float x, float y, float z, int loc)
 {
-	_FPC_FP32_CHECK_OPERATION_(x, y, z, loc);
+	_FPC_FP32_CHECK_OPERATION_(x, y, z, loc, 1);
 }
 
 __device__
 void _FPC_FP32_CHECK_MUL_(float x, float y, float z, int loc)
 {
-	_FPC_FP32_CHECK_OPERATION_(x, y, z, loc);
+	_FPC_FP32_CHECK_OPERATION_(x, y, z, loc, 2);
 }
 
 __device__
 void _FPC_FP32_CHECK_DIV_(float x, float y, float z, int loc)
 {
-	_FPC_FP32_CHECK_OPERATION_(x, y, z, loc);
+	_FPC_FP32_CHECK_OPERATION_(x, y, z, loc, 3);
 }
 
 /* ------------------------ FP64 Functions --------------------------------- */
 
 __device__
-static void _FPC_FP64_CHECK_OPERATION_(double x, double y, double z, int loc)
+static void _FPC_FP64_CHECK_OPERATION_(double x, double y, double z, int loc, int op)
 {
 	if (isinf(x))
 	{
-		_FPC_INTERRUPT_(1, 0, loc);
+		_FPC_INTERRUPT_(1, op, loc, 0, x);
 	}
 	else if (isnan(x))
 	{
-		_FPC_INTERRUPT_(0, 0, loc);
+		_FPC_INTERRUPT_(0, op, loc, 0, x);
 	}
 	else /// subnormals check
 	{
 		if (_FPC_FP64_IS_SUBNORMAL(x))
 		{
-			_FPC_INTERRUPT_(2, 0, loc);
+			_FPC_INTERRUPT_(2, op, loc, 0, x);
 		}
 		else if (_FPC_FP64_IS_ALMOST_SUBNORMAL(x))
 		{
-			_FPC_WARNING_(2, 0, loc);
+			_FPC_WARNING_(2, op, loc);
 		}
 		else if (_FPC_FP64_IS_ALMOST_OVERFLOW(x))
 		{
-			_FPC_WARNING_(1, 0, loc);
+			_FPC_WARNING_(1, op, loc);
 		}
 	}
 }
@@ -491,25 +533,25 @@ static int _FPC_FP64_IS_ALMOST_SUBNORMAL(double x)
 __device__
 void _FPC_FP64_CHECK_ADD_(double x, double y, double z, int loc)
 {
-	_FPC_FP64_CHECK_OPERATION_(x, y, z, loc);
+	_FPC_FP64_CHECK_OPERATION_(x, y, z, loc, 0);
 }
 
 __device__
 void _FPC_FP64_CHECK_SUB_(double x, double y, double z, int loc)
 {
-	_FPC_FP64_CHECK_OPERATION_(x, y, z, loc);
+	_FPC_FP64_CHECK_OPERATION_(x, y, z, loc, 1);
 }
 
 __device__
 void _FPC_FP64_CHECK_MUL_(double x, double y, double z, int loc)
 {
-	_FPC_FP64_CHECK_OPERATION_(x, y, z, loc);
+	_FPC_FP64_CHECK_OPERATION_(x, y, z, loc, 2);
 }
 
 __device__
 void _FPC_FP64_CHECK_DIV_(double x, double y, double z, int loc)
 {
-	_FPC_FP64_CHECK_OPERATION_(x, y, z, loc);
+	_FPC_FP64_CHECK_OPERATION_(x, y, z, loc, 3);
 }
 
 #endif /* SRC_RUNTIME_H_ */

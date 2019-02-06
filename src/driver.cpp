@@ -44,7 +44,11 @@ public:
 	{
 		Module *m = &M;
 		FPInstrumentation *fpInstrumentation = new FPInstrumentation(m);
-		outs() << "Running Module pass on module: " << m->getName().str() << "\n";
+
+		// ------------- Logging -----------------------
+		std::string out = "Running Module pass on module: " << m->getName().str();
+		Logging::info(out.c_str());
+		// ---------------------------------------------
 
 		for (auto f = M.begin(), e = M.end(); f != e; ++f)
 		{
@@ -63,9 +67,8 @@ public:
 
 				//outs() << "Instrumenting func: " << f->getName().str() << "\n";
 				// ------------- Logging -----------------------
-				std::stringstream out;
-				out << "Instrumenting function: " << f->getName().str();
-				Logging::info(out.str().c_str());
+				std::string out = "Instrumenting function: " + f->getName().str();
+				Logging::info(out.c_str());
 				// ---------------------------------------------
 				fpInstrumentation->instrumentFunction(F);
 			}
