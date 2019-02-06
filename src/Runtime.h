@@ -252,12 +252,7 @@ static void _FPC_WARNING_(int errorType, int op, int loc)
 	}
 }
 
-
-/// Check the operation.
-/// type: 0 for float, 1 for double
-/// x,y,z: x=operation result, y=first operand, z=second operand
-/// loc: line number
-__device__
+/*__device__
 //static void _FPC_CHECK_OPERATION_(int type, float x, float y, float z, int loc)
 static void _FPC_CHECK_OPERATION_(int type, double x, double y, double z, int loc)
 {
@@ -299,9 +294,37 @@ static void _FPC_CHECK_OPERATION_(int type, double x, double y, double z, int lo
 			_FPC_WARNING_(2, 0, loc);
 		}
 	}
-}
+}*/
 
 /* ------------------------ FP32 Functions --------------------------------- */
+
+__device__
+static void _FPC_FP32_CHECK_OPERATION_(float x, float y, float z, int loc)
+{
+	if (isinf(x))
+	{
+		_FPC_INTERRUPT_(1, 0, loc);
+	}
+	else if (isnan(x))
+	{
+		_FPC_INTERRUPT_(0, 0, loc);
+	}
+	else /// subnormals check
+	{
+		if (_FPC_FP32_IS_SUBNORMAL(x))
+		{
+			_FPC_INTERRUPT_(2, 0, loc);
+		}
+		else if (_FPC_FP32_IS_ALMOST_SUBNORMAL(x))
+		{
+			_FPC_WARNING_(2, 0, loc);
+		}
+		else if (_FPC_FP32_IS_ALMOST_OVERFLOW(x))
+		{
+			_FPC_WARNING_(2, 0, loc);
+		}
+	}
+}
 
 //// Returns non-zero value if FP argument is a sub-normal
 __device__
@@ -357,28 +380,56 @@ static int _FPC_FP32_IS_ALMOST_SUBNORMAL(float x)
 __device__
 void _FPC_FP32_CHECK_ADD_(float x, float y, float z, int loc)
 {
-	_FPC_CHECK_OPERATION_(0, x, y, z, loc);
+	_FPC_FP32_CHECK_OPERATION_(x, y, z, loc);
 }
 
 __device__
 void _FPC_FP32_CHECK_SUB_(float x, float y, float z, int loc)
 {
-	_FPC_CHECK_OPERATION_(0, x, y, z, loc);
+	_FPC_FP32_CHECK_OPERATION_(x, y, z, loc);
 }
 
 __device__
 void _FPC_FP32_CHECK_MUL_(float x, float y, float z, int loc)
 {
-	_FPC_CHECK_OPERATION_(0, x, y, z, loc);
+	_FPC_FP32_CHECK_OPERATION_(x, y, z, loc);
 }
 
 __device__
 void _FPC_FP32_CHECK_DIV_(float x, float y, float z, int loc)
 {
-	_FPC_CHECK_OPERATION_(0, x, y, z, loc);
+	_FPC_FP32_CHECK_OPERATION_(x, y, z, loc);
 }
 
 /* ------------------------ FP64 Functions --------------------------------- */
+
+__device__
+static void _FPC_FP64_CHECK_OPERATION_(double x, double y, double z, int loc)
+{
+	if (isinf(x))
+	{
+		_FPC_INTERRUPT_(1, 0, loc);
+	}
+	else if (isnan(x))
+	{
+		_FPC_INTERRUPT_(0, 0, loc);
+	}
+	else /// subnormals check
+	{
+		if (_FPC_FP64_IS_SUBNORMAL(x))
+		{
+			_FPC_INTERRUPT_(2, 0, loc);
+		}
+		else if (_FPC_FP64_IS_ALMOST_SUBNORMAL(x))
+		{
+			_FPC_WARNING_(2, 0, loc);
+		}
+		else if (_FPC_FP64_IS_ALMOST_OVERFLOW(x))
+		{
+			_FPC_WARNING_(2, 0, loc);
+		}
+	}
+}
 
 /// Returns non-zero value if FP argument is a sub-normal.
 /// Check that the exponent bits are zero.
@@ -435,25 +486,25 @@ static int _FPC_FP64_IS_ALMOST_SUBNORMAL(double x)
 __device__
 void _FPC_FP64_CHECK_ADD_(double x, double y, double z, int loc)
 {
-	_FPC_CHECK_OPERATION_(1, x, y, z, loc);
+	_FPC_FP64_CHECK_OPERATION_(x, y, z, loc);
 }
 
 __device__
 void _FPC_FP64_CHECK_SUB_(double x, double y, double z, int loc)
 {
-	_FPC_CHECK_OPERATION_(1, x, y, z, loc);
+	_FPC_FP64_CHECK_OPERATION_(x, y, z, loc);
 }
 
 __device__
 void _FPC_FP64_CHECK_MUL_(double x, double y, double z, int loc)
 {
-	_FPC_CHECK_OPERATION_(1, x, y, z, loc);
+	_FPC_FP64_CHECK_OPERATION_(x, y, z, loc);
 }
 
 __device__
 void _FPC_FP64_CHECK_DIV_(double x, double y, double z, int loc)
 {
-	_FPC_CHECK_OPERATION_(1, x, y, z, loc);
+	_FPC_FP64_CHECK_OPERATION_(x, y, z, loc);
 }
 
 #endif /* SRC_RUNTIME_H_ */
