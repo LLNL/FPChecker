@@ -1,13 +1,18 @@
 #!/usr/bin/env python
 
+import test_config
 import subprocess
 import os
 import sys
 
 def main():
-    
+   
+    print "* Static Tests *"
+ 
     ###########################################################################
-    sys.stdout.write("Test: find instrumentation functions ")
+    t = "Test: find instrumentation functions"
+    testTarget = test_config.textWidth.format(t)
+    sys.stdout.write(testTarget)
     os.chdir("./test_find_inst_functions/")
     cmd = ["./test.py"]
     cmdOutput = subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True)
@@ -16,7 +21,9 @@ def main():
     ###########################################################################
 
     ###########################################################################
-    sys.stdout.write("Test: num. fp operations ")
+    t = "Test: num. fp operations"
+    testTarget = test_config.textWidth.format(t)
+    sys.stdout.write(testTarget)
     os.chdir("./test_number_fp_operations/")
     cmd = ["./test.py"]
     cmdOutput = subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True)
@@ -25,7 +32,9 @@ def main():
     ###########################################################################
 
     ###########################################################################
-    sys.stdout.write("Test: a device function is found ")
+    t = "Test: a device function is found"
+    testTarget = test_config.textWidth.format(t)
+    sys.stdout.write(testTarget)
     os.chdir("./test_device_func_found/")
     cmd = ["./test.py"]
     cmdOutput = subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True)
@@ -34,7 +43,9 @@ def main():
     ###########################################################################
 
     ###########################################################################
-    sys.stdout.write("Test: a global function is found ")
+    t = "Test: a global function is found"
+    testTarget = test_config.textWidth.format(t)
+    sys.stdout.write(testTarget)
     os.chdir("./test_global_func_found/")
     cmd = ["./test.py"]
     cmdOutput = subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True)

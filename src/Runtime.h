@@ -258,7 +258,8 @@ static void _FPC_WARNING_(int errorType, int op, int loc)
 /// x,y,z: x=operation result, y=first operand, z=second operand
 /// loc: line number
 __device__
-static void _FPC_CHECK_OPERATION_(int type, float x, float y, float z, int loc)
+//static void _FPC_CHECK_OPERATION_(int type, float x, float y, float z, int loc)
+static void _FPC_CHECK_OPERATION_(int type, double x, double y, double z, int loc)
 {
 	if (isinf(x))
 	{
