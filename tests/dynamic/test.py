@@ -31,4 +31,81 @@ def main():
     os.chdir("../")
     ###########################################################################
 
+    ###########################################################################
+    t = "Test: fp32 NaN found"
+    testTarget = test_config.textWidth.format(t)
+    sys.stdout.write(testTarget)
+    os.chdir("./test_fp32_nan_found/")
+    cmd = ["./test.py"]
+    cmdOutput = subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True)
+    sys.stdout.write(cmdOutput)
+    os.chdir("../")
+    ###########################################################################
+
+    ###########################################################################
+    t = "Test: fp64 NaN found"
+    testTarget = test_config.textWidth.format(t)
+    sys.stdout.write(testTarget)
+    os.chdir("./test_fp64_nan_found/")
+    cmd = ["./test.py"]
+    cmdOutput = subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True)
+    sys.stdout.write(cmdOutput)
+    os.chdir("../")
+    ###########################################################################
+
+    ###########################################################################
+    t = "Test: fp32 overflow found"
+    testTarget = test_config.textWidth.format(t)
+    sys.stdout.write(testTarget)
+    os.chdir("./test_fp32_overflow_found/")
+    cmd = ["./test.py"]
+    cmdOutput = subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True)
+    sys.stdout.write(cmdOutput)
+    os.chdir("../")
+    ###########################################################################
+
+    ###########################################################################
+    t = "Test: fp64 overflow found"
+    testTarget = test_config.textWidth.format(t)
+    sys.stdout.write(testTarget)
+    os.chdir("./test_fp64_overflow_found/")
+    cmd = ["./test.py"]
+    cmdOutput = subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True)
+    sys.stdout.write(cmdOutput)
+    os.chdir("../")
+    ###########################################################################
+
+    ###########################################################################
+    t = "Test: fp32 almost underflow found"
+    testTarget = test_config.textWidth.format(t)
+    sys.stdout.write(testTarget)
+    os.chdir("./test_fp32_almost_underflow_found/")
+    cmd = ["./test.py"]
+    cmdOutput = subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True)
+    sys.stdout.write(cmdOutput)
+    os.chdir("../")
+    ###########################################################################
+
+    ###########################################################################
+    t = "Test: fp64 underflow found"
+    testTarget = test_config.textWidth.format(t)
+    sys.stdout.write(testTarget)
+    os.chdir("./test_fp64_almost_underflow_found/")
+    cmd = ["./test.py"]
+    cmdOutput = subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True)
+    sys.stdout.write(cmdOutput)
+    os.chdir("../")
+    ###########################################################################
+
+    ###########################################################################
+    t = "Test: debug info is correct"
+    testTarget = test_config.textWidth.format(t)
+    sys.stdout.write(testTarget)
+    os.chdir("./test_debug_info_is_correct/")
+    cmd = ["./test.py"]
+    cmdOutput = subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True)
+    sys.stdout.write(cmdOutput)
+    os.chdir("../")
+    ###########################################################################
+
 main()

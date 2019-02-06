@@ -6,3 +6,5 @@
 *.core
 /build/
 *.pyc
+*.bc
+*.ll

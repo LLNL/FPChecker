@@ -46,7 +46,12 @@ __device__ void 	_FPC_FP64_CHECK_DIV_(float x, float y, float z, int loc);
 #define REPORT_LINE_SIZE 80
 #define REPORT_COL1_SIZE 15
 #define REPORT_COL2_SIZE REPORT_LINE_SIZE-REPORT_COL1_SIZE-1
+
+#ifdef FPC_DANGER_ZONE_PERCENT
+#define DANGER_ZONE_PERCENTAGE FPC_DANGER_ZONE_PERCENT
+#else
 #define DANGER_ZONE_PERCENTAGE 0.10
+#endif
 
 /* ----------------------------- Global Data ------------------------------- */
 
@@ -321,7 +326,7 @@ static void _FPC_FP32_CHECK_OPERATION_(float x, float y, float z, int loc)
 		}
 		else if (_FPC_FP32_IS_ALMOST_OVERFLOW(x))
 		{
-			_FPC_WARNING_(2, 0, loc);
+			_FPC_WARNING_(1, 0, loc);
 		}
 	}
 }
@@ -426,7 +431,7 @@ static void _FPC_FP64_CHECK_OPERATION_(double x, double y, double z, int loc)
 		}
 		else if (_FPC_FP64_IS_ALMOST_OVERFLOW(x))
 		{
-			_FPC_WARNING_(2, 0, loc);
+			_FPC_WARNING_(1, 0, loc);
 		}
 	}
 }

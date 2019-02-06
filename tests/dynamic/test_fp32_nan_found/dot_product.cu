@@ -4,8 +4,8 @@
 __device__ void mul(float a, float b, float *res)
 {
   *res = a * b;
-  // underflow
-  *res = (*res) * 1e-44f; 
+  // NaN
+  *res = (*res)-(*res) / (*res)/(*res); 
 }
 
 __global__ void dot_prod(float *x, float *y, int size)
