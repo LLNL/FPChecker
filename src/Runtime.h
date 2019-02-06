@@ -244,11 +244,18 @@ static void _FPC_INTERRUPT_(int errorType, int op, int loc, float fp32_val, doub
 				_FPC_PRINT_REPORT_ROW_("Error", REPORT_COL1_SIZE, 0);
 				_FPC_PRINT_REPORT_ROW_(e, REPORT_COL2_SIZE, 1);
 				_FPC_PRINT_REPORT_ROW_("Operation", REPORT_COL1_SIZE, 0);
-				_FPC_PRINT_REPORT_ROW_(o, REPORT_COL2_SIZE, 0);
-				if (fp32_val != 0)
-					_FPC_PRINT_REPORT_ROW_(fp32_val, REPORT_COL2_SIZE, 1);
+				if (errorType == 2)
+				{
+					_FPC_PRINT_REPORT_ROW_(o, 4, 0);
+					if (fp32_val != 0)
+						_FPC_PRINT_REPORT_ROW_(fp32_val, REPORT_COL2_SIZE, 1);
+					else
+						_FPC_PRINT_REPORT_ROW_(fp64_val, REPORT_COL2_SIZE, 1);
+				}
 				else
-					_FPC_PRINT_REPORT_ROW_(fp64_val, REPORT_COL2_SIZE, 1);
+				{
+					_FPC_PRINT_REPORT_ROW_(o, REPORT_COL2_SIZE, 1);
+				}
 				_FPC_PRINT_REPORT_ROW_("File", REPORT_COL1_SIZE, 0);
 				_FPC_PRINT_REPORT_ROW_(_FPC_FILE_NAME_[0], REPORT_COL2_SIZE, 1);
 				_FPC_PRINT_REPORT_ROW_("Line", REPORT_COL1_SIZE, 0);
