@@ -87,7 +87,7 @@ def main():
     ###########################################################################
 
     ###########################################################################
-    t = "Test: fp64 underflow found"
+    t = "Test: fp64 almost underflow found"
     testTarget = test_config.textWidth.format(t)
     sys.stdout.write(testTarget)
     os.chdir("./test_fp64_almost_underflow_found/")
@@ -102,6 +102,17 @@ def main():
     testTarget = test_config.textWidth.format(t)
     sys.stdout.write(testTarget)
     os.chdir("./test_debug_info_is_correct/")
+    cmd = ["./test.py"]
+    cmdOutput = subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True)
+    sys.stdout.write(cmdOutput)
+    os.chdir("../")
+    ###########################################################################
+
+    ###########################################################################
+    t = "Test: operations are correct"
+    testTarget = test_config.textWidth.format(t)
+    sys.stdout.write(testTarget)
+    os.chdir("./test_ops_are_correct/")
     cmd = ["./test.py"]
     cmdOutput = subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True)
     sys.stdout.write(cmdOutput)
