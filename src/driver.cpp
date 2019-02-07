@@ -45,10 +45,10 @@ public:
 		Module *m = &M;
 		FPInstrumentation *fpInstrumentation = new FPInstrumentation(m);
 
-		// ------------- Logging -----------------------
-		std::string out = "Running Module pass on module: " << m->getName().str();
+#ifdef FPC_DEBUG
+		std::string out = "Running Module pass on: " << m->getName().str();
 		Logging::info(out.c_str());
-		// ---------------------------------------------
+#endif
 
 		for (auto f = M.begin(), e = M.end(); f != e; ++f)
 		{
@@ -57,19 +57,16 @@ public:
 				continue;
 
 			Function *F = &(*f);
-			//outs() << "\t==> Func: " << f->getName().str() << " call-conv: " << f->getCallingConv() << "\n";
-			//if (isFunctionAKernel(F))
-			//if (isAKernelFunction(*F))
+
 			if (CodeMatching::isDeviceCode(m))
 			{
 				if (CodeMatching::isUnwantedFunction(F))
 						continue;
 
-				//outs() << "Instrumenting func: " << f->getName().str() << "\n";
-				// ------------- Logging -----------------------
+#ifdef FPC_DEBUG
 				std::string out = "Instrumenting function: " + f->getName().str();
 				Logging::info(out.c_str());
-				// ---------------------------------------------
+#endif
 				fpInstrumentation->instrumentFunction(F);
 			}
 		}
@@ -82,8 +79,6 @@ public:
 	}
 
 };
-
-//MachinePassRegistry RegisterMyPasses::Registry;
 
 char CUDAKernelAnalysis::ID = 0;
 

@@ -33,13 +33,12 @@ FPInstrumentation::FPInstrumentation(Module *M) :
 		fp64_check_div_function(nullptr)
 {
 
-	// ------------- Logging -----------------------
+#ifdef FPC_DEBUG
 	Logging::info("Initializing instrumentation");
-	//printf("Value:  %p\n", fp32_check_add_function);
 	std::stringstream out;
 	out << "Pointer value (fp32_check_add_function): " << fp32_check_add_function;
 	Logging::info(out.str().c_str());
-	// ---------------------------------------------
+#endif
 
   // Find instrumentation function
   for(auto F = M->begin(), e = M->end(); F!=e; ++F)
@@ -47,9 +46,9 @@ FPInstrumentation::FPInstrumentation(Module *M) :
     Function *f = &(*F);
     if (f->getName().str().find("_FPC_FP32_CHECK_ADD_") != std::string::npos)
     {
-    	// ------------- Logging -----------------------
+#ifdef FPC_DEBUG
     	Logging::info("Found _FPC_FP32_CHECK_ADD_");
-    	// ---------------------------------------------
+#endif
 
     	fp32_check_add_function = f;
     	//if (f->getLinkage() != GlobalValue::LinkageTypes::LinkOnceODRLinkage)
@@ -59,9 +58,9 @@ FPInstrumentation::FPInstrumentation(Module *M) :
     }
     else if (f->getName().str().find("_FPC_FP32_CHECK_SUB_") != std::string::npos)
     {
-    	// ------------- Logging -----------------------
+#ifdef FPC_DEBUG
     	Logging::info("Found _FPC_FP32_CHECK_SUB_");
-    	// ---------------------------------------------
+#endif
 
     	fp32_check_sub_function = f;
     	//if (f->getLinkage() != GlobalValue::LinkageTypes::LinkOnceODRLinkage)
@@ -71,9 +70,9 @@ FPInstrumentation::FPInstrumentation(Module *M) :
     }
     else if (f->getName().str().find("_FPC_FP32_CHECK_MUL_") != std::string::npos)
     {
-    	// ------------- Logging -----------------------
+#ifdef FPC_DEBUG
     	Logging::info("Found _FPC_FP32_CHECK_MUL_");
-    	// ---------------------------------------------
+#endif
 
     	fp32_check_mul_function = f;
     	//if (f->getLinkage() != GlobalValue::LinkageTypes::LinkOnceODRLinkage)
@@ -83,9 +82,9 @@ FPInstrumentation::FPInstrumentation(Module *M) :
     }
     else if (f->getName().str().find("_FPC_FP32_CHECK_DIV_") != std::string::npos)
     {
-    	// ------------- Logging -----------------------
+#ifdef FPC_DEBUG
     	Logging::info("Found _FPC_FP32_CHECK_DIV_");
-    	// ---------------------------------------------
+#endif
 
     	fp32_check_div_function = f;
     	//if (f->getLinkage() != GlobalValue::LinkageTypes::LinkOnceODRLinkage)
@@ -95,9 +94,9 @@ FPInstrumentation::FPInstrumentation(Module *M) :
     }
     else if (f->getName().str().find("_FPC_FP64_CHECK_ADD_") != std::string::npos)
     {
-    	// ------------- Logging -----------------------
+#ifdef FPC_DEBUG
     	Logging::info("Found _FPC_FP64_CHECK_ADD_");
-    	// ---------------------------------------------
+#endif
 
     	fp64_check_add_function = f;
     	//if (f->getLinkage() != GlobalValue::LinkageTypes::LinkOnceODRLinkage)
@@ -107,9 +106,9 @@ FPInstrumentation::FPInstrumentation(Module *M) :
     }
     else if (f->getName().str().find("_FPC_FP64_CHECK_SUB_") != std::string::npos)
     {
-    	// ------------- Logging -----------------------
+#ifdef FPC_DEBUG
     	Logging::info("Found _FPC_FP64_CHECK_SUB_");
-    	// ---------------------------------------------
+#endif
 
     	fp64_check_sub_function = f;
     	//if (f->getLinkage() != GlobalValue::LinkageTypes::LinkOnceODRLinkage)
@@ -119,9 +118,9 @@ FPInstrumentation::FPInstrumentation(Module *M) :
     }
     else if (f->getName().str().find("_FPC_FP64_CHECK_MUL_") != std::string::npos)
     {
-    	// ------------- Logging -----------------------
+#ifdef FPC_DEBUG
     	Logging::info("Found _FPC_FP64_CHECK_MUL_");
-    	// ---------------------------------------------
+#endif
 
     	fp64_check_mul_function = f;
     	//if (f->getLinkage() != GlobalValue::LinkageTypes::LinkOnceODRLinkage)
@@ -131,9 +130,9 @@ FPInstrumentation::FPInstrumentation(Module *M) :
     }
     else if (f->getName().str().find("_FPC_FP64_CHECK_DIV_") != std::string::npos)
     {
-    	// ------------- Logging -----------------------
+#ifdef FPC_DEBUG
     	Logging::info("Found _FPC_FP64_CHECK_DIV_");
-    	// ---------------------------------------------
+#endif
 
     	fp64_check_div_function = f;
     	//if (f->getLinkage() != GlobalValue::LinkageTypes::LinkOnceODRLinkage)
@@ -143,81 +142,81 @@ FPInstrumentation::FPInstrumentation(Module *M) :
     }
     else if (f->getName().str().find("_FPC_INTERRUPT_") != std::string::npos)
     {
-    	// ------------- Logging -----------------------
+#ifdef FPC_DEBUG
     	Logging::info("Found _FPC_INTERRUPT_");
-    	// ---------------------------------------------
+#endif
 
     	//if (f->getLinkage() != GlobalValue::LinkageTypes::LinkOnceODRLinkage)
     	//	f->setLinkage(GlobalValue::LinkageTypes::LinkOnceODRLinkage);
     }
     else if (f->getName().str().find("_FPC_FP32_IS_SUBNORMAL") != std::string::npos)
     {
-    	// ------------- Logging -----------------------
+#ifdef FPC_DEBUG
     	Logging::info("Found _FPC_FP32_IS_SUBNORMAL");
-    	// ---------------------------------------------
+#endif
 
     	//if (f->getLinkage() != GlobalValue::LinkageTypes::LinkOnceODRLinkage)
     	//	f->setLinkage(GlobalValue::LinkageTypes::LinkOnceODRLinkage);
     }
     else if (f->getName().str().find("_FPC_FP64_IS_SUBNORMAL") != std::string::npos)
     {
-    	// ------------- Logging -----------------------
+#ifdef FPC_DEBUG
     	Logging::info("Found _FPC_FP64_IS_SUBNORMAL");
-    	// ---------------------------------------------
+#endif
 
     	//if (f->getLinkage() != GlobalValue::LinkageTypes::LinkOnceODRLinkage)
     	//	f->setLinkage(GlobalValue::LinkageTypes::LinkOnceODRLinkage);
     }
     else if (f->getName().str().find("_FPC_DEVICE_CODE_FUNC_") != std::string::npos)
     {
-    	// ------------- Logging -----------------------
+#ifdef FPC_DEBUG
     	Logging::info("Found _FPC_DEVICE_CODE_FUNC_");
-    	// ---------------------------------------------
+#endif
 
     	if (f->getLinkage() != GlobalValue::LinkageTypes::LinkOnceODRLinkage)
     		f->setLinkage(GlobalValue::LinkageTypes::LinkOnceODRLinkage);
     }
     else if (f->getName().str().find("_FPC_WARNING_") != std::string::npos)
     {
-    	// ------------- Logging -----------------------
+#ifdef FPC_DEBUG
     	Logging::info("Found _FPC_WARNING_");
-    	// ---------------------------------------------
+#endif
 
     	//if (f->getLinkage() != GlobalValue::LinkageTypes::LinkOnceODRLinkage)
     	//	f->setLinkage(GlobalValue::LinkageTypes::LinkOnceODRLinkage);
     }
     else if (f->getName().str().find("_FPC_FP32_IS_ALMOST_OVERFLOW") != std::string::npos)
     {
-    	// ------------- Logging -----------------------
+#ifdef FPC_DEBUG
     	Logging::info("Found _FPC_FP32_IS_ALMOST_OVERFLOW");
-    	// ---------------------------------------------
+#endif
 
     	//if (f->getLinkage() != GlobalValue::LinkageTypes::LinkOnceODRLinkage)
     	//	f->setLinkage(GlobalValue::LinkageTypes::LinkOnceODRLinkage);
     }
     else if (f->getName().str().find("_FPC_FP32_IS_ALMOST_SUBNORMAL") != std::string::npos)
     {
-    	// ------------- Logging -----------------------
+#ifdef FPC_DEBUG
     	Logging::info("Found _FPC_FP32_IS_ALMOST_SUBNORMAL");
-    	// ---------------------------------------------
+#endif
 
     	//if (f->getLinkage() != GlobalValue::LinkageTypes::LinkOnceODRLinkage)
     	//	f->setLinkage(GlobalValue::LinkageTypes::LinkOnceODRLinkage);
     }
     else if (f->getName().str().find("_FPC_FP64_IS_ALMOST_OVERFLOW") != std::string::npos)
     {
-    	// ------------- Logging -----------------------
+#ifdef FPC_DEBUG
     	Logging::info("Found _FPC_FP64_IS_ALMOST_OVERFLOW");
-    	// ---------------------------------------------
+#endif
 
     	//if (f->getLinkage() != GlobalValue::LinkageTypes::LinkOnceODRLinkage)
     	//	f->setLinkage(GlobalValue::LinkageTypes::LinkOnceODRLinkage);
     }
     else if (f->getName().str().find("_FPC_FP64_IS_ALMOST_SUBNORMAL") != std::string::npos)
     {
-    	// ------------- Logging -----------------------
+#ifdef FPC_DEBUG
     	Logging::info("Found _FPC_FP64_IS_ALMOST_SUBNORMAL");
-    	// ---------------------------------------------
+#endif
 
     	//if (f->getLinkage() != GlobalValue::LinkageTypes::LinkOnceODRLinkage)
     	//	f->setLinkage(GlobalValue::LinkageTypes::LinkOnceODRLinkage);
@@ -235,9 +234,9 @@ void FPInstrumentation::instrumentFunction(Function *f)
   assert((fp32_check_add_function!=NULL) && "Function not initialized!");
   assert((fp64_check_add_function!=nullptr) && "Function not initialized!");
 
-	// ------------- Logging -----------------------
+#ifdef FPC_DEBUG
 	Logging::info("Entering main loop in instrumentFunction");
-	// ---------------------------------------------
+#endif
 
 	int instrumentedOps = 0;
 	for (auto bb=f->begin(), end=f->end(); bb != end; ++bb)
@@ -326,13 +325,12 @@ void FPInstrumentation::instrumentFunction(Function *f)
 		}
 	}
 
-	// ------------- Logging -----------------------
+#ifdef FPC_DEBUG
 	std::stringstream out;
 	out << "Instrumented operations: " << instrumentedOps;
 	Logging::info(out.str().c_str());
-
 	Logging::info("Leaving main loop in instrumentFunction");
-	// ---------------------------------------------
+#endif
 }
 
 bool FPInstrumentation::isFPOperation(const Instruction *inst)
@@ -426,44 +424,41 @@ Instruction* FPInstrumentation::firstInstrution()
 void FPInstrumentation::generateCodeForInterruption()
 {
 
-	for (auto i = mod->global_begin(), end = mod->global_end(); i != end; ++i)
-	{
-	//	outs() << "Global: " << *i << "\n";
-	}
+#ifdef FPC_DEBUG
+	std::string out = "Generating code for interruption...";
+	Logging::info(out.c_str());
+#endif
 
-	errs() << "in generteCodeForInterruption\n";
+	//for (auto i = mod->global_begin(), end = mod->global_end(); i != end; ++i)
+	//{
+	//	outs() << "Global: " << *i << "\n";
+	//}
+
+	//errs() << "in generteCodeForInterruption\n";
 	GlobalVariable *gArray = nullptr;
-	//gArray = mod->getNamedGlobal("_FPC_FILE_NAME_");
 	gArray = mod->getGlobalVariable ("_ZL15_FPC_FILE_NAME_", true);
 	assert((gArray!=nullptr) && "Global array not found");
-	errs() << "setting linkage\n";
+	//errs() << "setting linkage\n";
 	gArray->setLinkage(GlobalValue::LinkageTypes::InternalLinkage);
-	//GArray->setAlignment(4);
-	errs() << "got array ptr\n";
+	//errs() << "got array ptr\n";
 
 	std::vector<Constant*> values;
-	//Function *tmpF = mod->getFunction("main");
-	//printf("Value:  tmpF: %p\n", tmpF);
-	//Instruction *i = tmpF->begin()->getFirstNonPHI();
 	Instruction *i = firstInstrution();
 	printf("Value:  i: %p\n", i);
 	IRBuilder<> builder(i);
 
-	errs() << "created builder\n";
-	//std::string fileName = getFileNameFromInstruction(i);
+	//errs() << "created builder\n";
 	std::string fileName = getFileNameFromModule(mod);
 	Constant *c = builder.CreateGlobalStringPtr(fileName);
 	values.push_back(c);
-	//c = builder.CreateGlobalStringPtr("value_2");
-	//values.push_back(c);
-	errs() << "pushed value\n";
+	//errs() << "pushed value\n";
 
 	ArrayType *t = ArrayType::get(Type::getInt8PtrTy(mod->getContext()), 1);
-	errs() << "got array type\n";
+	//errs() << "got array type\n";
 	Constant* init = ConstantArray::get(t, values);
 
 	gArray->setInitializer(NULL);
-	errs() << "Removed existing initializer\n";
+	//errs() << "Removed existing initializer\n";
 	gArray->setInitializer(init);
-	errs() << "initialized\n";
+	//errs() << "initialized\n";
 }
