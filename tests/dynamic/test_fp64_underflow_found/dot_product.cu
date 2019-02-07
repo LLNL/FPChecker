@@ -5,7 +5,7 @@ __device__ void mul(double a, double b, double *res)
 {
   *res = a * b;
   // underflow
-  *res = (*res) * 1e-300 * 1e-24; 
+  *res = (*res) * (1e-300 * 1e-22); 
 }
 
 __global__ void dot_prod(double *x, double *y, int size)
