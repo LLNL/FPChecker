@@ -142,7 +142,7 @@ static void _FPC_PRINT_REPORT_HEADER_(int type)
 }
 
 __device__
-static void _FPC_PRINT_REPORT_ROW_(const char *val, int space, int last)
+static void _FPC_PRINT_REPORT_ROW_(const char *val, int space, int last, char lastChar)
 {
 	char msg[255];
 	msg[0] = '\0';
@@ -154,7 +154,7 @@ static void _FPC_PRINT_REPORT_ROW_(const char *val, int space, int last)
 	printf("%s",msg);
 
 	if (last==0)
-		printf(":");
+		printf("%c", lastChar);
 	else
 		printf("\n");
 }
@@ -243,12 +243,12 @@ static void _FPC_INTERRUPT_(int errorType, int op, int loc, float fp32_val, doub
 				else _FPC_CPY_(o, "NONE");
 
 				_FPC_PRINT_REPORT_HEADER_(0);
-				_FPC_PRINT_REPORT_ROW_("Error", REPORT_COL1_SIZE, 0);
-				_FPC_PRINT_REPORT_ROW_(e, REPORT_COL2_SIZE, 1);
-				_FPC_PRINT_REPORT_ROW_("Operation", REPORT_COL1_SIZE, 0);
+				_FPC_PRINT_REPORT_ROW_("Error", REPORT_COL1_SIZE, 0, ':');
+				_FPC_PRINT_REPORT_ROW_(e, REPORT_COL2_SIZE, 1, '');
+				_FPC_PRINT_REPORT_ROW_("Operation", REPORT_COL1_SIZE, 0, ':');
 				if (errorType == 2)
 				{
-					_FPC_PRINT_REPORT_ROW_(o, 4, 0);
+					_FPC_PRINT_REPORT_ROW_(o, 4, 0, '');
 					if (fp32_val != 0)
 						_FPC_PRINT_REPORT_ROW_(fp32_val, REPORT_COL2_SIZE, 1);
 					else
@@ -256,11 +256,11 @@ static void _FPC_INTERRUPT_(int errorType, int op, int loc, float fp32_val, doub
 				}
 				else
 				{
-					_FPC_PRINT_REPORT_ROW_(o, REPORT_COL2_SIZE, 1);
+					_FPC_PRINT_REPORT_ROW_(o, REPORT_COL2_SIZE, 1, '');
 				}
-				_FPC_PRINT_REPORT_ROW_("File", REPORT_COL1_SIZE, 0);
-				_FPC_PRINT_REPORT_ROW_(_FPC_FILE_NAME_[0], REPORT_COL2_SIZE, 1);
-				_FPC_PRINT_REPORT_ROW_("Line", REPORT_COL1_SIZE, 0);
+				_FPC_PRINT_REPORT_ROW_("File", REPORT_COL1_SIZE, 0, ':');
+				_FPC_PRINT_REPORT_ROW_(_FPC_FILE_NAME_[0], REPORT_COL2_SIZE, 1, '');
+				_FPC_PRINT_REPORT_ROW_("Line", REPORT_COL1_SIZE, 0, ':');
 				//_FPC_PRINT_REPORT_ROW_(l, REPORT_COL2_SIZE, 1);
 				_FPC_PRINT_REPORT_ROW_(loc, REPORT_COL2_SIZE, 1);
 				_FPC_PRINT_REPORT_LINE_('+');
@@ -292,12 +292,12 @@ static void _FPC_WARNING_(int errorType, int op, int loc, float fp32_val, double
 				else _FPC_CPY_(o, "NONE");
 
 				_FPC_PRINT_REPORT_HEADER_(1);
-				_FPC_PRINT_REPORT_ROW_("Error", REPORT_COL1_SIZE, 0);
-				_FPC_PRINT_REPORT_ROW_(e, REPORT_COL2_SIZE, 1);
-				_FPC_PRINT_REPORT_ROW_("Operation", REPORT_COL1_SIZE, 0);
+				_FPC_PRINT_REPORT_ROW_("Error", REPORT_COL1_SIZE, 0, ':');
+				_FPC_PRINT_REPORT_ROW_(e, REPORT_COL2_SIZE, 1, '');
+				_FPC_PRINT_REPORT_ROW_("Operation", REPORT_COL1_SIZE, 0, ':');
 				if (errorType == 1 || errorType == 2)
 				{
-					_FPC_PRINT_REPORT_ROW_(o, 4, 0);
+					_FPC_PRINT_REPORT_ROW_(o, 4, 0, '');
 					if (fp32_val != 0)
 						_FPC_PRINT_REPORT_ROW_(fp32_val, REPORT_COL2_SIZE, 1);
 					else
@@ -305,11 +305,11 @@ static void _FPC_WARNING_(int errorType, int op, int loc, float fp32_val, double
 				}
 				else
 				{
-					_FPC_PRINT_REPORT_ROW_(o, REPORT_COL2_SIZE, 1);
+					_FPC_PRINT_REPORT_ROW_(o, REPORT_COL2_SIZE, 1, '');
 				}
-				_FPC_PRINT_REPORT_ROW_("File", REPORT_COL1_SIZE, 0);
-				_FPC_PRINT_REPORT_ROW_(_FPC_FILE_NAME_[0], REPORT_COL2_SIZE, 1);
-				_FPC_PRINT_REPORT_ROW_("Line", REPORT_COL1_SIZE, 0);
+				_FPC_PRINT_REPORT_ROW_("File", REPORT_COL1_SIZE, 0, ':');
+				_FPC_PRINT_REPORT_ROW_(_FPC_FILE_NAME_[0], REPORT_COL2_SIZE, 1, '');
+				_FPC_PRINT_REPORT_ROW_("Line", REPORT_COL1_SIZE, 0, ':');
 				//_FPC_PRINT_REPORT_ROW_(l, REPORT_COL2_SIZE, 1);
 				_FPC_PRINT_REPORT_ROW_(loc, REPORT_COL2_SIZE, 1);
 				_FPC_PRINT_REPORT_LINE_('+');
