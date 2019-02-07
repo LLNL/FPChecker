@@ -191,9 +191,10 @@ static void _FPC_PRINT_REPORT_ROW_(float val, int space, int last)
 		_FPC_CAT_(msg," ");
 	printf("%s",msg);
 
-	if (last==0)
-		printf(":");
-	else
+	//if (last==0)
+	//	printf("");
+	//else
+	if (last!=0)
 		printf("\n");
 }
 
@@ -210,9 +211,10 @@ static void _FPC_PRINT_REPORT_ROW_(double val, int space, int last)
 		_FPC_CAT_(msg," ");
 	printf("%s",msg);
 
-	if (last==0)
-		printf(":");
-	else
+	//if (last==0)
+	//	printf("");
+	//else
+	if (last!=0)
 		printf("\n");
 }
 
@@ -269,7 +271,7 @@ static void _FPC_INTERRUPT_(int errorType, int op, int loc, float fp32_val, doub
 }
 
 __device__
-static void _FPC_WARNING_(int errorType, int op, int loc)
+static void _FPC_WARNING_(int errorType, int op, int loc, float fp32_val, double fp64_val)
 {
 	bool blocked = true;
   	while(blocked) {
@@ -293,7 +295,18 @@ static void _FPC_WARNING_(int errorType, int op, int loc)
 				_FPC_PRINT_REPORT_ROW_("Error", REPORT_COL1_SIZE, 0);
 				_FPC_PRINT_REPORT_ROW_(e, REPORT_COL2_SIZE, 1);
 				_FPC_PRINT_REPORT_ROW_("Operation", REPORT_COL1_SIZE, 0);
-				_FPC_PRINT_REPORT_ROW_(o, REPORT_COL2_SIZE, 1);
+				if (errorType == 1 || errorType == 2)
+				{
+					_FPC_PRINT_REPORT_ROW_(o, 4, 0);
+					if (fp32_val != 0)
+						_FPC_PRINT_REPORT_ROW_(fp32_val, REPORT_COL2_SIZE, 1);
+					else
+						_FPC_PRINT_REPORT_ROW_(fp64_val, REPORT_COL2_SIZE, 1);
+				}
+				else
+				{
+					_FPC_PRINT_REPORT_ROW_(o, REPORT_COL2_SIZE, 1);
+				}
 				_FPC_PRINT_REPORT_ROW_("File", REPORT_COL1_SIZE, 0);
 				_FPC_PRINT_REPORT_ROW_(_FPC_FILE_NAME_[0], REPORT_COL2_SIZE, 1);
 				_FPC_PRINT_REPORT_ROW_("Line", REPORT_COL1_SIZE, 0);
@@ -371,11 +384,11 @@ static void _FPC_FP32_CHECK_OPERATION_(float x, float y, float z, int loc, int o
 		}
 		else if (_FPC_FP32_IS_ALMOST_SUBNORMAL(x))
 		{
-			_FPC_WARNING_(2, op, loc);
+			_FPC_WARNING_(2, op, loc, x, 0);
 		}
 		else if (_FPC_FP32_IS_ALMOST_OVERFLOW(x))
 		{
-			_FPC_WARNING_(1, op, loc);
+			_FPC_WARNING_(1, op, loc, x, 0);
 		}
 	}
 }
@@ -476,11 +489,11 @@ static void _FPC_FP64_CHECK_OPERATION_(double x, double y, double z, int loc, in
 		}
 		else if (_FPC_FP64_IS_ALMOST_SUBNORMAL(x))
 		{
-			_FPC_WARNING_(2, op, loc);
+			_FPC_WARNING_(2, op, loc, 0, x);
 		}
 		else if (_FPC_FP64_IS_ALMOST_OVERFLOW(x))
 		{
-			_FPC_WARNING_(1, op, loc);
+			_FPC_WARNING_(1, op, loc, 0, x);
 		}
 	}
 }
