@@ -223,7 +223,7 @@ FPInstrumentation::FPInstrumentation(Module *M) :
     }
   }
 
-  printf("Value:  %p\n", fp32_check_add_function);
+  //printf("Value:  %p\n", fp32_check_add_function);
 }
 
 void FPInstrumentation::instrumentFunction(Function *f)
@@ -411,7 +411,7 @@ Instruction* FPInstrumentation::firstInstrution()
 		if (f->isDeclaration())
 			continue;
 
-		Function *F = &(*f);
+		//Function *F = &(*f);
 		BasicBlock *bb = &(f->getEntryBlock());
 		inst = bb->getFirstNonPHIOrDbgOrLifetime();
 		break;
@@ -444,7 +444,7 @@ void FPInstrumentation::generateCodeForInterruption()
 
 	std::vector<Constant*> values;
 	Instruction *i = firstInstrution();
-	printf("Value:  i: %p\n", i);
+	//printf("Value:  i: %p\n", i);
 	IRBuilder<> builder(i);
 
 	//errs() << "created builder\n";

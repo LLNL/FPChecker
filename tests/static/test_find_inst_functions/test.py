@@ -29,5 +29,5 @@ def main():
 	if count == 8:
 		print "PASSED"
 	else:
-		exit()
+		print "failed"
 main()

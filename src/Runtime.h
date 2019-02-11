@@ -223,7 +223,6 @@ static void _FPC_PRINT_REPORT_ROW_(double val, int space, int last)
 __device__
 static void _FPC_INTERRUPT_(int errorType, int op, int loc, float fp32_val, double fp64_val)
 {
-	//asm("trap;");
 	bool blocked = true;
   	while(blocked) {
 			if(0 == atomicCAS(&lock_state, 0, 1)) {
@@ -265,7 +264,12 @@ static void _FPC_INTERRUPT_(int errorType, int op, int loc, float fp32_val, doub
 				_FPC_PRINT_REPORT_ROW_(loc, REPORT_COL2_SIZE, 1);
 				_FPC_PRINT_REPORT_LINE_('+');
 
+#ifndef FPC_DISABLE_ERRORS_ABORT
 				asm("trap;");
+#else
+				blocked = false;
+				atomicExch(&lock_state,0u);
+#endif
 		}
 	}
 }

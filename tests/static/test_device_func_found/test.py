@@ -15,6 +15,6 @@ def main():
     if passed == True:
         print "PASSED"
     else:
-        exit()
+        print "failed"
 
 main()

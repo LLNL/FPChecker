@@ -46,7 +46,7 @@ public:
 		FPInstrumentation *fpInstrumentation = new FPInstrumentation(m);
 
 #ifdef FPC_DEBUG
-		std::string out = "Running Module pass on: " << m->getName().str();
+		std::string out = "Running Module pass on: " + m->getName().str();
 		Logging::info(out.c_str());
 #endif
 
