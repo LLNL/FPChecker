@@ -31,6 +31,9 @@ private:
   Function *fp64_check_mul_function;
   Function *fp64_check_div_function;
 
+  /* Host */
+  Function *print_at_main;
+
   IRBuilder<> createBuilderAfter(Instruction *inst);
   IRBuilder<> createBuilderBefore(Instruction *inst);
   void setFakeDebugLocation(Function *f, Instruction *inst);
@@ -39,7 +42,7 @@ private:
 public:
   FPInstrumentation(Module *M);
   void instrumentFunction(Function *f);
-  //void instrumentMainFunction(Function *f);
+  void instrumentMainFunction(Function *f);
   void generateCodeForInterruption();
 
   /* Helper functions */

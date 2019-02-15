@@ -69,6 +69,13 @@ public:
 #endif
 				fpInstrumentation->instrumentFunction(F);
 			}
+			else // host code
+			{
+				if (CodeMatching::isMainFunction(F))
+				{
+					fpInstrumentation->instrumentMainFunction(F);
+				}
+			}
 		}
 		
 		if (CodeMatching::isDeviceCode(m))

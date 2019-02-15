@@ -224,6 +224,21 @@ FPInstrumentation::FPInstrumentation(Module *M) :
   }
 
   //printf("Value:  %p\n", fp32_check_add_function);
+
+  // ---- Find instrumentation function in HOST code ----
+  for(auto F = M->begin(), e = M->end(); F!=e; ++F)
+  {
+    Function *f = &(*F);
+    if (f->getName().str().find("_FPC_PRINT_AT_MAIN_") != std::string::npos)
+    {
+#ifdef FPC_DEBUG
+    	Logging::info("Found _FPC_PRINT_AT_MAIN_");
+#endif
+    	print_at_main = f;
+    	if (f->getLinkage() != GlobalValue::LinkageTypes::LinkOnceODRLinkage)
+    		f->setLinkage(GlobalValue::LinkageTypes::LinkOnceODRLinkage);
+    }
+  }
 }
 
 void FPInstrumentation::instrumentFunction(Function *f)
@@ -461,4 +476,17 @@ void FPInstrumentation::generateCodeForInterruption()
 	//errs() << "Removed existing initializer\n";
 	gArray->setInitializer(init);
 	//errs() << "initialized\n";
+}
+
+void FPInstrumentation::instrumentMainFunction(Function *f)
+{
+	BasicBlock *bb = &(*(f->begin()));
+	Instruction *inst = bb->getFirstNonPHIOrDbg();
+	IRBuilder<> builder = createBuilderBefore(inst);
+	std::vector<Value *> args;
+
+	CallInst *callInst = nullptr;
+	callInst = builder.CreateCall(print_at_main, args);
+	assert(callInst && "Invalid call instruction!");
+	setFakeDebugLocation(f, callInst);
 }

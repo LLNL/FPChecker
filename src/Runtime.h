@@ -43,6 +43,8 @@ __device__ void 	_FPC_FP64_CHECK_SUB_(float x, float y, float z, int loc);
 __device__ void 	_FPC_FP64_CHECK_MUL_(float x, float y, float z, int loc);
 __device__ void 	_FPC_FP64_CHECK_DIV_(float x, float y, float z, int loc);
 
+void _FPC_PRINT_AT_MAIN_();
+
 #define REPORT_LINE_SIZE 80
 #define REPORT_COL1_SIZE 15
 #define REPORT_COL2_SIZE REPORT_LINE_SIZE-REPORT_COL1_SIZE-1
@@ -264,12 +266,7 @@ static void _FPC_INTERRUPT_(int errorType, int op, int loc, float fp32_val, doub
 				_FPC_PRINT_REPORT_ROW_(loc, REPORT_COL2_SIZE, 1);
 				_FPC_PRINT_REPORT_LINE_('+');
 
-#ifndef FPC_DISABLE_ERRORS_ABORT
 				asm("trap;");
-#else
-				blocked = false;
-				atomicExch(&lock_state,0u);
-#endif
 		}
 	}
 }
@@ -323,49 +320,10 @@ static void _FPC_WARNING_(int errorType, int op, int loc, float fp32_val, double
 	}
 }
 
-/*__device__
-//static void _FPC_CHECK_OPERATION_(int type, float x, float y, float z, int loc)
-static void _FPC_CHECK_OPERATION_(int type, double x, double y, double z, int loc)
+void _FPC_PRINT_AT_MAIN_()
 {
-	if (isinf(x))
-	{
-		_FPC_INTERRUPT_(1, 0, loc);
-	}
-	else if (isnan(x))
-	{
-		_FPC_INTERRUPT_(0, 0, loc);
-	}
-	else if (type == 0) /// subnormals check
-	{
-		if (_FPC_FP32_IS_SUBNORMAL(x))
-		{
-			_FPC_INTERRUPT_(2, 0, loc);
-		}
-		else if (_FPC_FP32_IS_ALMOST_SUBNORMAL(x))
-		{
-			_FPC_WARNING_(2, 0, loc);
-		}
-		else if (_FPC_FP32_IS_ALMOST_OVERFLOW(x))
-		{
-			_FPC_WARNING_(2, 0, loc);
-		}
-	}
-	else if (type == 1) /// subnormals check
-	{
-		if (_FPC_FP64_IS_SUBNORMAL(x))
-		{
-			_FPC_INTERRUPT_(2, 0, loc);
-		}
-		else if (_FPC_FP64_IS_ALMOST_SUBNORMAL(x))
-		{
-			_FPC_WARNING_(2, 0, loc);
-		}
-		else if (_FPC_FP64_IS_ALMOST_OVERFLOW(x))
-		{
-			_FPC_WARNING_(2, 0, loc);
-		}
-	}
-}*/
+	printf("======== FPChecker ============\n");
+}
 
 /* ------------------------ FP32 Functions --------------------------------- */
 
