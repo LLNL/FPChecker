@@ -73,6 +73,9 @@ public:
 			{
 				if (CodeMatching::isMainFunction(F))
 				{
+#ifdef FPC_DEBUG
+					Logging::info("main() found");
+#endif
 					fpInstrumentation->instrumentMainFunction(F);
 				}
 			}

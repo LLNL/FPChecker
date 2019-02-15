@@ -119,4 +119,15 @@ def main():
     os.chdir("../")
     ###########################################################################
 
+    ###########################################################################
+    t = "Test: print at main"
+    testTarget = test_config.textWidth.format(t)
+    sys.stdout.write(testTarget)
+    os.chdir("./test_print_at_main/")
+    cmd = ["./test.py"]
+    cmdOutput = subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True)
+    sys.stdout.write(cmdOutput)
+    os.chdir("../")
+    ###########################################################################
+
 main()

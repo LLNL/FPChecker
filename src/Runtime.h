@@ -322,7 +322,11 @@ static void _FPC_WARNING_(int errorType, int op, int loc, float fp32_val, double
 
 void _FPC_PRINT_AT_MAIN_()
 {
-	printf("======== FPChecker ============\n");
+	printf("\n");
+	printf("========================================\n");
+	printf(" FPChecker (v0.0.1, %s)\n", __DATE__);
+	printf("========================================\n");
+	printf("\n");
 }
 
 /* ------------------------ FP32 Functions --------------------------------- */
