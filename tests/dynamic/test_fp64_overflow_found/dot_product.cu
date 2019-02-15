@@ -5,7 +5,12 @@ __device__ void mul(double a, double b, double *res)
 {
   *res = a * b;
   // Overflow
+
+#ifdef FPC_POSITIVE_OVERFLOW
   *res = (*res) * (1e307 * 1e10);
+#else
+  *res = (*res) * (1e307 * -1e10);
+#endif
 }
 
 __global__ void dot_prod(double *x, double *y, int size)

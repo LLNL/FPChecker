@@ -27,7 +27,7 @@ def getFPCReport(lines):
 
 def main():
     # --- compile code ---
-    cmd = ["make"]
+    cmd = ["make -f Makefile.1"]
     try:
         cmdOutput = subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True)
     except subprocess.CalledProcessError as e:
@@ -42,8 +42,27 @@ def main():
         print e.output
         exit()
 
-    rep = getFPCReport(cmdOutput.split("\n"))
-    if rep[0] == 'INF' and rep[3] == '8':
+    rep1 = getFPCReport(cmdOutput.split("\n"))
+
+    # --- compile code ---
+    cmd = ["make -f Makefile.2"]
+    try:
+        cmdOutput = subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True)
+    except subprocess.CalledProcessError as e:
+        print e.output
+        exit()
+
+    # --- run code ---
+    cmd = ["./main"]
+    try:
+        cmdOutput = subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True)
+    except subprocess.CalledProcessError as e:
+        print e.output
+        exit()
+
+    rep2 = getFPCReport(cmdOutput.split("\n"))
+
+    if rep1[0] == 'INF' and rep1[3] == '10' and rep2[0] == 'INF' and rep2[3] == '12':
         print "PASSED"
     else:
         print "failed"
