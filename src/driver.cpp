@@ -82,7 +82,10 @@ public:
 		}
 		
 		if (CodeMatching::isDeviceCode(m))
+		{
 			fpInstrumentation->generateCodeForInterruption();
+			fpInstrumentation->instrumentErrorArray();
+		}
 
 		delete fpInstrumentation;
 		return false;

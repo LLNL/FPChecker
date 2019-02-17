@@ -44,6 +44,7 @@ public:
   void instrumentFunction(Function *f);
   void instrumentMainFunction(Function *f);
   void generateCodeForInterruption();
+  void instrumentErrorArray();
 
   /* Helper functions */
   //static bool isUnwantedFunction(Function *f);

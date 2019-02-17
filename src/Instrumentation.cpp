@@ -15,6 +15,8 @@
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/GlobalValue.h"
 #include "llvm/IR/Attributes.h"
+#include "llvm/IR/GlobalVariable.h"
+#include "llvm/IR/Constants.h"
 
 #include <list>
 
@@ -489,4 +491,94 @@ void FPInstrumentation::instrumentMainFunction(Function *f)
 	callInst = builder.CreateCall(print_at_main, args);
 	assert(callInst && "Invalid call instruction!");
 	setFakeDebugLocation(f, callInst);
+}
+
+void FPInstrumentation::instrumentErrorArray()
+{
+	// Global error variable
+		GlobalVariable *gArray = nullptr;
+		gArray = mod->getGlobalVariable ("_ZL21errors_per_line_array", true);
+		//gArray = mod->getNamedGlobal ("errors_per_line_array");
+		assert((gArray!=nullptr) && "Global array not found");
+
+		printf("garray type id: %d\n", gArray->getType()->getTypeID());
+
+		if (gArray->getType()->isArrayTy())
+			printf("is array\n");
+		else if (gArray->getType()->isVectorTy())
+			printf("is vector\n");
+		else if (gArray->getType()->isIntegerTy())
+			printf("is int\n");
+		else if (gArray->getType()->isPtrOrPtrVectorTy())
+			printf("is ptr or ptr vec\n");
+		else if (gArray->getType()->isPointerTy())
+			printf("is ptr\n");
+
+
+		ArrayType *arrType = ArrayType::get(Type::getInt32Ty(mod->getContext()), 77);
+		//PointerType* PointerTy_1 = PointerType::get(arrType, 1);
+		//Type *ElementType = Type::getInt32PtrTy(mod->getContext());
+		//VectorType *vecType =	VectorType::get(ElementType, 77);
+		//PointerType *ptrType = 	PointerType::get(Type::getInt32Ty(mod->getContext()), 1);
+
+		GlobalVariable *newGv = nullptr;
+		newGv = new GlobalVariable(
+				*mod,
+				arrType,
+				false,
+				GlobalValue::LinkageTypes::InternalLinkage, // InternalLinkage,
+				0,
+				"myVar",
+				nullptr,
+				GlobalValue::ThreadLocalMode::NotThreadLocal,
+				1,
+				true
+				);
+
+		ConstantAggregateZero* const_array_2 = ConstantAggregateZero::get(arrType);
+		newGv->setInitializer(const_array_2);
+
+		//IRBuilder<> builder(mod->getContext());
+		//Value *v = builder.CreateBitCast (gArray, arrType, "my");
+		//Value *v = builder.CreatePointerBitCastOrAddrSpaceCast(gArray, newGv->getType(), "my");
+		//Value *v = builder.CreateBitOrPointerCast(gArray, newGv->getType(), "my");
+		//if (v->getType()->isPtrOrPtrVectorTy())
+		//			printf("v is ptr or ptr vec\n");
+		//printf("v type id: %d\n", v->getType()->getTypeID());
+		//gArray->replaceAllUsesWith(v);
+
+    //llvm::Constant *NewPtrForOldDecl =
+    //    llvm::ConstantExpr::getBitCast(gArray, newGv->getType());
+    //gArray->replaceAllUsesWith(NewPtrForOldDecl);
+
+		for (auto f=mod->begin(), mend=mod->end(); f != mend; ++f)
+		{
+			for (auto bb=f->begin(), end=f->end(); bb != end; ++bb)
+			{
+				for (auto i=bb->begin(), bend=bb->end(); i != bend; ++i)
+				{
+					Instruction *inst = &(*i);
+					if (CallInst *callInst = dyn_cast<CallInst>(inst))
+					{
+						std::string instName = inst2str(inst);
+						if (instName.find("_ZL9atomicAddPii") != std::string::npos)
+						{
+							auto pType = PointerType::get(arrType, 0);
+							auto addCast = new AddrSpaceCastInst(newGv, pType, "my", inst);
+							outs() << "adding: " << inst2str(addCast) << "\n";
+							Value* indexList[2] = {ConstantInt::get(Type::getInt64Ty(mod->getContext()), 0), ConstantInt::get(Type::getInt64Ty(mod->getContext()), 0)};
+							auto gep = GetElementPtrInst::Create (arrType, addCast, ArrayRef<Value*>(indexList, 2), "my", inst);
+							outs() << "gep: " << inst2str(gep) << "\n";
+
+							callInst->setOperand(0, gep);
+
+							//IRBuilder<> builder = createBuilderBefore(inst);
+							//builder.CreatePointerBitCastOrAddrSpaceCast(newGv, Type::getInt32PtrTy(mod->getContext(),0), "my");
+						}
+					}
+				}
+			}
+		}
+
+
 }
