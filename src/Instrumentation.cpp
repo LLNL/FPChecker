@@ -144,6 +144,7 @@ FPInstrumentation::FPInstrumentation(Module *M) :
     }
     else if (f->getName().str().find("_FPC_INTERRUPT_") != std::string::npos)
     {
+    	_fpc_interrupt_ = f;
 #ifdef FPC_DEBUG
     	Logging::info("Found _FPC_INTERRUPT_");
 #endif
@@ -496,89 +497,45 @@ void FPInstrumentation::instrumentMainFunction(Function *f)
 void FPInstrumentation::instrumentErrorArray()
 {
 	// Global error variable
-		GlobalVariable *gArray = nullptr;
-		gArray = mod->getGlobalVariable ("_ZL21errors_per_line_array", true);
-		//gArray = mod->getNamedGlobal ("errors_per_line_array");
-		assert((gArray!=nullptr) && "Global array not found");
+	GlobalVariable *gArray = nullptr;
+	gArray = mod->getGlobalVariable ("_ZL21errors_per_line_array", true);
+	assert((gArray!=nullptr) && "Global array not found");
 
-		printf("garray type id: %d\n", gArray->getType()->getTypeID());
+	ArrayType *arrType = ArrayType::get(Type::getInt32Ty(mod->getContext()), 77);
 
-		if (gArray->getType()->isArrayTy())
-			printf("is array\n");
-		else if (gArray->getType()->isVectorTy())
-			printf("is vector\n");
-		else if (gArray->getType()->isIntegerTy())
-			printf("is int\n");
-		else if (gArray->getType()->isPtrOrPtrVectorTy())
-			printf("is ptr or ptr vec\n");
-		else if (gArray->getType()->isPointerTy())
-			printf("is ptr\n");
+	GlobalVariable *newGv = nullptr;
+	newGv = new GlobalVariable(*mod, arrType, false,
+			GlobalValue::LinkageTypes::InternalLinkage, 0,"myVar",
+			nullptr, GlobalValue::ThreadLocalMode::NotThreadLocal, 1, true);
 
+	ConstantAggregateZero* const_array_2 = ConstantAggregateZero::get(arrType);
+	newGv->setInitializer(const_array_2);
 
-		ArrayType *arrType = ArrayType::get(Type::getInt32Ty(mod->getContext()), 77);
-		//PointerType* PointerTy_1 = PointerType::get(arrType, 1);
-		//Type *ElementType = Type::getInt32PtrTy(mod->getContext());
-		//VectorType *vecType =	VectorType::get(ElementType, 77);
-		//PointerType *ptrType = 	PointerType::get(Type::getInt32Ty(mod->getContext()), 1);
+	auto bb = _fpc_interrupt_->begin();
+	Instruction *inst = &(*(bb->getFirstNonPHIOrDbg()));
+	IRBuilder<> builder = createBuilderBefore(inst);
 
-		GlobalVariable *newGv = nullptr;
-		newGv = new GlobalVariable(
-				*mod,
-				arrType,
-				false,
-				GlobalValue::LinkageTypes::InternalLinkage, // InternalLinkage,
-				0,
-				"myVar",
-				nullptr,
-				GlobalValue::ThreadLocalMode::NotThreadLocal,
-				1,
-				true
-				);
+	auto arg = _fpc_interrupt_->arg_begin();
+	arg++; arg++; // get third arg
+	auto sext = builder.CreateSExt(arg, Type::getInt64Ty(mod->getContext()), "my");
+	//setFakeDebugLocation(_fpc_interrupt_, sext);
 
-		ConstantAggregateZero* const_array_2 = ConstantAggregateZero::get(arrType);
-		newGv->setInitializer(const_array_2);
+	std::vector<Value *> args;
+	args.push_back(ConstantInt::get(Type::getInt64Ty(mod->getContext()), 0));
+	args.push_back(sext);
+	ArrayRef<Value *> indexList(args);
 
-		//IRBuilder<> builder(mod->getContext());
-		//Value *v = builder.CreateBitCast (gArray, arrType, "my");
-		//Value *v = builder.CreatePointerBitCastOrAddrSpaceCast(gArray, newGv->getType(), "my");
-		//Value *v = builder.CreateBitOrPointerCast(gArray, newGv->getType(), "my");
-		//if (v->getType()->isPtrOrPtrVectorTy())
-		//			printf("v is ptr or ptr vec\n");
-		//printf("v type id: %d\n", v->getType()->getTypeID());
-		//gArray->replaceAllUsesWith(v);
+	auto gep = builder.CreateInBoundsGEP(arrType, newGv, indexList, "my");
+	//setFakeDebugLocation(_fpc_interrupt_, gep);
 
-    //llvm::Constant *NewPtrForOldDecl =
-    //    llvm::ConstantExpr::getBitCast(gArray, newGv->getType());
-    //gArray->replaceAllUsesWith(NewPtrForOldDecl);
+	auto addCast = new AddrSpaceCastInst(gep, Type::getInt32PtrTy(mod->getContext(), 0), "my", inst);
+	//setFakeDebugLocation(_fpc_interrupt_, addCast);
 
-		for (auto f=mod->begin(), mend=mod->end(); f != mend; ++f)
-		{
-			for (auto bb=f->begin(), end=f->end(); bb != end; ++bb)
-			{
-				for (auto i=bb->begin(), bend=bb->end(); i != bend; ++i)
-				{
-					Instruction *inst = &(*i);
-					if (CallInst *callInst = dyn_cast<CallInst>(inst))
-					{
-						std::string instName = inst2str(inst);
-						if (instName.find("_ZL9atomicAddPii") != std::string::npos)
-						{
-							auto pType = PointerType::get(arrType, 0);
-							auto addCast = new AddrSpaceCastInst(newGv, pType, "my", inst);
-							outs() << "adding: " << inst2str(addCast) << "\n";
-							Value* indexList[2] = {ConstantInt::get(Type::getInt64Ty(mod->getContext()), 0), ConstantInt::get(Type::getInt64Ty(mod->getContext()), 0)};
-							auto gep = GetElementPtrInst::Create (arrType, addCast, ArrayRef<Value*>(indexList, 2), "my", inst);
-							outs() << "gep: " << inst2str(gep) << "\n";
+	AtomicRMWInst *atomic = builder.CreateAtomicRMW(
+				AtomicRMWInst::Add,
+				addCast,
+				ConstantInt::get(Type::getInt32Ty(mod->getContext()), 1),
+				AtomicOrdering::SequentiallyConsistent, SyncScope::System);
 
-							callInst->setOperand(0, gep);
-
-							//IRBuilder<> builder = createBuilderBefore(inst);
-							//builder.CreatePointerBitCastOrAddrSpaceCast(newGv, Type::getInt32PtrTy(mod->getContext(),0), "my");
-						}
-					}
-				}
-			}
-		}
-
-
+	outs() << "atomic " << inst2str(atomic) << "\n";
 }

@@ -222,12 +222,18 @@ static void _FPC_PRINT_REPORT_ROW_(double val, int space, int last)
 		printf("\n");
 }
 
+__device__
+static void _FPC_INC_ERRORS_(int loc)
+{
+	atomicAdd(&errors_per_line_array[loc], 1);
+}
+
 /// errorType: 0:NaN, 1:INF, 2:Underflow
 /// op: 0:ADD, 1:SUB, 2:MUL, 3:DIV
 __device__
 static void _FPC_INTERRUPT_(int errorType, int op, int loc, float fp32_val, double fp64_val)
 {
-	atomicAdd(&errors_per_line_array[0], loc);
+	_FPC_INC_ERRORS_(loc);
 
 	bool blocked = true;
   	while(blocked) {

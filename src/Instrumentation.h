@@ -31,6 +31,8 @@ private:
   Function *fp64_check_mul_function;
   Function *fp64_check_div_function;
 
+  Function *_fpc_interrupt_;
+
   /* Host */
   Function *print_at_main;
 
