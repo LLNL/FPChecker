@@ -64,6 +64,8 @@ __device__ static char *_FPC_FILE_NAME_[1];
 /// Lock to print from one thread only
 __device__ static int lock_state = 0;
 
+__device__ static int errors_per_line_array[33];
+
 /* ------------------------ Generic Functions ------------------------------ */
 
 /// Report format
@@ -225,6 +227,8 @@ static void _FPC_PRINT_REPORT_ROW_(double val, int space, int last)
 __device__
 static void _FPC_INTERRUPT_(int errorType, int op, int loc, float fp32_val, double fp64_val)
 {
+	atomicAdd(&errors_per_line_array[0], 1);
+
 	bool blocked = true;
   	while(blocked) {
 			if(0 == atomicCAS(&lock_state, 0, 1)) {
