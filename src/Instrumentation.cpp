@@ -504,9 +504,9 @@ void FPInstrumentation::instrumentMainFunction(Function *f)
 void FPInstrumentation::instrumentErrorArray()
 {
 	// Global error variable
-	GlobalVariable *gArray = nullptr;
-	gArray = mod->getGlobalVariable ("_ZL21errors_per_line_array", true);
-	assert((gArray!=nullptr) && "Global array not found");
+	//GlobalVariable *gArray = nullptr;
+	//gArray = mod->getGlobalVariable ("_ZL21errors_per_line_array", true);
+	//assert((gArray!=nullptr) && "Global array not found");
 
 	ArrayType *arrType = ArrayType::get(Type::getInt32Ty(mod->getContext()), 77);
 

@@ -65,8 +65,8 @@ __device__ static char *_FPC_FILE_NAME_[1];
 /// Lock to print from one thread only
 __device__ static int lock_state = 0;
 
-__device__ static int errors_array_size = 26;
-__device__ static int errors_per_line_array[33];
+__device__ static int errors_array_size = 10000;
+__device__ static int errors_per_line_array[10]; // not used in practice
 
 /* ------------------------ Generic Functions ------------------------------ */
 
@@ -224,11 +224,11 @@ static void _FPC_PRINT_REPORT_ROW_(double val, int space, int last)
 		printf("\n");
 }
 
-__device__
-static void _FPC_INC_ERRORS_(int loc)
-{
-	atomicAdd(&errors_per_line_array[loc], 1);
-}
+//__device__
+//static void _FPC_INC_ERRORS_(int loc)
+//{
+//	atomicAdd(&errors_per_line_array[loc], 1);
+//}
 
 
 /// errorType: 0:NaN, 1:INF, 2:Underflow
@@ -236,13 +236,12 @@ static void _FPC_INC_ERRORS_(int loc)
 __device__
 __attribute__((noinline))  static void _FPC_INTERRUPT_(int errorType, int op, int loc, float fp32_val, double fp64_val)
 {
-	_FPC_INC_ERRORS_(loc);
-
+	//_FPC_INC_ERRORS_(loc);
 	asm ("");
-
-	/*
-	bool blocked = true;
-  	while(blocked) {
+	
+	//volatile bool blocked = true;
+	volatile bool blocked = false;  
+	while(blocked) {
 			if(0 == atomicCAS(&lock_state, 0, 1)) {
 
 				char e[64]; e[0] = '\0';
@@ -285,7 +284,6 @@ __attribute__((noinline))  static void _FPC_INTERRUPT_(int errorType, int op, in
 				asm("trap;");
 		}
 	}
-	*/
 }
 
 __device__
