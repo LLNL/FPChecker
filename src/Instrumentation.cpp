@@ -538,50 +538,50 @@ void FPInstrumentation::instrumentErrorArray()
 	auto addCast = new AddrSpaceCastInst(gep, Type::getInt32PtrTy(mod->getContext(), 0), "my", inst);
 	//setFakeDebugLocation(_fpc_interrupt_, addCast);
 
-	//AtomicRMWInst *atomic = builder.CreateAtomicRMW(
-	//			AtomicRMWInst::Add,
-	//			addCast,
-	//			ConstantInt::get(Type::getInt32Ty(mod->getContext()), 1),
-	//			AtomicOrdering::SequentiallyConsistent, SyncScope::System);
+	AtomicRMWInst *atomic = builder.CreateAtomicRMW(
+				AtomicRMWInst::Add,
+				addCast,
+				ConstantInt::get(Type::getInt32Ty(mod->getContext()), 1),
+				AtomicOrdering::SequentiallyConsistent, SyncScope::System);
 
-	//outs() << "atomic " << inst2str(atomic) << "\n";
+	outs() << "atomic " << inst2str(atomic) << "\n";
 
 	/* -------- Instrument _Z32_FPC_ACCESS_GLOBAL_ERRORS_ARRAY_i ------*/
-	//for (auto f = mod->begin(), fend = mod->end(); f != fend; ++f)
-	//{
-		//if (f->getName().str().find("_Z32_FPC_ACCESS_GLOBAL_ERRORS_ARRAY_i") != std::string::npos)
-		//{
-			//outs() << "found _Z32_FPC_ACCESS_GLOBAL_ERRORS_ARRAY_i\n";
+	for (auto f = mod->begin(), fend = mod->end(); f != fend; ++f)
+	{
+		if (f->getName().str().find("_Z32_FPC_ACCESS_GLOBAL_ERRORS_ARRAY_i") != std::string::npos)
+		{
+			outs() << "found _Z32_FPC_ACCESS_GLOBAL_ERRORS_ARRAY_i\n";
 
 			// Find return instruction (last instruction)
 			// We only have a single basic block
-			//Instruction *retInst = &(f->begin()->back());
-			//assert(isa<ReturnInst>(retInst) && "Not a return instruction");
+			Instruction *retInst = &(f->begin()->back());
+			assert(isa<ReturnInst>(retInst) && "Not a return instruction");
 
 			// Get instruction before the return
-		  //BasicBlock::iterator tmpIt(retInst);
-		  //tmpIt--;
-		  //Instruction *prevInst = &(*(tmpIt));
-		  //assert(prevInst && "Invalid instruction!");
+		  	BasicBlock::iterator tmpIt(retInst);
+		  	tmpIt--;
+		  	Instruction *prevInst = &(*(tmpIt));
+		  	assert(prevInst && "Invalid instruction!");
 
-			//IRBuilder<> builder = createBuilderBefore(retInst);
+			IRBuilder<> builder = createBuilderBefore(retInst);
 
 			// Create signed extension of parameter
-			//auto arg = f->arg_begin();
-			//auto sext = builder.CreateSExt(arg, Type::getInt64Ty(mod->getContext()), "my");
+			auto arg = f->arg_begin();
+			auto sext = builder.CreateSExt(arg, Type::getInt64Ty(mod->getContext()), "my");
 
 			// Create GEP inst and addr-space cast inst
-			//std::vector<Value *> args;
-			//args.push_back(ConstantInt::get(Type::getInt64Ty(mod->getContext()), 0));
-			//args.push_back(sext);
-			//ArrayRef<Value *> indexList(args);
-			//auto gep = builder.CreateInBoundsGEP(arrType, newGv, indexList, "my");
-			//auto addCast = new AddrSpaceCastInst(gep, Type::getInt32PtrTy(mod->getContext(), 0), "my", retInst);
-			//auto loadInst = builder.CreateAlignedLoad (addCast, 4, "my");
-			//retInst->setOperand(0, loadInst);
+			std::vector<Value *> args;
+			args.push_back(ConstantInt::get(Type::getInt64Ty(mod->getContext()), 0));
+			args.push_back(sext);
+			ArrayRef<Value *> indexList(args);
+			auto gep = builder.CreateInBoundsGEP(arrType, newGv, indexList, "my");
+			auto addCast = new AddrSpaceCastInst(gep, Type::getInt32PtrTy(mod->getContext(), 0), "my", retInst);
+			auto loadInst = builder.CreateAlignedLoad (addCast, 4, "my");
+			retInst->setOperand(0, loadInst);
 
 			// Now we remove old (unused) instructions
-			/*auto iter = f->begin()->begin();
+			auto iter = f->begin()->begin();
 			Instruction *old = &(*iter);
 			std::list<Instruction *> iList;
 			while (old != prevInst)
@@ -596,11 +596,11 @@ void FPInstrumentation::instrumentErrorArray()
 			{
 				outs() << "removing: " << inst2str(*rit) << "\n";
 			  (*rit)->eraseFromParent();
-			}*/
+			}
 
-			//break;
-		//}
-	//}
+			break;
+		}
+	}
 }
 
 void FPInstrumentation::instrumentEndOfKernel(Function *f)

@@ -65,7 +65,7 @@ __device__ static char *_FPC_FILE_NAME_[1];
 /// Lock to print from one thread only
 __device__ static int lock_state = 0;
 
-//__device__ static int errors_array_size = 26;
+__device__ static int errors_array_size = 26;
 __device__ static int errors_per_line_array[33];
 
 /* ------------------------ Generic Functions ------------------------------ */
@@ -234,10 +234,13 @@ static void _FPC_INC_ERRORS_(int loc)
 /// errorType: 0:NaN, 1:INF, 2:Underflow
 /// op: 0:ADD, 1:SUB, 2:MUL, 3:DIV
 __device__
-static void _FPC_INTERRUPT_(int errorType, int op, int loc, float fp32_val, double fp64_val)
+__attribute__((noinline))  static void _FPC_INTERRUPT_(int errorType, int op, int loc, float fp32_val, double fp64_val)
 {
 	_FPC_INC_ERRORS_(loc);
 
+	asm ("");
+
+	/*
 	bool blocked = true;
   	while(blocked) {
 			if(0 == atomicCAS(&lock_state, 0, 1)) {
@@ -282,6 +285,7 @@ static void _FPC_INTERRUPT_(int errorType, int op, int loc, float fp32_val, doub
 				asm("trap;");
 		}
 	}
+	*/
 }
 
 __device__
@@ -344,10 +348,10 @@ void _FPC_PRINT_AT_MAIN_()
 
 /* !!! Warning: DO NOT MODIFY THIS FUNCTION !!! */
 /* It will be instrumented */
-/*__device__
-int _FPC_ACCESS_GLOBAL_ERRORS_ARRAY_(int i)
+__device__
+__attribute__((noinline))  int _FPC_ACCESS_GLOBAL_ERRORS_ARRAY_(int i)
 {
-	//asm ("");
+	asm ("");
 	return errors_per_line_array[i];
 }
 
@@ -360,11 +364,12 @@ void _FPC_PRINT_ERRORS_()
 		for (int i=0; i < errors_array_size; ++i)
 		{
 			int errors = _FPC_ACCESS_GLOBAL_ERRORS_ARRAY_(i);
-			printf("Loc %d: %d\n", i, errors);
+			if (errors > 0)
+				printf("Errors ** threadId: %d, Loc %d: %d, at %s\n", id, i, errors, _FPC_FILE_NAME_[0]);
 		}
 	}
 
-}*/
+}
 
 /* ------------------------ FP32 Functions --------------------------------- */
 
