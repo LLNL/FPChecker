@@ -556,12 +556,12 @@ void FPInstrumentation::instrumentErrorArray()
 
 	outs() << "atomic " << inst2str(atomic) << "\n";
 
-	/* -------- Instrument _Z32_FPC_ACCESS_GLOBAL_ERRORS_ARRAY_i ------*/
+	/* ----------- Instrument _Z32_FPC_READ_GLOBAL_ERRORS_ARRAY_i -------------*/
 	for (auto f = mod->begin(), fend = mod->end(); f != fend; ++f)
 	{
-		if (f->getName().str().find("_Z32_FPC_ACCESS_GLOBAL_ERRORS_ARRAY_i") != std::string::npos)
+		if (f->getName().str().find("_Z30_FPC_READ_GLOBAL_ERRORS_ARRAY_i") != std::string::npos)
 		{
-			outs() << "found _Z32_FPC_ACCESS_GLOBAL_ERRORS_ARRAY_i\n";
+			outs() << "found _Z30_FPC_READ_GLOBAL_ERRORS_ARRAY_i\n";
 
 			// Find return instruction (last instruction)
 			// We only have a single basic block
@@ -611,6 +611,66 @@ void FPInstrumentation::instrumentErrorArray()
 			break;
 		}
 	}
+	/* ------------------------------------------------------------------------ */
+
+	/* ----------- Instrument _Z31_FPC_WRITE_GLOBAL_ERRORS_ARRAY_ii -------------*/
+	for (auto f = mod->begin(), fend = mod->end(); f != fend; ++f)
+	{
+		if (f->getName().str().find("_Z31_FPC_WRITE_GLOBAL_ERRORS_ARRAY_ii") != std::string::npos)
+		{
+			outs() << "found _Z31_FPC_WRITE_GLOBAL_ERRORS_ARRAY_ii\n";
+
+			// Find return instruction (last instruction)
+			// We only have a single basic block
+			Instruction *retInst = &(f->begin()->back());
+			assert(isa<ReturnInst>(retInst) && "Not a return instruction");
+
+			// Get instruction before the return
+			BasicBlock::iterator tmpIt(retInst);
+			tmpIt--;
+			Instruction *prevInst = &(*(tmpIt));
+			assert(prevInst && "Invalid instruction!");
+
+			IRBuilder<> builder = createBuilderBefore(retInst);
+
+			// Create signed extension of parameter
+			auto arg = f->arg_begin();
+			auto sext = builder.CreateSExt(arg, Type::getInt64Ty(mod->getContext()), "my");
+
+			// Create GEP inst and addr-space cast inst
+			std::vector<Value *> args;
+			args.push_back(ConstantInt::get(Type::getInt64Ty(mod->getContext()), 0));
+			args.push_back(sext);
+			ArrayRef<Value *> indexList(args);
+			auto gep = builder.CreateInBoundsGEP(arrType, newGv, indexList, "my");
+			auto addCast = new AddrSpaceCastInst(gep, Type::getInt32PtrTy(mod->getContext(), 0), "my", retInst);
+			arg++;
+			Value *val = &(*arg);
+			auto storeInst = builder.CreateAlignedStore(val, addCast, 4, false);
+			//auto loadInst = builder.CreateAlignedLoad (addCast, 4, "my");
+
+			// Now we remove old (unused) instructions
+			auto iter = f->begin()->begin();
+			Instruction *old = &(*iter);
+			std::list<Instruction *> iList;
+			while (old != prevInst)
+			{
+				iList.push_back(old);
+				iter++;
+				old = &(*iter);
+			}
+			iList.push_back(prevInst);
+
+			for (std::list<Instruction *>::reverse_iterator rit=iList.rbegin(); rit!=iList.rend(); ++rit)
+			{
+				outs() << "removing: " << inst2str(*rit) << "\n";
+			  (*rit)->eraseFromParent();
+			}
+
+			break;
+		}
+	}
+	/* ------------------------------------------------------------------------ */
 }
 
 void FPInstrumentation::instrumentEndOfKernel(Function *f)

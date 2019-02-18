@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <stdint.h>
+#include <limits.h>
 
 /// *** Warning ***
 /// Changing this file: Runtime.h
@@ -344,14 +345,23 @@ void _FPC_PRINT_AT_MAIN_()
 	printf("\n");
 }
 
-/* !!! Warning: DO NOT MODIFY THIS FUNCTION !!! */
+/* -------------------------------------- */
+/*         Warning: DO NOT MODIFY!        */
 /* It will be instrumented */
 __device__
-__attribute__((noinline))  int _FPC_ACCESS_GLOBAL_ERRORS_ARRAY_(int i)
+__attribute__((noinline))  int _FPC_READ_GLOBAL_ERRORS_ARRAY_(int i)
 {
 	asm ("");
 	return errors_per_line_array[i];
 }
+__device__
+__attribute__((noinline)) void _FPC_WRITE_GLOBAL_ERRORS_ARRAY_(int i, int val)
+{
+	asm ("");
+	errors_per_line_array[i] = val;
+}
+/* -------------------------------------- */
+
 
 __device__
 void _FPC_PRINT_ERRORS_()
@@ -361,9 +371,17 @@ void _FPC_PRINT_ERRORS_()
 	{
 		for (int i=0; i < errors_array_size; ++i)
 		{
-			int errors = _FPC_ACCESS_GLOBAL_ERRORS_ARRAY_(i);
+			int errors = _FPC_READ_GLOBAL_ERRORS_ARRAY_(i);
 			if (errors > 0)
+			{
 				printf("Errors ** threadId: %d, Loc %d: %d, at %s\n", id, i, errors, _FPC_FILE_NAME_[0]);
+				_FPC_WRITE_GLOBAL_ERRORS_ARRAY_(i, INT_MIN);
+			}
+			else if (errors < 0)
+			{
+				// This is so we do not report them multiple times
+				_FPC_WRITE_GLOBAL_ERRORS_ARRAY_(i, INT_MIN);
+			}
 		}
 	}
 
