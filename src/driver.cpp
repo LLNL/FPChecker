@@ -68,6 +68,12 @@ public:
 				Logging::info(out.c_str());
 #endif
 				fpInstrumentation->instrumentFunction(F);
+
+				if (CodeMatching::isAKernelFunction(*F))
+				{
+					outs() << "kernel: " << f->getName().str() << "\n";
+					//fpInstrumentation->instrumentEndOfKernel(F);
+				}
 			}
 			else // host code
 			{
@@ -84,7 +90,7 @@ public:
 		if (CodeMatching::isDeviceCode(m))
 		{
 			fpInstrumentation->generateCodeForInterruption();
-			fpInstrumentation->instrumentErrorArray();
+			//fpInstrumentation->instrumentErrorArray();
 		}
 
 		delete fpInstrumentation;
