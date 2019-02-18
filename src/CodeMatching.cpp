@@ -52,7 +52,9 @@ bool CodeMatching::isUnwantedFunction(Function *f)
 			f->getName().str().find("_FPC_FP32_IS_ALMOST_SUBNORMAL") != std::string::npos ||
 			f->getName().str().find("_FPC_FP64_IS_ALMOST_OVERFLOW") != std::string::npos ||
 			f->getName().str().find("_FPC_FP64_IS_ALMOST_SUBNORMAL") != std::string::npos ||
-			f->getName().str().find("_FPC_WARNING_") != std::string::npos
+			f->getName().str().find("_FPC_WARNING_") != std::string::npos ||
+			f->getName().str().find("_FPC_PRINT_ERRORS_") != std::string::npos ||
+			f->getName().str().find("_FPC_INC_ERRORS_") != std::string::npos
 			)
 		ret = true;
 
@@ -140,7 +142,7 @@ bool findOneNVVMAnnotation(const GlobalValue *gv, const std::string &prop,
   return true;
 }
 
-bool isAKernelFunction(const Function &F)
+bool CodeMatching::isAKernelFunction(const Function &F)
 {
   unsigned x = 0;
   bool retval = findOneNVVMAnnotation(&F, "kernel", x);

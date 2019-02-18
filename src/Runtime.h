@@ -31,6 +31,7 @@ __device__ static void	_FPC_INTERRUPT_(int loc);
 __device__ static int	_FPC_FP32_IS_SUBNORMAL(float x);
 __device__ static int 	_FPC_FP32_IS_ALMOST_OVERFLOW(float x);
 __device__ static int 	_FPC_FP32_IS_ALMOST_SUBNORMAL(float x);
+__device__ void 	_FPC_PRINT_ERRORS_();
 __device__ void 	_FPC_FP32_CHECK_ADD_(float x, float y, float z, int loc);
 __device__ void 	_FPC_FP32_CHECK_SUB_(float x, float y, float z, int loc);
 __device__ void 	_FPC_FP32_CHECK_MUL_(float x, float y, float z, int loc);
@@ -64,6 +65,7 @@ __device__ static char *_FPC_FILE_NAME_[1];
 /// Lock to print from one thread only
 __device__ static int lock_state = 0;
 
+//__device__ static int errors_array_size = 26;
 __device__ static int errors_per_line_array[33];
 
 /* ------------------------ Generic Functions ------------------------------ */
@@ -228,6 +230,7 @@ static void _FPC_INC_ERRORS_(int loc)
 	atomicAdd(&errors_per_line_array[loc], 1);
 }
 
+
 /// errorType: 0:NaN, 1:INF, 2:Underflow
 /// op: 0:ADD, 1:SUB, 2:MUL, 3:DIV
 __device__
@@ -338,6 +341,30 @@ void _FPC_PRINT_AT_MAIN_()
 	printf("========================================\n");
 	printf("\n");
 }
+
+/* !!! Warning: DO NOT MODIFY THIS FUNCTION !!! */
+/* It will be instrumented */
+/*__device__
+int _FPC_ACCESS_GLOBAL_ERRORS_ARRAY_(int i)
+{
+	//asm ("");
+	return errors_per_line_array[i];
+}
+
+__device__
+void _FPC_PRINT_ERRORS_()
+{
+	int id = (blockDim.x * blockDim.y * threadIdx.z) + (blockDim.x * threadIdx.y + threadIdx.x);
+	if (id == 0)
+	{
+		for (int i=0; i < errors_array_size; ++i)
+		{
+			int errors = _FPC_ACCESS_GLOBAL_ERRORS_ARRAY_(i);
+			printf("Loc %d: %d\n", i, errors);
+		}
+	}
+
+}*/
 
 /* ------------------------ FP32 Functions --------------------------------- */
 

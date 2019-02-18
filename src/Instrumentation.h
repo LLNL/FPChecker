@@ -32,6 +32,7 @@ private:
   Function *fp64_check_div_function;
 
   Function *_fpc_interrupt_;
+  Function *_print_errors_;
 
   /* Host */
   Function *print_at_main;
@@ -47,6 +48,8 @@ public:
   void instrumentMainFunction(Function *f);
   void generateCodeForInterruption();
   void instrumentErrorArray();
+  void instrumentEndOfKernel(Function *f);
+  //InstSet finalInstrutions(Function *f);
 
   /* Helper functions */
   //static bool isUnwantedFunction(Function *f);
