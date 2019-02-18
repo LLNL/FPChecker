@@ -34,6 +34,9 @@ private:
   Function *_fpc_interrupt_;
   Function *_print_errors_;
 
+  // maximum number for a code line
+  int maxNumLocations = 0;
+
   /* Host */
   Function *print_at_main;
 

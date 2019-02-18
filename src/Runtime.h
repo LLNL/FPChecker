@@ -65,7 +65,7 @@ __device__ static char *_FPC_FILE_NAME_[1];
 /// Lock to print from one thread only
 __device__ static int lock_state = 0;
 
-__device__ static int errors_array_size = 10000;
+__device__ static int errors_array_size = 10;
 __device__ static int errors_per_line_array[10]; // not used in practice
 
 /* ------------------------ Generic Functions ------------------------------ */

@@ -12,4 +12,4 @@ all:
 	$(CC) -c compute.cu $(OP)
 
 clean:
-	rm *.o main
+	rm *.o *.ll *.bc main

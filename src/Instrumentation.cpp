@@ -287,6 +287,10 @@ void FPInstrumentation::instrumentFunction(Function *f)
 				ConstantInt* locId = ConstantInt::get(mod->getContext(), APInt(32, lineNumber, true));
 				args.push_back(locId);
 
+				// Update max location number
+				if (lineNumber > maxNumLocations)
+					maxNumLocations = lineNumber;
+
 				ArrayRef<Value *> args_ref(args);
 
 				CallInst *callInst = nullptr;
@@ -503,13 +507,18 @@ void FPInstrumentation::instrumentMainFunction(Function *f)
 
 void FPInstrumentation::instrumentErrorArray()
 {
-	// Global error variable
-	//GlobalVariable *gArray = nullptr;
-	//gArray = mod->getGlobalVariable ("_ZL21errors_per_line_array", true);
-	//assert((gArray!=nullptr) && "Global array not found");
+	// Set size of the global array
+	int extra = 10;
+	int elems = maxNumLocations + extra;
 
-	int arrayType = 10000;
-	ArrayType *arrType = ArrayType::get(Type::getInt32Ty(mod->getContext()), arrayType);
+	// Global error variable - array size
+	GlobalVariable *arrSize = nullptr;
+	arrSize = mod->getGlobalVariable ("_ZL17errors_array_size", true);
+	assert((arrSize!=nullptr) && "Global array not found");
+	auto constSize = ConstantInt::get (Type::getInt32Ty(mod->getContext()), (uint64_t)elems, true);
+	arrSize->setInitializer(constSize);
+
+	ArrayType *arrType = ArrayType::get(Type::getInt32Ty(mod->getContext()), elems);
 
 	GlobalVariable *newGv = nullptr;
 	newGv = new GlobalVariable(*mod, arrType, false,
@@ -560,10 +569,10 @@ void FPInstrumentation::instrumentErrorArray()
 			assert(isa<ReturnInst>(retInst) && "Not a return instruction");
 
 			// Get instruction before the return
-		  	BasicBlock::iterator tmpIt(retInst);
-		  	tmpIt--;
-		  	Instruction *prevInst = &(*(tmpIt));
-		  	assert(prevInst && "Invalid instruction!");
+			BasicBlock::iterator tmpIt(retInst);
+			tmpIt--;
+			Instruction *prevInst = &(*(tmpIt));
+			assert(prevInst && "Invalid instruction!");
 
 			IRBuilder<> builder = createBuilderBefore(retInst);
 
