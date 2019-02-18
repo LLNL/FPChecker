@@ -508,7 +508,8 @@ void FPInstrumentation::instrumentErrorArray()
 	//gArray = mod->getGlobalVariable ("_ZL21errors_per_line_array", true);
 	//assert((gArray!=nullptr) && "Global array not found");
 
-	ArrayType *arrType = ArrayType::get(Type::getInt32Ty(mod->getContext()), 77);
+	int arrayType = 10000;
+	ArrayType *arrType = ArrayType::get(Type::getInt32Ty(mod->getContext()), arrayType);
 
 	GlobalVariable *newGv = nullptr;
 	newGv = new GlobalVariable(*mod, arrType, false,
