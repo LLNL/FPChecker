@@ -130,4 +130,15 @@ def main():
     os.chdir("../")
     ###########################################################################
 
+    ###########################################################################
+    t = "Test: errors dont abort"
+    testTarget = test_config.textWidth.format(t)
+    sys.stdout.write(testTarget)
+    os.chdir("./test_errors_dont_abort/")
+    cmd = ["./test.py"]
+    cmdOutput = subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True)
+    sys.stdout.write(cmdOutput)
+    os.chdir("../")
+    ###########################################################################
+
 main()

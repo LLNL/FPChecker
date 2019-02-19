@@ -71,7 +71,10 @@ public:
 
 				if (CodeMatching::isAKernelFunction(*F))
 				{
-					outs() << "kernel: " << f->getName().str() << "\n";
+#ifdef FPC_DEBUG
+					std::string out = "<<< kernel >>> " + f->getName().str();
+					Logging::info(out.c_str());
+#endif
 					fpInstrumentation->instrumentEndOfKernel(F);
 				}
 			}

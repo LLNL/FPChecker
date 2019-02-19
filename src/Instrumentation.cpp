@@ -510,7 +510,7 @@ void FPInstrumentation::instrumentErrorArray()
 	// Set size of the global array
 	int extra = 10;
 	int elems = maxNumLocations + extra;
-	outs() << "In instrumentErrorArray" << "\n";
+	//outs() << "In instrumentErrorArray" << "\n";
 
 	// Global error variable - array size
 	GlobalVariable *arrSize = nullptr;
@@ -518,7 +518,7 @@ void FPInstrumentation::instrumentErrorArray()
 	assert((arrSize!=nullptr) && "Global array not found");
 	auto constSize = ConstantInt::get (Type::getInt32Ty(mod->getContext()), (uint64_t)elems, true);
 	arrSize->setInitializer(constSize);
-	outs() << "error variable changed" << "\n";
+	//outs() << "error variable changed" << "\n";
 
 	ArrayType *arrType = ArrayType::get(Type::getInt32Ty(mod->getContext()), elems);
 
@@ -526,21 +526,25 @@ void FPInstrumentation::instrumentErrorArray()
 	newGv = new GlobalVariable(*mod, arrType, false,
 			GlobalValue::LinkageTypes::InternalLinkage, 0,"myVar",
 			nullptr, GlobalValue::ThreadLocalMode::NotThreadLocal, 1, true);
-	outs() << "global created" << "\n";
+	//outs() << "global created" << "\n";
 
 	ConstantAggregateZero* const_array_2 = ConstantAggregateZero::get(arrType);
 	newGv->setInitializer(const_array_2);
 
+#ifdef FPC_DEBUG
+        Logging::info("Global errors array created");
+#endif
+
 	auto bb = _fpc_interrupt_->begin();
 	Instruction *inst = &(*(bb->getFirstNonPHIOrDbg()));
 	IRBuilder<> builder = createBuilderBefore(inst);
-	outs() << "1st inst of _fpc_interrupt_ found" << "\n";
+	//outs() << "1st inst of _fpc_interrupt_ found" << "\n";
 
 	auto arg = _fpc_interrupt_->arg_begin();
-	outs() << "1st args of _fpc_interrupt_ found" << "\n";
+	//outs() << "1st args of _fpc_interrupt_ found" << "\n";
 	arg++; arg++; // get third arg
 	auto sext = builder.CreateSExt(arg, Type::getInt64Ty(mod->getContext()), "my");
-	outs() << "sext created" << "\n";
+	//outs() << "sext created" << "\n";
 
 	std::vector<Value *> args;
 	args.push_back(ConstantInt::get(Type::getInt64Ty(mod->getContext()), 0));
@@ -558,15 +562,19 @@ void FPInstrumentation::instrumentErrorArray()
 				addCast,
 				ConstantInt::get(Type::getInt32Ty(mod->getContext()), 1),
 				AtomicOrdering::SequentiallyConsistent, SyncScope::System);
-
-	outs() << "atomic " << inst2str(atomic) << "\n";
+#ifdef FPC_DEBUG
+	std::string out = "atomic " + inst2str(atomic) + " created";
+	Logging::info(out.c_str());
+#endif
 
 	/* ----------- Instrument _Z32_FPC_READ_GLOBAL_ERRORS_ARRAY_i -------------*/
 	for (auto f = mod->begin(), fend = mod->end(); f != fend; ++f)
 	{
 		if (f->getName().str().find("_Z30_FPC_READ_GLOBAL_ERRORS_ARRAY_i") != std::string::npos)
 		{
-			outs() << "found _Z30_FPC_READ_GLOBAL_ERRORS_ARRAY_i\n";
+#ifdef FPC_DEBUG
+			Logging::info("found function: _Z30_FPC_READ_GLOBAL_ERRORS_ARRAY_i");
+#endif
 
 			// Find return instruction (last instruction)
 			// We only have a single basic block
@@ -609,8 +617,8 @@ void FPInstrumentation::instrumentErrorArray()
 
 			for (std::list<Instruction *>::reverse_iterator rit=iList.rbegin(); rit!=iList.rend(); ++rit)
 			{
-				outs() << "removing: " << inst2str(*rit) << "\n";
-			  (*rit)->eraseFromParent();
+				//outs() << "removing: " << inst2str(*rit) << "\n";
+			  	(*rit)->eraseFromParent();
 			}
 
 			break;
@@ -623,7 +631,9 @@ void FPInstrumentation::instrumentErrorArray()
 	{
 		if (f->getName().str().find("_Z31_FPC_WRITE_GLOBAL_ERRORS_ARRAY_ii") != std::string::npos)
 		{
-			outs() << "found _Z31_FPC_WRITE_GLOBAL_ERRORS_ARRAY_ii\n";
+#ifdef FPC_DEBUG
+                        Logging::info("found function: _Z31_FPC_WRITE_GLOBAL_ERRORS_ARRAY_ii");
+#endif
 
 			// Find return instruction (last instruction)
 			// We only have a single basic block
@@ -668,8 +678,8 @@ void FPInstrumentation::instrumentErrorArray()
 
 			for (std::list<Instruction *>::reverse_iterator rit=iList.rbegin(); rit!=iList.rend(); ++rit)
 			{
-				outs() << "removing: " << inst2str(*rit) << "\n";
-			  (*rit)->eraseFromParent();
+				//outs() << "removing: " << inst2str(*rit) << "\n";
+			  	(*rit)->eraseFromParent();
 			}
 
 			break;

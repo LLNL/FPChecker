@@ -382,7 +382,7 @@ void _FPC_PRINT_ERRORS_()
 			int errors = _FPC_READ_GLOBAL_ERRORS_ARRAY_(i);
 			if (errors > 0)
 			{
-				printf("\n#FPCHECKER: Errors at %s:%d (threadId: %d, #: %d)\n", _FPC_FILE_NAME_[0], i, id, errors);
+				printf("\n#FPCHECKER: Errors at %s:%d (#%d, tid:%d)\n", _FPC_FILE_NAME_[0], i, errors, id);
 				_FPC_WRITE_GLOBAL_ERRORS_ARRAY_(i, INT_MIN);
 			}
 			else if (errors < 0)

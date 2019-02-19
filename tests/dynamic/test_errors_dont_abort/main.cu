@@ -5,7 +5,7 @@
 
 int main(int argc, char **argv)
 {
-  int n = 3;
+  int n = 8;
   int nbytes = n*sizeof(double); 
   double *d_a = 0;
   cudaMalloc(&d_a, nbytes);
@@ -19,7 +19,8 @@ int main(int argc, char **argv)
   cudaMemcpy((void *)d_a, (void *)data, nbytes, cudaMemcpyHostToDevice);
 
   printf("Calling kernel\n");
-  dot_prod<<<16,64>>>(d_a, d_a, nbytes);
+  //dot_prod<<<1,1>>>(d_a, d_a, nbytes);
+  dot_prod<<<2,4>>>(d_a, d_a, n);
   cudaDeviceSynchronize();
   printf("done\n");
 

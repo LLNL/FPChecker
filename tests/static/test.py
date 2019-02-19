@@ -64,5 +64,15 @@ def main():
     os.chdir("../")
     ###########################################################################
 
+    ###########################################################################
+    t = "Test: global array instrumentation"
+    testTarget = test_config.textWidth.format(t)
+    sys.stdout.write(testTarget)
+    os.chdir("./test_global_array_instrumentation/")
+    cmd = ["./test.py"]
+    cmdOutput = subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True)
+    sys.stdout.write(cmdOutput)
+    os.chdir("../")
+    ###########################################################################
 
 main()
