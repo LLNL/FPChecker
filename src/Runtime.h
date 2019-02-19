@@ -230,15 +230,19 @@ static void _FPC_PRINT_REPORT_ROW_(double val, int space, int last)
 __device__
 __attribute__((noinline))  static void _FPC_INTERRUPT_(int errorType, int op, int loc, float fp32_val, double fp64_val)
 {
-#ifdef FPC_ERRORS_DONT_ABORT
+/*#ifdef FPC_ERRORS_DONT_ABORT
 	volatile int x=3;
 	while(x != 0)
 		x--;
 	x = errorType + op + loc + (int)fp32_val + (int)fp64_val;
 	asm ("");
-#else
+#else*/
+
+#ifdef FPC_ERRORS_DONT_ABORT
 	volatile bool blocked = true;
-	//volatile bool blocked = false;  
+#else
+	bool blocked = true;
+#endif
 	while(blocked) {
 			if(0 == atomicCAS(&lock_state, 0, 1)) {
 
@@ -282,13 +286,16 @@ __attribute__((noinline))  static void _FPC_INTERRUPT_(int errorType, int op, in
 				asm("trap;");
 		}
 	}
-#endif
 }
 
 __device__
 static void _FPC_WARNING_(int errorType, int op, int loc, float fp32_val, double fp64_val)
 {
+#ifdef FPC_ERRORS_DONT_ABORT
+	volatile bool blocked = true;
+#else
 	bool blocked = true;
+#endif
   	while(blocked) {
 			if(0 == atomicCAS(&lock_state, 0, 1)) {
 
