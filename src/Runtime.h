@@ -419,11 +419,13 @@ void _FPC_PRINT_ERRORS_()
 			}
 
 			/* --- Print warning reports ---- */
-			unsigned long long int warnigs = _FPC_READ_FP64_GLOBAL_ARRAY_(i);
-			double val;
-		  memcpy((void *) &val, (void *) &warnigs, sizeof(val));
-		  printf("\n#FPCHECKER: Warnings at %s:%d (#%e, tid:%d)\n", _FPC_FILE_NAME_[0], i, val, id);
-
+			unsigned long long int warnings = _FPC_READ_FP64_GLOBAL_ARRAY_(i);
+			if (warnings != 0)
+			{
+				double val;
+		  		memcpy((void *) &val, (void *) &warnings, sizeof(val));
+		  		printf("\n#FPCHECKER: Warnings at %s:%d (#%e, tid:%d)\n", _FPC_FILE_NAME_[0], i, val, id);
+			}
 		}
 	}
 }
