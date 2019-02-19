@@ -239,7 +239,7 @@ __attribute__((noinline))  static void _FPC_INTERRUPT_(int errorType, int op, in
 #else*/
 
 #ifdef FPC_ERRORS_DONT_ABORT
-	volatile bool blocked = true;
+	volatile bool blocked = false;
 #else
 	bool blocked = true;
 #endif
@@ -292,7 +292,7 @@ __device__
 static void _FPC_WARNING_(int errorType, int op, int loc, float fp32_val, double fp64_val)
 {
 #ifdef FPC_ERRORS_DONT_ABORT
-	volatile bool blocked = true;
+	volatile bool blocked = false;
 #else
 	bool blocked = true;
 #endif
