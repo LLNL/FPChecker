@@ -225,23 +225,19 @@ static void _FPC_PRINT_REPORT_ROW_(double val, int space, int last)
 		printf("\n");
 }
 
-//__device__
-//static void _FPC_INC_ERRORS_(int loc)
-//{
-//	atomicAdd(&errors_per_line_array[loc], 1);
-//}
-
-
 /// errorType: 0:NaN, 1:INF, 2:Underflow
 /// op: 0:ADD, 1:SUB, 2:MUL, 3:DIV
 __device__
 __attribute__((noinline))  static void _FPC_INTERRUPT_(int errorType, int op, int loc, float fp32_val, double fp64_val)
 {
-	//_FPC_INC_ERRORS_(loc);
+#ifdef FPC_ERRORS_DONT_ABORT
+	volatile int x=3;
+	while(x != 0)
+		x--;
 	asm ("");
-	
-	//volatile bool blocked = true;
-	volatile bool blocked = false;  
+#else
+	volatile bool blocked = true;
+	//volatile bool blocked = false;  
 	while(blocked) {
 			if(0 == atomicCAS(&lock_state, 0, 1)) {
 
@@ -285,6 +281,7 @@ __attribute__((noinline))  static void _FPC_INTERRUPT_(int errorType, int op, in
 				asm("trap;");
 		}
 	}
+#endif
 }
 
 __device__
@@ -362,11 +359,21 @@ __attribute__((noinline)) void _FPC_WRITE_GLOBAL_ERRORS_ARRAY_(int i, int val)
 }
 /* -------------------------------------- */
 
+__device__
+static int getGlobalIdx_3D_3D()
+{
+	int blockId = blockIdx.x + blockIdx.y * gridDim.x
+		+ gridDim.x * gridDim.y * blockIdx.z;
+	int threadId = blockId * (blockDim.x * blockDim.y * blockDim.z)
+ 		+ (threadIdx.z * (blockDim.x * blockDim.y))
+ 		+ (threadIdx.y * blockDim.x) + threadIdx.x;
+	return threadId;
+}
 
 __device__
 void _FPC_PRINT_ERRORS_()
 {
-	int id = (blockDim.x * blockDim.y * threadIdx.z) + (blockDim.x * threadIdx.y + threadIdx.x);
+	int id = getGlobalIdx_3D_3D();
 	if (id == 0)
 	{
 		for (int i=0; i < errors_array_size; ++i)
@@ -374,7 +381,7 @@ void _FPC_PRINT_ERRORS_()
 			int errors = _FPC_READ_GLOBAL_ERRORS_ARRAY_(i);
 			if (errors > 0)
 			{
-				printf("Errors ** threadId: %d, Loc %d: %d, at %s\n", id, i, errors, _FPC_FILE_NAME_[0]);
+				printf("\n#FPCHECKER: Errors at %s:%d (threadId: %d, #: %d)\n", _FPC_FILE_NAME_[0], i, id, errors);
 				_FPC_WRITE_GLOBAL_ERRORS_ARRAY_(i, INT_MIN);
 			}
 			else if (errors < 0)

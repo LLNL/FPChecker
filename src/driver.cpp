@@ -90,7 +90,7 @@ public:
 		if (CodeMatching::isDeviceCode(m))
 		{
 			fpInstrumentation->generateCodeForInterruption();
-			fpInstrumentation->instrumentErrorArray();
+			//fpInstrumentation->instrumentErrorArray();
 		}
 
 		delete fpInstrumentation;
