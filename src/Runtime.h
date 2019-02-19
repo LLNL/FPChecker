@@ -234,6 +234,7 @@ __attribute__((noinline))  static void _FPC_INTERRUPT_(int errorType, int op, in
 	volatile int x=3;
 	while(x != 0)
 		x--;
+	x = errorType + op + loc + (int)fp32_val + (int)fp64_val;
 	asm ("");
 #else
 	volatile bool blocked = true;
