@@ -32,6 +32,7 @@ private:
   Function *fp64_check_div_function;
 
   Function *_fpc_interrupt_;
+  Function *_fpc_warning_;
   Function *_print_errors_;
 
   // maximum number for a code line

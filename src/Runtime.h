@@ -67,7 +67,8 @@ __device__ static char *_FPC_FILE_NAME_[1];
 __device__ static int lock_state = 0;
 
 __device__ static int errors_array_size = 10;
-__device__ static int errors_per_line_array[10]; // not used in practice
+__device__ static int errors_per_line_array[10]; 		// not used at runtime
+__device__ static unsigned long long int warnings_per_line_array[10]; 	// not used at runtime
 
 /* ------------------------ Generic Functions ------------------------------ */
 
@@ -291,6 +292,11 @@ __attribute__((noinline))  static void _FPC_INTERRUPT_(int errorType, int op, in
 __device__
 static void _FPC_WARNING_(int errorType, int op, int loc, float fp32_val, double fp64_val)
 {
+	//uint64_t intVal;
+  //memcpy((void *) &intVal, (void *) &fp64_val, sizeof(intVal));
+  //unsigned long long int* address = &(warnings_per_line_array[loc]);
+	//atomicCAS(address, 0, intVal);
+
 #ifdef FPC_ERRORS_DONT_ABORT
 	volatile bool blocked = false;
 #else
@@ -352,7 +358,8 @@ void _FPC_PRINT_AT_MAIN_()
 
 /* -------------------------------------- */
 /*         Warning: DO NOT MODIFY!        */
-/* It will be instrumented */
+/*      Functions will be instrumented    */
+/* -------------------------------------- */
 __device__
 __attribute__((noinline))  int _FPC_READ_GLOBAL_ERRORS_ARRAY_(int i)
 {
@@ -364,6 +371,18 @@ __attribute__((noinline)) void _FPC_WRITE_GLOBAL_ERRORS_ARRAY_(int i, int val)
 {
 	asm ("");
 	errors_per_line_array[i] = val;
+}
+__device__
+__attribute__((noinline))  unsigned long long int _FPC_READ_FP64_GLOBAL_ARRAY_(int index)
+{
+	asm ("");
+	return warnings_per_line_array[index];
+}
+__device__
+__attribute__((noinline))  void _FPC_WRITE_FP64_GLOBAL_ARRAY_(int index, unsigned long long int val)
+{
+	asm ("");
+	warnings_per_line_array[index] = val;
 }
 /* -------------------------------------- */
 
@@ -386,6 +405,7 @@ void _FPC_PRINT_ERRORS_()
 	{
 		for (int i=0; i < errors_array_size; ++i)
 		{
+			/* --- Print error reports ---- */
 			int errors = _FPC_READ_GLOBAL_ERRORS_ARRAY_(i);
 			if (errors > 0)
 			{
@@ -397,9 +417,15 @@ void _FPC_PRINT_ERRORS_()
 				// This is so we do not report them multiple times
 				_FPC_WRITE_GLOBAL_ERRORS_ARRAY_(i, INT_MIN);
 			}
+
+			/* --- Print warning reports ---- */
+			unsigned long long int warnigs = _FPC_READ_FP64_GLOBAL_ARRAY_(i);
+			double val;
+		  memcpy((void *) &val, (void *) &warnigs, sizeof(val));
+		  printf("\n#FPCHECKER: Warnings at %s:%d (#%e, tid:%d)\n", _FPC_FILE_NAME_[0], i, val, id);
+
 		}
 	}
-
 }
 
 /* ------------------------ FP32 Functions --------------------------------- */
