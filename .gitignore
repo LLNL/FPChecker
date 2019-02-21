@@ -10,3 +10,4 @@
 *.ll
 main
 *.swp
+.nfs*

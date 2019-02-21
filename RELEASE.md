@@ -1,3 +1,5 @@
+## Release 0.0.3
+- Warning reports printed once only (in ERRORS_DONT_ABORT mode)
 
 ## Release 0.0.2
 - Supports functionality to avoid aborting the program when an error/warning is found (-D FPC_ERRORS_DONT_ABORT)
