@@ -35,7 +35,7 @@ def main():
 	exit()
 
     # --- run code ---
-    cmd = ["./dot_product_raja"]
+    cmd = ["./main"]
     error = False
     try:
         cmdOutput = subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True)
@@ -55,7 +55,7 @@ def main():
         exit()
 
     # --- run code ---
-    cmd = ["./dot_product_raja"]
+    cmd = ["./main"]
     error = False
     try:
         cmdOutput = subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True)

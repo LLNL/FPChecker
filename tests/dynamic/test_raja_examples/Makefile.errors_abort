@@ -11,7 +11,7 @@ LINK	= -L${CUDA_PATH}/lib64/ -lcuda -lcudart \
 	-L$(RAJA_PATH)/lib -lRAJA
 all:
 	$(CC) $(OP) -c dot_product_raja.cpp
-	$(CC) -o dot_product_raja dot_product_raja.o $(LINK)
+	$(CC) -o main dot_product_raja.o $(LINK)
 
 clean:
-	rm *.o *.core dot_product_raja
+	rm *.o *.core main 
