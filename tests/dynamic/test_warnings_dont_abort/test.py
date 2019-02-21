@@ -51,12 +51,32 @@ def checkForErrorReports(out):
     ret = False
     firstLine = False
     secondLine = False
+    thirdLine = False
     for l in out:
-        if "#FPCHECKER: Errors at dot_product.cu:8" in l and "#64" in l:
+        if "#FPCHECKER: Warnings at dot_product.cu:6" in l:
             firstLine = True
-        if "#FPCHECKER: Errors at dot_product.cu:18" in l and "#64" in l:
+        if "#FPCHECKER: Warnings at dot_product.cu:8" in l:
             secondLine = True
-    return (firstLine and secondLine)
+        if "#FPCHECKER: Warnings at dot_product.cu:18" in l:
+            thirdLine = True
+    return (firstLine and secondLine and thirdLine)
+
+def checkWarningsDontRepeat(out):
+    cache = {}
+    for l in out:
+        if "#FPCHECKER: Warnings at dot_product.cu:" in l:
+            if l not in cache.keys():
+                cache[l] = 1
+            else:
+                cache[l] = cache[l] + 1
+
+    repeated = False
+    for k in cache.keys():
+        if cache[k] > 1:
+            repeated = True
+            break
+
+    return (not repeated)
 
 def main():
     op0_res = compileAndRun("0")
@@ -83,7 +103,15 @@ def main():
     if a1==True and a2==True and a3==True and a4==True:
         error_report_is_correct = True
 
-    if no_aborts_are_seen==True and error_report_is_correct==True:
+    reportsDontRepeat = False
+    b1 = checkWarningsDontRepeat(op0_res)
+    b2 = checkWarningsDontRepeat(op1_res)
+    b3 = checkWarningsDontRepeat(op2_res)
+    b4 = checkWarningsDontRepeat(op3_res)
+    if b1==True and b2==True and b3==True and b4==True:
+        reportsDontRepeat = True
+
+    if no_aborts_are_seen==True and error_report_is_correct==True and reportsDontRepeat==True:
         print "PASSED"
     else:
         print "failed"

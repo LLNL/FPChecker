@@ -421,8 +421,8 @@ void _FPC_PRINT_ERRORS_()
 			/* --- Print warning reports ---- */
 			unsigned long long int warnings = _FPC_READ_FP64_GLOBAL_ARRAY_(i);
 			double val;
-	  	memcpy((void *) &val, (void *) &warnings, sizeof(val));
-			if (warnings != 0 and !isnan(val))
+			memcpy((void *) &val, (void *) &warnings, sizeof(val));
+			if (warnings != 0 && !isnan(val) )
 			{
 		  		printf("\n#FPCHECKER: Warnings at %s:%d (#%e, tid:%d)\n", _FPC_FILE_NAME_[0], i, val, id);
 		  		double newVal = NAN;
@@ -431,8 +431,8 @@ void _FPC_PRINT_ERRORS_()
 			}
 			else if (isnan(val))
 			{
-	  		memcpy((void *) &warnings, (void *) &val, sizeof(warnings));
-	  		_FPC_WRITE_FP64_GLOBAL_ARRAY_(i, warnings);
+	  			memcpy((void *) &warnings, (void *) &val, sizeof(warnings));
+	  			_FPC_WRITE_FP64_GLOBAL_ARRAY_(i, warnings);
 			}
 		}
 	}
