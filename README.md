@@ -42,7 +42,7 @@ This will tell clang where the FPChecker runtime is located. FPCHECKER_PATH is t
 
 2. Compile your code and run it.
 
-##Expected Output
+## Expected Output
 
 When your applications begins to run, you should see the following, indicating that your application was instrumented by FPChecker:
 
