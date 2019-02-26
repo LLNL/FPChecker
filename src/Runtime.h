@@ -70,8 +70,9 @@ __device__ static int lock_state = 0;
 // Variables to store errors/warnings found in errors-dont-abort mode
 // The size of vectors is irrelevant since they will be instrumented
 __device__ static long long int errors_array_size = 10;
-__device__ static long long int errors_per_line_array[10]; 		// not used at runtime
-__device__ static unsigned long long int warnings_per_line_array[10]; 	// not used at runtime
+//__device__ static long long int errors_per_line_array[10]; 		// not used at runtime
+//__device__ static unsigned long long int warnings_per_line_array[10]; 	// not used at runtime
+__device__ static long long int _FPC_ARR_NOT_USED_[10];            // not used at runtime
 
 /* ------------------------ Generic Functions ------------------------------ */
 
@@ -354,25 +355,31 @@ __device__
 __attribute__((noinline))  long long int _FPC_READ_GLOBAL_ERRORS_ARRAY_(long long int i)
 {
 	asm ("");
-	return errors_per_line_array[i];
+	//return errors_per_line_array[i];
+	return _FPC_ARR_NOT_USED_[i];
 }
 __device__
 __attribute__((noinline)) void _FPC_WRITE_GLOBAL_ERRORS_ARRAY_(long long int i, long long int val)
 {
 	asm ("");
-	errors_per_line_array[i] = val;
+	//errors_per_line_array[i] = val;
+	_FPC_ARR_NOT_USED_[i] = val;
 }
 __device__
-__attribute__((noinline))  unsigned long long int _FPC_READ_FP64_GLOBAL_ARRAY_(int index)
+//__attribute__((noinline))  unsigned long long int _FPC_READ_FP64_GLOBAL_ARRAY_(int index)
+__attribute__((noinline))  long long int _FPC_READ_FP64_GLOBAL_ARRAY_(long long int i)
 {
 	asm ("");
-	return warnings_per_line_array[index];
+	//return warnings_per_line_array[index];
+	return _FPC_ARR_NOT_USED_[i]; 
 }
 __device__
-__attribute__((noinline))  void _FPC_WRITE_FP64_GLOBAL_ARRAY_(int index, unsigned long long int val)
+//__attribute__((noinline))  void _FPC_WRITE_FP64_GLOBAL_ARRAY_(int index, unsigned long long int val)
+__attribute__((noinline))  void _FPC_WRITE_FP64_GLOBAL_ARRAY_(long long int i, long long int val)
 {
 	asm ("");
-	warnings_per_line_array[index] = val;
+	//warnings_per_line_array[index] = val;
+	_FPC_ARR_NOT_USED_[i] = val;
 }
 /* -------------------------------------- */
 
@@ -409,7 +416,7 @@ void _FPC_PRINT_ERRORS_()
 			}
 
 			/* --- Print warning reports ---- */
-			unsigned long long int warnings = _FPC_READ_FP64_GLOBAL_ARRAY_(i);
+			unsigned long long int warnings = (unsigned long long int)_FPC_READ_FP64_GLOBAL_ARRAY_(i);
 			double val;
 			memcpy((void *) &val, (void *) &warnings, sizeof(val));
 			if (warnings != 0 && !isnan(val) )
