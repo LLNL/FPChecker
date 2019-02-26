@@ -399,7 +399,16 @@ void _FPC_PRINT_ERRORS_()
 			//if (errors > 0)
 			if (errors < 0 && errors > -4)
 			{
-				printf("\n#FPCHECKER: Errors at %s:%lld (#%lld, tid:%d)\n", _FPC_FILE_NAME_[0], i, errors, id);
+				if (errors == -1) // NaN
+					printf("\n#FPCHECKER: NAN Error ");
+				if (errors == -2) // INF
+					printf("\n#FPCHECKER: INF Error ");
+				if (errors == -3) // Underflow
+					printf("\n#FPCHECKER: Underflow Error ");
+				else
+					printf("\n#FPCHECKER: UNKNOWN Error ");
+
+				printf("at %s:%lld (#%lld, tid:%d)\n", _FPC_FILE_NAME_[0], i, errors, id);
 				_FPC_WRITE_GLOBAL_ERRORS_ARRAY_(i, LLONG_MIN);
 			}
 			//else if (errors < 0)
@@ -415,7 +424,7 @@ void _FPC_PRINT_ERRORS_()
 			memcpy((void *) &val, (void *) &warnings, sizeof(val));
 			if (warnings != 0 && !isnan(val) )
 			{
-		  		printf("\n#FPCHECKER: Warnings at %s:%lld (#%e, tid:%d)\n", _FPC_FILE_NAME_[0], i, val, id);
+		  		printf("\n#FPCHECKER: Warning at %s:%lld (#%e, tid:%d)\n", _FPC_FILE_NAME_[0], i, val, id);
 		  		double newVal = NAN;
 		  		memcpy((void *) &warnings, (void *) &newVal, sizeof(warnings));
 		  		_FPC_WRITE_FP64_GLOBAL_ARRAY_(i, warnings);
