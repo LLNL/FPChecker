@@ -69,8 +69,8 @@ __device__ static int lock_state = 0;
 
 // Variables to store errors/warnings found in errors-dont-abort mode
 // The size of vectors is irrelevant since they will be instrumented
-__device__ static int errors_array_size = 10;
-__device__ static int errors_per_line_array[10]; 		// not used at runtime
+__device__ static long long int errors_array_size = 10;
+__device__ static long long int errors_per_line_array[10]; 		// not used at runtime
 __device__ static unsigned long long int warnings_per_line_array[10]; 	// not used at runtime
 
 /* ------------------------ Generic Functions ------------------------------ */
@@ -351,13 +351,13 @@ void _FPC_PRINT_AT_MAIN_()
 /*      Functions will be instrumented    */
 /* -------------------------------------- */
 __device__
-__attribute__((noinline))  int _FPC_READ_GLOBAL_ERRORS_ARRAY_(int i)
+__attribute__((noinline))  long long int _FPC_READ_GLOBAL_ERRORS_ARRAY_(long long int i)
 {
 	asm ("");
 	return errors_per_line_array[i];
 }
 __device__
-__attribute__((noinline)) void _FPC_WRITE_GLOBAL_ERRORS_ARRAY_(int i, int val)
+__attribute__((noinline)) void _FPC_WRITE_GLOBAL_ERRORS_ARRAY_(long long int i, long long int val)
 {
 	asm ("");
 	errors_per_line_array[i] = val;
@@ -393,19 +393,19 @@ void _FPC_PRINT_ERRORS_()
 	int id = _FPC_GET_GLOBAL_IDX_3D_3D();
 	if (id == 0)
 	{
-		for (int i=0; i < errors_array_size; ++i)
+		for (long long int i=0; i < errors_array_size; ++i)
 		{
 			/* --- Print error reports ---- */
-			int errors = _FPC_READ_GLOBAL_ERRORS_ARRAY_(i);
+			long long int errors = _FPC_READ_GLOBAL_ERRORS_ARRAY_(i);
 			if (errors > 0)
 			{
-				printf("\n#FPCHECKER: Errors at %s:%d (#%d, tid:%d)\n", _FPC_FILE_NAME_[0], i, errors, id);
-				_FPC_WRITE_GLOBAL_ERRORS_ARRAY_(i, INT_MIN);
+				printf("\n#FPCHECKER: Errors at %s:%lld (#%lld, tid:%d)\n", _FPC_FILE_NAME_[0], i, errors, id);
+				_FPC_WRITE_GLOBAL_ERRORS_ARRAY_(i, LLONG_MIN);
 			}
 			else if (errors < 0)
 			{
 				// This is so we do not report them multiple times
-				_FPC_WRITE_GLOBAL_ERRORS_ARRAY_(i, INT_MIN);
+				_FPC_WRITE_GLOBAL_ERRORS_ARRAY_(i, LLONG_MIN);
 			}
 
 			/* --- Print warning reports ---- */
@@ -414,7 +414,7 @@ void _FPC_PRINT_ERRORS_()
 			memcpy((void *) &val, (void *) &warnings, sizeof(val));
 			if (warnings != 0 && !isnan(val) )
 			{
-		  		printf("\n#FPCHECKER: Warnings at %s:%d (#%e, tid:%d)\n", _FPC_FILE_NAME_[0], i, val, id);
+		  		printf("\n#FPCHECKER: Warnings at %s:%lld (#%e, tid:%d)\n", _FPC_FILE_NAME_[0], i, val, id);
 		  		double newVal = NAN;
 		  		memcpy((void *) &warnings, (void *) &newVal, sizeof(warnings));
 		  		_FPC_WRITE_FP64_GLOBAL_ARRAY_(i, warnings);

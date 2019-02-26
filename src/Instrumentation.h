@@ -10,6 +10,7 @@
 
 #include "CommonTypes.h"
 #include "llvm/IR/IRBuilder.h"
+#include <string>
 
 using namespace llvm;
 
@@ -47,6 +48,9 @@ private:
   Instruction* firstInstrution();
 
   GlobalVariable* generateIntArrayGlobalVariable(ArrayType *arrType);
+  void createReadFunctionForGlobalArray(GlobalVariable *arr, ArrayType *arrType, std::string funcName);
+  void createWriteFunctionForGlobalArray(GlobalVariable *arr, ArrayType *arrType, std::string funcName);
+
 
 public:
   FPInstrumentation(Module *M);

@@ -16,10 +16,10 @@ def check(cmdOutput):
         if "#FPCHECKER: Instrumenting function:" in l and "computed" in l:
             func_found = True
 
-        if "#FPCHECKER: found function: _Z30_FPC_READ_GLOBAL_ERRORS_ARRAY_i" in l:
+        if "#FPCHECKER: found function: _FPC_READ_GLOBAL_ERRORS_ARRAY_" in l:
             read_array_func_found = True
 
-        if "#FPCHECKER: found function: _Z31_FPC_WRITE_GLOBAL_ERRORS_ARRAY_ii" in l:
+        if "#FPCHECKER: found function: _FPC_WRITE_GLOBAL_ERRORS_ARRAY" in l:
             write_array_func_found = True
 
 
