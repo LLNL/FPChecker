@@ -44,6 +44,7 @@ __device__ void 	_FPC_FP64_CHECK_ADD_(float x, float y, float z, int loc);
 __device__ void 	_FPC_FP64_CHECK_SUB_(float x, float y, float z, int loc);
 __device__ void 	_FPC_FP64_CHECK_MUL_(float x, float y, float z, int loc);
 __device__ void 	_FPC_FP64_CHECK_DIV_(float x, float y, float z, int loc);
+__device__ static int _FPC_GET_GLOBAL_IDX_3D_3D();
 
 void _FPC_PRINT_AT_MAIN_();
 
@@ -66,6 +67,8 @@ __device__ static char *_FPC_FILE_NAME_[1];
 /// Lock to print from one thread only
 __device__ static int lock_state = 0;
 
+// Variables to store errors/warnings found in errors-dont-abort mode
+// The size of vectors is irrelevant since they will be instrumented
 __device__ static int errors_array_size = 10;
 __device__ static int errors_per_line_array[10]; 		// not used at runtime
 __device__ static unsigned long long int warnings_per_line_array[10]; 	// not used at runtime
@@ -231,14 +234,6 @@ static void _FPC_PRINT_REPORT_ROW_(double val, int space, int last)
 __device__
 __attribute__((noinline))  static void _FPC_INTERRUPT_(int errorType, int op, int loc, float fp32_val, double fp64_val)
 {
-/*#ifdef FPC_ERRORS_DONT_ABORT
-	volatile int x=3;
-	while(x != 0)
-		x--;
-	x = errorType + op + loc + (int)fp32_val + (int)fp64_val;
-	asm ("");
-#else*/
-
 #ifdef FPC_ERRORS_DONT_ABORT
 	volatile bool blocked = false;
 #else
@@ -292,11 +287,6 @@ __attribute__((noinline))  static void _FPC_INTERRUPT_(int errorType, int op, in
 __device__
 static void _FPC_WARNING_(int errorType, int op, int loc, float fp32_val, double fp64_val)
 {
-	//uint64_t intVal;
-  //memcpy((void *) &intVal, (void *) &fp64_val, sizeof(intVal));
-  //unsigned long long int* address = &(warnings_per_line_array[loc]);
-	//atomicCAS(address, 0, intVal);
-
 #ifdef FPC_ERRORS_DONT_ABORT
 	volatile bool blocked = false;
 #else
@@ -387,7 +377,7 @@ __attribute__((noinline))  void _FPC_WRITE_FP64_GLOBAL_ARRAY_(int index, unsigne
 /* -------------------------------------- */
 
 __device__
-static int getGlobalIdx_3D_3D()
+static int _FPC_GET_GLOBAL_IDX_3D_3D()
 {
 	int blockId = blockIdx.x + blockIdx.y * gridDim.x
 		+ gridDim.x * gridDim.y * blockIdx.z;
@@ -400,7 +390,7 @@ static int getGlobalIdx_3D_3D()
 __device__
 void _FPC_PRINT_ERRORS_()
 {
-	int id = getGlobalIdx_3D_3D();
+	int id = _FPC_GET_GLOBAL_IDX_3D_3D();
 	if (id == 0)
 	{
 		for (int i=0; i < errors_array_size; ++i)

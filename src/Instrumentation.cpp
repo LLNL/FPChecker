@@ -505,32 +505,38 @@ void FPInstrumentation::instrumentMainFunction(Function *f)
 	setFakeDebugLocation(f, callInst);
 }
 
+
+// Generates a global array on n integers, initialized to zero
+GlobalVariable* FPInstrumentation::generateIntArrayGlobalVariable(ArrayType *arrType)
+{
+	GlobalVariable *newGv = nullptr;
+	newGv = new GlobalVariable(*mod, arrType, false,
+				GlobalValue::LinkageTypes::InternalLinkage, 0,"myVar",
+				nullptr, GlobalValue::ThreadLocalMode::NotThreadLocal, 1, true);
+
+	ConstantAggregateZero* const_array = ConstantAggregateZero::get(arrType);
+	newGv->setInitializer(const_array);
+
+	return newGv;
+}
+
 void FPInstrumentation::instrumentErrorArray()
 {
 	// Set size of the global array
 	int extra = 10;
 	int elems = maxNumLocations + extra;
-	//outs() << "In instrumentErrorArray" << "\n";
 
-	// Global error variable - array size
+	// Modify initializer of array size for global error array
 	GlobalVariable *arrSize = nullptr;
 	arrSize = mod->getGlobalVariable ("_ZL17errors_array_size", true);
 	assert((arrSize!=nullptr) && "Global array not found");
 	auto constSize = ConstantInt::get (Type::getInt32Ty(mod->getContext()), (uint64_t)elems, true);
 	arrSize->setInitializer(constSize);
-	//outs() << "error variable changed" << "\n";
 
+
+	/* --- Modify begin of INTERRUPT runtime function ------------------------- */
 	ArrayType *arrType = ArrayType::get(Type::getInt32Ty(mod->getContext()), elems);
-
-	GlobalVariable *newGv = nullptr;
-	newGv = new GlobalVariable(*mod, arrType, false,
-			GlobalValue::LinkageTypes::InternalLinkage, 0,"myVar",
-			nullptr, GlobalValue::ThreadLocalMode::NotThreadLocal, 1, true);
-	//outs() << "global created" << "\n";
-
-	ConstantAggregateZero* const_array_2 = ConstantAggregateZero::get(arrType);
-	newGv->setInitializer(const_array_2);
-
+	GlobalVariable *newGv = generateIntArrayGlobalVariable(arrType);
 #ifdef FPC_DEBUG
         Logging::info("Global errors array created");
 #endif
@@ -538,13 +544,10 @@ void FPInstrumentation::instrumentErrorArray()
 	auto bb = _fpc_interrupt_->begin();
 	Instruction *inst = &(*(bb->getFirstNonPHIOrDbg()));
 	IRBuilder<> builder = createBuilderBefore(inst);
-	//outs() << "1st inst of _fpc_interrupt_ found" << "\n";
 
 	auto arg = _fpc_interrupt_->arg_begin();
-	//outs() << "1st args of _fpc_interrupt_ found" << "\n";
 	arg++; arg++; // get third arg
 	auto sext = builder.CreateSExt(arg, Type::getInt64Ty(mod->getContext()), "my");
-	//outs() << "sext created" << "\n";
 
 	std::vector<Value *> args;
 	args.push_back(ConstantInt::get(Type::getInt64Ty(mod->getContext()), 0));
@@ -553,7 +556,6 @@ void FPInstrumentation::instrumentErrorArray()
 
 	auto gep = builder.CreateInBoundsGEP(arrType, newGv, indexList, "my");
 	//setFakeDebugLocation(_fpc_interrupt_, gep);
-
 	auto addCast = new AddrSpaceCastInst(gep, Type::getInt32PtrTy(mod->getContext(), 0), "my", inst);
 	//setFakeDebugLocation(_fpc_interrupt_, addCast);
 

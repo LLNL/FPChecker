@@ -46,6 +46,8 @@ private:
   void setFakeDebugLocation(Function *f, Instruction *inst);
   Instruction* firstInstrution();
 
+  GlobalVariable* generateIntArrayGlobalVariable(ArrayType *arrType);
+
 public:
   FPInstrumentation(Module *M);
   void instrumentFunction(Function *f);

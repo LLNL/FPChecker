@@ -55,7 +55,8 @@ bool CodeMatching::isUnwantedFunction(Function *f)
 			f->getName().str().find("_FPC_WARNING_") != std::string::npos ||
 			f->getName().str().find("_FPC_PRINT_ERRORS_") != std::string::npos ||
 			f->getName().str().find("_Z30_FPC_READ_GLOBAL_ERRORS_ARRAY_i") != std::string::npos ||
-			f->getName().str().find("_Z31_FPC_WRITE_GLOBAL_ERRORS_ARRAY_ii") != std::string::npos
+			f->getName().str().find("_Z31_FPC_WRITE_GLOBAL_ERRORS_ARRAY_ii") != std::string::npos ||
+			f->getName().str().find("_FPC_GET_GLOBAL_IDX_3D_3D") != std::string::npos
 			)
 		ret = true;
 
