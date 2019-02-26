@@ -680,17 +680,31 @@ void FPInstrumentation::instrumentErrorArray()
 	ArrayRef<Value *> indexList(args);
 
 	auto gep = builder.CreateInBoundsGEP(arrType, newGv, indexList, "my");
-	//setFakeDebugLocation(_fpc_interrupt_, gep);
 	auto addCast = new AddrSpaceCastInst(gep, Type::getInt64PtrTy(mod->getContext(), 0), "my", inst);
-	//setFakeDebugLocation(_fpc_interrupt_, addCast);
-
-	AtomicRMWInst *atomic = builder.CreateAtomicRMW(
+	/*AtomicRMWInst *atomic = builder.CreateAtomicRMW(
 				AtomicRMWInst::Add,
 				addCast,
 				ConstantInt::get(Type::getInt64Ty(mod->getContext()), 1),
 				AtomicOrdering::SequentiallyConsistent, SyncScope::System);
 #ifdef FPC_DEBUG
 	std::string out = "atomic " + inst2str(atomic) + " created";
+	Logging::info(out.c_str());
+#endif
+	 */
+
+	auto errType = _fpc_interrupt_->arg_begin();
+	// subtract 1 from the error type
+	Value *subInst = builder.CreateSub (errType, ConstantInt::get(Type::getInt64Ty(mod->getContext()), 1), "my", false, false);
+
+	AtomicCmpXchgInst *cmpXchg = builder.CreateAtomicCmpXchg(
+			addCast,
+			ConstantInt::get(Type::getInt64Ty(mod->getContext()), 0),
+			subInst,
+			AtomicOrdering::SequentiallyConsistent,
+			AtomicOrdering::SequentiallyConsistent,
+			SyncScope::System);
+#ifdef FPC_DEBUG
+	std::string out = "cmpxchg " + inst2str(cmpXchg) + " created";
 	Logging::info(out.c_str());
 #endif
 

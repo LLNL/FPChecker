@@ -70,9 +70,7 @@ __device__ static int lock_state = 0;
 // Variables to store errors/warnings found in errors-dont-abort mode
 // The size of vectors is irrelevant since they will be instrumented
 __device__ static long long int errors_array_size = 10;
-//__device__ static long long int errors_per_line_array[10]; 		// not used at runtime
-//__device__ static unsigned long long int warnings_per_line_array[10]; 	// not used at runtime
-__device__ static long long int _FPC_ARR_NOT_USED_[10];            // not used at runtime
+__device__ static long long int _FPC_ARR_NOT_USED_[10]; // not used at runtime
 
 /* ------------------------ Generic Functions ------------------------------ */
 
@@ -355,30 +353,24 @@ __device__
 __attribute__((noinline))  long long int _FPC_READ_GLOBAL_ERRORS_ARRAY_(long long int i)
 {
 	asm ("");
-	//return errors_per_line_array[i];
 	return _FPC_ARR_NOT_USED_[i];
 }
 __device__
 __attribute__((noinline)) void _FPC_WRITE_GLOBAL_ERRORS_ARRAY_(long long int i, long long int val)
 {
 	asm ("");
-	//errors_per_line_array[i] = val;
 	_FPC_ARR_NOT_USED_[i] = val;
 }
 __device__
-//__attribute__((noinline))  unsigned long long int _FPC_READ_FP64_GLOBAL_ARRAY_(int index)
 __attribute__((noinline))  long long int _FPC_READ_FP64_GLOBAL_ARRAY_(long long int i)
 {
 	asm ("");
-	//return warnings_per_line_array[index];
 	return _FPC_ARR_NOT_USED_[i]; 
 }
 __device__
-//__attribute__((noinline))  void _FPC_WRITE_FP64_GLOBAL_ARRAY_(int index, unsigned long long int val)
 __attribute__((noinline))  void _FPC_WRITE_FP64_GLOBAL_ARRAY_(long long int i, long long int val)
 {
 	asm ("");
-	//warnings_per_line_array[index] = val;
 	_FPC_ARR_NOT_USED_[i] = val;
 }
 /* -------------------------------------- */
@@ -404,12 +396,14 @@ void _FPC_PRINT_ERRORS_()
 		{
 			/* --- Print error reports ---- */
 			long long int errors = _FPC_READ_GLOBAL_ERRORS_ARRAY_(i);
-			if (errors > 0)
+			//if (errors > 0)
+			if (errors < 0 && errors > -4)
 			{
 				printf("\n#FPCHECKER: Errors at %s:%lld (#%lld, tid:%d)\n", _FPC_FILE_NAME_[0], i, errors, id);
 				_FPC_WRITE_GLOBAL_ERRORS_ARRAY_(i, LLONG_MIN);
 			}
-			else if (errors < 0)
+			//else if (errors < 0)
+			else if (errors == LLONG_MIN)
 			{
 				// This is so we do not report them multiple times
 				_FPC_WRITE_GLOBAL_ERRORS_ARRAY_(i, LLONG_MIN);
