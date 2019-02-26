@@ -694,30 +694,19 @@ void FPInstrumentation::instrumentErrorArray()
 	Logging::info(out.c_str());
 #endif
 
-	/* ----------- Instrument _Z32_FPC_READ_GLOBAL_ERRORS_ARRAY_i -------------*/
+	/* ----------- Instrument _FPC_READ_GLOBAL_ERRORS_ARRAY -------------*/
 	createReadFunctionForGlobalArray(newGv, arrType, "_FPC_READ_GLOBAL_ERRORS_ARRAY_");
 	/* ------------------------------------------------------------------------ */
-
-	/* ----------- Instrument _Z31_FPC_WRITE_GLOBAL_ERRORS_ARRAY_ii -------------*/
+	/* ----------- Instrument _FPC_WRITE_GLOBAL_ERRORS_ARRAY -------------*/
 	createWriteFunctionForGlobalArray(newGv, arrType, "_FPC_WRITE_GLOBAL_ERRORS_ARRAY_");
 	/* ------------------------------------------------------------------------ */
 
 	/* ============= Instrumentation for Warning function ======================*/
-	ArrayType *warArrayType = ArrayType::get(Type::getInt64Ty(mod->getContext()), elems);
-
-	GlobalVariable *newWarningsGv = nullptr;
-	newWarningsGv = new GlobalVariable(*mod, warArrayType, false,
-			GlobalValue::LinkageTypes::InternalLinkage, 0,"myWarnings",
-			nullptr, GlobalValue::ThreadLocalMode::NotThreadLocal, 1, true);
-	//outs() << "global created" << "\n";
-
-	ConstantAggregateZero* arrayZero = ConstantAggregateZero::get(warArrayType);
-	newWarningsGv->setInitializer(arrayZero);
+	GlobalVariable *newWarningsGv = generateIntArrayGlobalVariable(arrType);
 
 	auto bbTmp = _fpc_warning_->begin();
 	Instruction *firstInst = &(*(bbTmp->getFirstNonPHIOrDbg()));
 	IRBuilder<> builderTmp = createBuilderBefore(firstInst);
-	//outs() << "1st inst of _fpc_interrupt_ found" << "\n";
 
 	auto argTmp = _fpc_warning_->arg_begin();
 	argTmp++; argTmp++; argTmp++; argTmp++; // get 5th arg
@@ -726,14 +715,13 @@ void FPInstrumentation::instrumentErrorArray()
 	auto argTmp2 = _fpc_warning_->arg_begin();
 	argTmp2++; argTmp2++; // get third arg
 	auto sextTmp = builderTmp.CreateSExt(argTmp2, Type::getInt64Ty(mod->getContext()), "my");
-	//outs() << "sext created" << "\n";
 
 	std::vector<Value *> argsTmp;
 	argsTmp.push_back(ConstantInt::get(Type::getInt64Ty(mod->getContext()), 0));
 	argsTmp.push_back(sextTmp);
 	ArrayRef<Value *> indexTmp(argsTmp);
 
-	auto gepTmp = builderTmp.CreateInBoundsGEP(warArrayType, newWarningsGv, indexTmp, "my");
+	auto gepTmp = builderTmp.CreateInBoundsGEP(arrType, newWarningsGv, indexTmp, "my");
 	//setFakeDebugLocation(_fpc_interrupt_, gep);
 
 	auto addCastTmp = new AddrSpaceCastInst(gepTmp, Type::getInt64PtrTy(mod->getContext(), 0), "my", firstInst);
@@ -752,7 +740,9 @@ void FPInstrumentation::instrumentErrorArray()
 #endif
 
 	/* ----------- Instrument _Z28_FPC_READ_FP64_GLOBAL_ARRAY_Pyi -------------*/
-	for (auto f = mod->begin(), fend = mod->end(); f != fend; ++f)
+	createReadFunctionForGlobalArray(newWarningsGv, arrType, "_FPC_READ_FP64_GLOBAL_ARRAY_");
+
+	/*for (auto f = mod->begin(), fend = mod->end(); f != fend; ++f)
 	{
 		if (f->getName().str().find("_Z28_FPC_READ_FP64_GLOBAL_ARRAY_i") != std::string::npos)
 		{
@@ -808,10 +798,12 @@ void FPInstrumentation::instrumentErrorArray()
 
 			break;
 		}
-	}
+	}*/
 	/* ------------------------------------------------------------------------ */
 
 	/* ----------- Instrument _Z31_FPC_WRITE_GLOBAL_ERRORS_ARRAY_ii -------------*/
+	createWriteFunctionForGlobalArray(newWarningsGv, arrType, "_FPC_WRITE_FP64_GLOBAL_ARRAY_");
+	/*
 	for (auto f = mod->begin(), fend = mod->end(); f != fend; ++f)
 	{
 		if (f->getName().str().find("_Z29_FPC_WRITE_FP64_GLOBAL_ARRAY_iy") != std::string::npos)
@@ -871,9 +863,8 @@ void FPInstrumentation::instrumentErrorArray()
 
 			break;
 		}
-	}
+	}*/
 	/* ------------------------------------------------------------------------ */
-
 }
 
 void FPInstrumentation::instrumentEndOfKernel(Function *f)
