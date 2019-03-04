@@ -33,6 +33,7 @@ int main(int RAJA_UNUSED_ARG(argc), char **RAJA_UNUSED_ARG(argv[]))
     // --------------------------------
   });    
 
+  cudaDeviceSynchronize();
   dot = cudot.get();
   std::cout << "(a, b) = " << dot << std::endl;
 

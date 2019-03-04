@@ -52,9 +52,9 @@ def checkForErrorReports(out):
     firstLine = False
     secondLine = False
     for l in out:
-        if "#FPCHECKER: Errors at dot_product.cu:8" in l and "#64" in l:
+        if "#FPCHECKER: NAN Error at dot_product.cu:8" in l:
             firstLine = True
-        if "#FPCHECKER: Errors at dot_product.cu:18" in l and "#64" in l:
+        if "#FPCHECKER: NAN Error at dot_product.cu:18" in l:
             secondLine = True
     return (firstLine and secondLine)
 

@@ -53,18 +53,18 @@ def checkForErrorReports(out):
     secondLine = False
     thirdLine = False
     for l in out:
-        if "#FPCHECKER: Warnings at dot_product.cu:6" in l:
+        if "#FPCHECKER: Warning at dot_product.cu:6" in l:
             firstLine = True
-        if "#FPCHECKER: Warnings at dot_product.cu:8" in l:
+        if "#FPCHECKER: Warning at dot_product.cu:8" in l:
             secondLine = True
-        if "#FPCHECKER: Warnings at dot_product.cu:18" in l:
+        if "#FPCHECKER: Warning at dot_product.cu:18" in l:
             thirdLine = True
     return (firstLine and secondLine and thirdLine)
 
 def checkWarningsDontRepeat(out):
     cache = {}
     for l in out:
-        if "#FPCHECKER: Warnings at dot_product.cu:" in l:
+        if "#FPCHECKER: Warning at dot_product.cu:" in l:
             if l not in cache.keys():
                 cache[l] = 1
             else:

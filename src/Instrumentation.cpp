@@ -694,8 +694,8 @@ void FPInstrumentation::instrumentErrorArray()
 
 	auto errType = _fpc_interrupt_->arg_begin();
 	// subtract 1 from the error type
-	auto sext = builder.CreateSExt(errType, Type::getInt64Ty(mod->getContext()), "my");
-	Value *subInst = builder.CreateSub (sext, ConstantInt::get(Type::getInt64Ty(mod->getContext()), 1), "my", false, false);
+	auto ext = builder.CreateSExt(errType, Type::getInt64Ty(mod->getContext()), "my");
+	Value *subInst = builder.CreateSub (ext, ConstantInt::get(Type::getInt64Ty(mod->getContext()), 3), "my", false, false);
 
 	AtomicCmpXchgInst *cmpXchg = builder.CreateAtomicCmpXchg(
 			addCast,

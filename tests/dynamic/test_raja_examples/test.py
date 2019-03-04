@@ -66,7 +66,7 @@ def main():
 
     error_no_aborts = False
     for l in cmdOutput.split("\n"):
-        if "#FPCHECKER: Errors at dot_product_raja.cpp:32" in l:
+        if "#FPCHECKER: Underflow Error at dot_product_raja.cpp:32" in l:
             error_no_aborts = True
 
     if rep[0] == 'Underflow' and rep[3] == '32' and error_no_aborts == True:

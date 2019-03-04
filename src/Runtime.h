@@ -399,16 +399,16 @@ void _FPC_PRINT_ERRORS_()
 			//if (errors > 0)
 			if (errors < 0 && errors > -4)
 			{
-				if (errors == -1) // NaN
+				if (errors == -3) // NaN
 					printf("\n#FPCHECKER: NAN Error ");
-				if (errors == -2) // INF
+				else if (errors == -2) // INF
 					printf("\n#FPCHECKER: INF Error ");
-				if (errors == -3) // Underflow
+				else if (errors == -1) // Underflow
 					printf("\n#FPCHECKER: Underflow Error ");
 				else
 					printf("\n#FPCHECKER: UNKNOWN Error ");
 
-				printf("at %s:%lld (#%lld, tid:%d)\n", _FPC_FILE_NAME_[0], i, errors, id);
+				printf("at %s:%lld (code:#%lld, tid:%d)\n", _FPC_FILE_NAME_[0], i, errors, id);
 				_FPC_WRITE_GLOBAL_ERRORS_ARRAY_(i, LLONG_MIN);
 			}
 			//else if (errors < 0)
@@ -518,7 +518,6 @@ static int _FPC_FP32_IS_ALMOST_SUBNORMAL(float x)
   }
   return ret;
 }
-
 __device__
 void _FPC_FP32_CHECK_ADD_(float x, float y, float z, int loc)
 {
