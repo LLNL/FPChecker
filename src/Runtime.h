@@ -18,7 +18,7 @@
 /// Changing this file: Runtime.h
 /// When a global __device__ function is added in the this file, some actions
 /// must be taken:
-/// (1) We need to find this function when initializing Instrumentation pass.
+/// (1) We may need to find this function when initializing Instrumentation pass.
 /// (2) Linkage of the function must be set to LinkOnceODRLinkage.
 /// (3) We need to add this function to the list of unwanted functions, i.e.,
 ///     functions we do not instrument in the pass.
@@ -28,8 +28,42 @@
 __device__ void _FPC_DEVICE_CODE_FUNC_(){};
 #endif
 
+/* --- non-static ----------------------------------------------------------- */
+__device__ void _FPC_PRINT_ERRORS_();
+__device__ void _FPC_FP32_CHECK_ADD_(float x, float y, float z, int loc);
+__device__ void _FPC_FP32_CHECK_SUB_(float x, float y, float z, int loc);
+__device__ void _FPC_FP32_CHECK_MUL_(float x, float y, float z, int loc);
+__device__ void _FPC_FP32_CHECK_DIV_(float x, float y, float z, int loc);
+__device__ void _FPC_FP64_CHECK_ADD_(double x, double y, double z, int loc);
+__device__ void _FPC_FP64_CHECK_SUB_(double x, double y, double z, int loc);
+__device__ void _FPC_FP64_CHECK_MUL_(double x, double y, double z, int loc);
+__device__ void _FPC_FP64_CHECK_DIV_(double x, double y, double z, int loc);
+
+/* --- static --------------------------------------------------------------- */
+__device__ __attribute__((noinline)) static void _FPC_INTERRUPT_(int errorType, int op, int loc, float fp32_val, double fp64_val);
+__device__ __attribute__((noinline)) static void _FPC_WARNING_(int errorType, int op, int loc, float fp32_val, double fp64_val);
+__device__ static int _FPC_LEN_(const char *s);
+__device__ static void _FPC_CPY_(char *d, const char *s);
+__device__ static void _FPC_CAT_(char *d, const char *s);
+__device__ static void _FPC_PRINT_REPORT_LINE_(const char border);
+__device__ static void _FPC_PRINT_REPORT_HEADER_(int type);
+__device__ static void _FPC_PRINT_REPORT_ROW_(const char *val, int space, int last, char lastChar);
+__device__ static void _FPC_PRINT_REPORT_ROW_(int val, int space, int last);
+__device__ static void _FPC_PRINT_REPORT_ROW_(float val, int space, int last);
+__device__ static void _FPC_PRINT_REPORT_ROW_(double val, int space, int last);
+__device__ static void _FPC_FP32_CHECK_OPERATION_(float x, float y, float z, int loc, int op);
+__device__ static int _FPC_FP32_IS_SUBNORMAL(float x);
+__device__ static int _FPC_FP32_IS_ALMOST_OVERFLOW(float x);
+__device__ static int _FPC_FP32_IS_ALMOST_SUBNORMAL(float x);
+__device__ static void _FPC_FP64_CHECK_OPERATION_(double x, double y, double z, int loc, int op);
+__device__ static int _FPC_FP64_IS_SUBNORMAL(double x);
+__device__ static int _FPC_FP64_IS_ALMOST_OVERFLOW(double x);
+__device__ static int _FPC_FP64_IS_ALMOST_SUBNORMAL(double x);
+__device__ static int _FPC_GET_GLOBAL_IDX_3D_3D();
+
+/*
 __device__ static void	_FPC_INTERRUPT_(int loc);
-__device__ static int	_FPC_FP32_IS_SUBNORMAL(float x);
+__device__ static int		_FPC_FP32_IS_SUBNORMAL(float x);
 __device__ static int 	_FPC_FP32_IS_ALMOST_OVERFLOW(float x);
 __device__ static int 	_FPC_FP32_IS_ALMOST_SUBNORMAL(float x);
 __device__ void 	_FPC_PRINT_ERRORS_();
@@ -38,13 +72,14 @@ __device__ void 	_FPC_FP32_CHECK_SUB_(float x, float y, float z, int loc);
 __device__ void 	_FPC_FP32_CHECK_MUL_(float x, float y, float z, int loc);
 __device__ void 	_FPC_FP32_CHECK_DIV_(float x, float y, float z, int loc);
 __device__ static int	_FPC_FP64_IS_SUBNORMAL(double x);
-__device__ static int 	_FPC_FP64_IS_ALMOST_OVERFLOW(double x);
-__device__ static int 	_FPC_FP64_IS_ALMOST_SUBNORMAL(double x);
+__device__ static int _FPC_FP64_IS_ALMOST_OVERFLOW(double x);
+__device__ static int _FPC_FP64_IS_ALMOST_SUBNORMAL(double x);
 __device__ void 	_FPC_FP64_CHECK_ADD_(float x, float y, float z, int loc);
 __device__ void 	_FPC_FP64_CHECK_SUB_(float x, float y, float z, int loc);
 __device__ void 	_FPC_FP64_CHECK_MUL_(float x, float y, float z, int loc);
 __device__ void 	_FPC_FP64_CHECK_DIV_(float x, float y, float z, int loc);
 __device__ static int _FPC_GET_GLOBAL_IDX_3D_3D();
+*/
 
 void _FPC_PRINT_AT_MAIN_();
 
@@ -67,8 +102,8 @@ __device__ static char *_FPC_FILE_NAME_[1];
 /// Lock to print from one thread only
 __device__ static int lock_state = 0;
 
-// Variables to store errors/warnings found in errors-dont-abort mode
-// The size of vectors is irrelevant since they will be instrumented
+/// Variables to store errors/warnings found in errors-dont-abort mode
+/// The size of vectors is irrelevant since they will be instrumented
 __device__ static long long int errors_array_size = 10;
 __device__ static long long int _FPC_ARR_NOT_USED_[10]; // not used at runtime
 
@@ -80,7 +115,6 @@ __device__ static long long int _FPC_ARR_NOT_USED_[10]; // not used at runtime
 ///  Operation : DIV
 ///  File      : /usr/file/pathForceCalculation.cc
 ///  Line      : 23
-///  Thread ID : 1024
 /// +----------------------------------------------------------+
 
 __device__
