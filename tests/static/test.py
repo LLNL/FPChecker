@@ -75,4 +75,15 @@ def main():
     os.chdir("../")
     ###########################################################################
 
+    ###########################################################################
+    t = "Test: correct func are found and instrumented"
+    testTarget = test_config.textWidth.format(t)
+    sys.stdout.write(testTarget)
+    os.chdir("./test_correct_inst_functions_found/")
+    cmd = ["./test.py"]
+    cmdOutput = subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True)
+    sys.stdout.write(cmdOutput)
+    os.chdir("../")
+    ###########################################################################
+
 main()

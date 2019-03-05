@@ -29,7 +29,7 @@ static sys::Mutex Lock;
 bool CodeMatching::isUnwantedFunction(Function *f)
 {
 	bool ret = false;
-	if (
+	/*if (
 			f->getName().str().find("_FPC_INTERRUPT_") != std::string::npos ||
 			f->getName().str().find("_FPC_DEVICE_CODE_FUNC_") != std::string::npos ||
 			f->getName().str().find("_FPC_FP32_CHECK_ADD_") != std::string::npos ||
@@ -54,10 +54,19 @@ bool CodeMatching::isUnwantedFunction(Function *f)
 			f->getName().str().find("_FPC_FP64_IS_ALMOST_SUBNORMAL") != std::string::npos ||
 			f->getName().str().find("_FPC_WARNING_") != std::string::npos ||
 			f->getName().str().find("_FPC_PRINT_ERRORS_") != std::string::npos ||
-			f->getName().str().find("_Z30_FPC_READ_GLOBAL_ERRORS_ARRAY_i") != std::string::npos ||
-			f->getName().str().find("_Z31_FPC_WRITE_GLOBAL_ERRORS_ARRAY_ii") != std::string::npos ||
-			f->getName().str().find("_FPC_GET_GLOBAL_IDX_3D_3D") != std::string::npos
+			f->getName().str().find("_FPC_GET_GLOBAL_IDX_3D_3D") != std::string::npos ||
+			f->getName().str().find("_FPC_FP32_CHECK_OPERATION_") != std::string::npos ||
+			f->getName().str().find("_FPC_FP64_CHECK_OPERATION_") != std::string::npos ||
+			f->getName().str().find("_FPC_READ_GLOBAL_ERRORS_ARRAY_") != std::string::npos ||
+			f->getName().str().find("_FPC_WRITE_GLOBAL_ERRORS_ARRAY_") != std::string::npos ||
+			f->getName().str().find("_FPC_READ_FP64_GLOBAL_ARRAY_") != std::string::npos ||
+			f->getName().str().find("_FPC_WRITE_FP64_GLOBAL_ARRAY_") != std::string::npos
 			)
+			*/
+
+	/// We assume all functions in the runtime begin with _FPC_, so we will
+	/// not instrument device functions that contain this
+	if (f->getName().str().find("_FPC_") != std::string::npos)
 		ret = true;
 
 	return ret;
