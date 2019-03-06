@@ -60,6 +60,8 @@ __device__ static int _FPC_FP64_IS_SUBNORMAL(double x);
 __device__ static int _FPC_FP64_IS_ALMOST_OVERFLOW(double x);
 __device__ static int _FPC_FP64_IS_ALMOST_SUBNORMAL(double x);
 __device__ static int _FPC_GET_GLOBAL_IDX_3D_3D();
+__device__ static int _FPC_FP32_IS_FLUSH_TO_ZERO(float x, float y, float z);
+__device__ static int _FPC_FP64_IS_FLUSH_TO_ZERO(double x, double y, double z);
 
 /*
 __device__ static void	_FPC_INTERRUPT_(int loc);
@@ -491,6 +493,10 @@ static void _FPC_FP32_CHECK_OPERATION_(float x, float y, float z, int loc, int o
 		{
 			_FPC_INTERRUPT_(2, op, loc, x, 0);
 		}
+		else if (_FPC_FP32_IS_FLUSH_TO_ZERO(x, y, z))
+		{
+			_FPC_INTERRUPT_(2, op, loc, x, 0);
+		}
 		else if (_FPC_FP32_IS_ALMOST_SUBNORMAL(x))
 		{
 			_FPC_WARNING_(2, op, loc, x, 0);
@@ -500,6 +506,23 @@ static void _FPC_FP32_CHECK_OPERATION_(float x, float y, float z, int loc, int o
 			_FPC_WARNING_(1, op, loc, x, 0);
 		}
 	}
+}
+
+/// Returns non-zero value if operation returned zero,
+/// but none of arguments of the operation was zero
+__device__
+static int _FPC_FP32_IS_FLUSH_TO_ZERO(float x, float y, float z)
+{
+	int ret = 0;
+	if (x == 0.0 || x == -0.0)
+	{
+		if (y != 0.0 && y != -0.0 && z != 0.0 && z != -0.0)
+		{
+			ret = 1;
+		}
+	}
+
+	return ret;
 }
 
 //// Returns non-zero value if FP argument is a sub-normal
@@ -595,6 +618,10 @@ static void _FPC_FP64_CHECK_OPERATION_(double x, double y, double z, int loc, in
 		{
 			_FPC_INTERRUPT_(2, op, loc, 0, x);
 		}
+		else if (_FPC_FP64_IS_FLUSH_TO_ZERO(x, y, z))
+		{
+			_FPC_INTERRUPT_(2, op, loc, x, 0);
+		}
 		else if (_FPC_FP64_IS_ALMOST_SUBNORMAL(x))
 		{
 			_FPC_WARNING_(2, op, loc, 0, x);
@@ -604,6 +631,23 @@ static void _FPC_FP64_CHECK_OPERATION_(double x, double y, double z, int loc, in
 			_FPC_WARNING_(1, op, loc, 0, x);
 		}
 	}
+}
+
+/// Returns non-zero value if operation returned zero,
+/// but none of arguments of the operation was zero
+__device__
+static int _FPC_FP64_IS_FLUSH_TO_ZERO(double x, double y, double z)
+{
+	int ret = 0;
+	if (x == 0.0 || x == -0.0)
+	{
+		if (y != 0.0 && y != -0.0 && z != 0.0 && z != -0.0)
+		{
+			ret = 1;
+		}
+	}
+
+	return ret;
 }
 
 /// Returns non-zero value if FP argument is a sub-normal.
