@@ -60,8 +60,8 @@ __device__ static int _FPC_FP64_IS_SUBNORMAL(double x);
 __device__ static int _FPC_FP64_IS_ALMOST_OVERFLOW(double x);
 __device__ static int _FPC_FP64_IS_ALMOST_SUBNORMAL(double x);
 __device__ static int _FPC_GET_GLOBAL_IDX_3D_3D();
-__device__ static int _FPC_FP32_IS_FLUSH_TO_ZERO(float x, float y, float z);
-__device__ static int _FPC_FP64_IS_FLUSH_TO_ZERO(double x, double y, double z);
+__device__ static int _FPC_FP32_IS_FLUSH_TO_ZERO(float x, float y, float z, int op);
+__device__ static int _FPC_FP64_IS_FLUSH_TO_ZERO(double x, double y, double z, int op);
 
 /*
 __device__ static void	_FPC_INTERRUPT_(int loc);
@@ -493,7 +493,7 @@ static void _FPC_FP32_CHECK_OPERATION_(float x, float y, float z, int loc, int o
 		{
 			_FPC_INTERRUPT_(2, op, loc, x, 0);
 		}
-		else if (_FPC_FP32_IS_FLUSH_TO_ZERO(x, y, z))
+		else if (_FPC_FP32_IS_FLUSH_TO_ZERO(x, y, z, op))
 		{
 			_FPC_INTERRUPT_(2, op, loc, x, 0);
 		}
@@ -511,14 +511,15 @@ static void _FPC_FP32_CHECK_OPERATION_(float x, float y, float z, int loc, int o
 /// Returns non-zero value if operation returned zero,
 /// but none of arguments of the operation was zero
 __device__
-static int _FPC_FP32_IS_FLUSH_TO_ZERO(float x, float y, float z)
+static int _FPC_FP32_IS_FLUSH_TO_ZERO(float x, float y, float z, int op)
 {
 	int ret = 0;
 	if (x == 0.0 || x == -0.0)
 	{
 		if (y != 0.0 && y != -0.0 && z != 0.0 && z != -0.0)
 		{
-			ret = 1;
+			if (op != 0 && op != 1) // for now, we check on MUL, DIV
+				ret = 1;
 		}
 	}
 
@@ -618,7 +619,7 @@ static void _FPC_FP64_CHECK_OPERATION_(double x, double y, double z, int loc, in
 		{
 			_FPC_INTERRUPT_(2, op, loc, 0, x);
 		}
-		else if (_FPC_FP64_IS_FLUSH_TO_ZERO(x, y, z))
+		else if (_FPC_FP64_IS_FLUSH_TO_ZERO(x, y, z, op))
 		{
 			_FPC_INTERRUPT_(2, op, loc, x, 0);
 		}
@@ -636,14 +637,15 @@ static void _FPC_FP64_CHECK_OPERATION_(double x, double y, double z, int loc, in
 /// Returns non-zero value if operation returned zero,
 /// but none of arguments of the operation was zero
 __device__
-static int _FPC_FP64_IS_FLUSH_TO_ZERO(double x, double y, double z)
+static int _FPC_FP64_IS_FLUSH_TO_ZERO(double x, double y, double z, int op)
 {
 	int ret = 0;
 	if (x == 0.0 || x == -0.0)
 	{
 		if (y != 0.0 && y != -0.0 && z != 0.0 && z != -0.0)
 		{
-			ret = 1;
+                        if (op != 0 && op != 1) // for now, we check on MUL, DIV
+                                ret = 1;
 		}
 	}
 
