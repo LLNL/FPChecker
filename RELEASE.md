@@ -1,3 +1,9 @@
+## Release 0.0.4
+- When errors-dont-abort, it reports the class of error
+- Various code cleaning commits
+- Added some tests and cahnge how test config
+- Known issue: When errors-dont-abort, we only perform FP64 checks
+
 ## Release 0.0.3
 - Warning reports printed once only (in ERRORS_DONT_ABORT mode)
 
