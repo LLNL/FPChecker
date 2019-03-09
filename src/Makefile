@@ -1,6 +1,6 @@
 include ../Makefile.config
 
-PROG		= libcudakernels.so
+PROG		= libfpchecker.so
 SRC_FILES	= driver.cpp Utility.cpp Instrumentation.cpp CodeMatching.cpp Logging.cpp
 
 O_FILES		= $(SRC_FILES:%.cpp=%.o)

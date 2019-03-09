@@ -54,7 +54,7 @@ FPInstrumentation::FPInstrumentation(Module *M) :
 		fp64_check_div_function(nullptr),
 	  _fpc_interrupt_(nullptr),
 	  _fpc_warning_(nullptr),
-	  _print_errors_(nullptr)
+	  _fpc_print_errors_(nullptr)
 {
 
 #ifdef FPC_DEBUG
@@ -125,7 +125,7 @@ FPInstrumentation::FPInstrumentation(Module *M) :
     }
     else if (f->getName().str().find("_FPC_PRINT_ERRORS_") != std::string::npos)
     {
-    	confFunction(f, &_print_errors_, CallingConv::PTX_Device,
+    	confFunction(f, &_fpc_print_errors_, CallingConv::PTX_Device,
     			GlobalValue::LinkageTypes::InternalLinkage, "_FPC_PRINT_ERRORS_");
     }
   }
@@ -539,7 +539,8 @@ void FPInstrumentation::instrumentErrorArray()
 
 	// Modify initializer of array size for global error array
 	GlobalVariable *arrSize = nullptr;
-	arrSize = mod->getGlobalVariable ("_ZL17errors_array_size", true);
+	//arrSize = mod->getGlobalVariable ("_ZL17errors_array_size", true);
+	arrSize = mod->getGlobalVariable("_ZL23_FPC_ERRORS_ARRAY_SIZE_", true);
 	assert((arrSize!=nullptr) && "Global array not found");
 	auto constSize = ConstantInt::get (Type::getInt64Ty(mod->getContext()), (uint64_t)elems, true);
 	arrSize->setInitializer(constSize);
@@ -648,7 +649,7 @@ void FPInstrumentation::instrumentEndOfKernel(Function *f)
 			{
 				IRBuilder<> builder = createBuilderBefore(inst);
 				std::vector<Value *> args;
-				CallInst *callInst = builder.CreateCall(_print_errors_, args);
+				CallInst *callInst = builder.CreateCall(_fpc_print_errors_, args);
 				assert(callInst && "Invalid call instruction!");
 				setFakeDebugLocation(f, callInst);
 			}

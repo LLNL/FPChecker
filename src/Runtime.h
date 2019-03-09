@@ -19,8 +19,8 @@
 /// When a global __device__ function is added in the this file, some actions
 /// must be taken:
 /// (1) We may need to find this function when initializing Instrumentation pass.
-/// (2) Linkage of the function must be set to LinkOnceODRLinkage.
-/// (3) We need to add this function to the list of unwanted functions, i.e.,
+/// (2) Linkage of the function must be set to LinkOnceODRLinkage or static.
+/// (3) MAke sure we add this function to the list of unwanted functions, i.e.,
 ///     functions we do not instrument in the pass.
 
 #ifdef __CUDA_ARCH__
@@ -63,26 +63,7 @@ __device__ static int _FPC_GET_GLOBAL_IDX_3D_3D();
 __device__ static int _FPC_FP32_IS_FLUSH_TO_ZERO(float x, float y, float z, int op);
 __device__ static int _FPC_FP64_IS_FLUSH_TO_ZERO(double x, double y, double z, int op);
 
-/*
-__device__ static void	_FPC_INTERRUPT_(int loc);
-__device__ static int		_FPC_FP32_IS_SUBNORMAL(float x);
-__device__ static int 	_FPC_FP32_IS_ALMOST_OVERFLOW(float x);
-__device__ static int 	_FPC_FP32_IS_ALMOST_SUBNORMAL(float x);
-__device__ void 	_FPC_PRINT_ERRORS_();
-__device__ void 	_FPC_FP32_CHECK_ADD_(float x, float y, float z, int loc);
-__device__ void 	_FPC_FP32_CHECK_SUB_(float x, float y, float z, int loc);
-__device__ void 	_FPC_FP32_CHECK_MUL_(float x, float y, float z, int loc);
-__device__ void 	_FPC_FP32_CHECK_DIV_(float x, float y, float z, int loc);
-__device__ static int	_FPC_FP64_IS_SUBNORMAL(double x);
-__device__ static int _FPC_FP64_IS_ALMOST_OVERFLOW(double x);
-__device__ static int _FPC_FP64_IS_ALMOST_SUBNORMAL(double x);
-__device__ void 	_FPC_FP64_CHECK_ADD_(float x, float y, float z, int loc);
-__device__ void 	_FPC_FP64_CHECK_SUB_(float x, float y, float z, int loc);
-__device__ void 	_FPC_FP64_CHECK_MUL_(float x, float y, float z, int loc);
-__device__ void 	_FPC_FP64_CHECK_DIV_(float x, float y, float z, int loc);
-__device__ static int _FPC_GET_GLOBAL_IDX_3D_3D();
-*/
-
+/// Host function to print @ main()
 void _FPC_PRINT_AT_MAIN_();
 
 #define REPORT_LINE_SIZE 80
@@ -102,11 +83,13 @@ void _FPC_PRINT_AT_MAIN_();
 __device__ static char *_FPC_FILE_NAME_[1];
 
 /// Lock to print from one thread only
-__device__ static int lock_state = 0;
+//__device__ static int lock_state = 0;
+__device__ static int _FPC_LOCK_STATE_ = 0;
 
 /// Variables to store errors/warnings found in errors-dont-abort mode
 /// The size of vectors is irrelevant since they will be instrumented
-__device__ static long long int errors_array_size = 10;
+//__device__ static long long int errors_array_size = 10;
+__device__ static long long int _FPC_ERRORS_ARRAY_SIZE_ = 10;
 __device__ static long long int _FPC_ARR_NOT_USED_[10]; // not used at runtime
 
 /* ------------------------ Generic Functions ------------------------------ */
@@ -275,7 +258,7 @@ __attribute__((noinline))  static void _FPC_INTERRUPT_(int errorType, int op, in
 	bool blocked = true;
 #endif
 	while(blocked) {
-			if(0 == atomicCAS(&lock_state, 0, 1)) {
+			if(0 == atomicCAS(&_FPC_LOCK_STATE_, 0, 1)) {
 
 				char e[64]; e[0] = '\0';
 				char o[64]; o[0] = '\0';
@@ -328,7 +311,7 @@ static void _FPC_WARNING_(int errorType, int op, int loc, float fp32_val, double
 	bool blocked = true;
 #endif
   	while(blocked) {
-			if(0 == atomicCAS(&lock_state, 0, 1)) {
+			if(0 == atomicCAS(&_FPC_LOCK_STATE_, 0, 1)) {
 
 				char e[64]; e[0] = '\0';
 				char o[64]; o[0] = '\0';
@@ -428,7 +411,8 @@ void _FPC_PRINT_ERRORS_()
 	int id = _FPC_GET_GLOBAL_IDX_3D_3D();
 	if (id == 0)
 	{
-		for (long long int i=0; i < errors_array_size; ++i)
+		for (long long int i=0; i < _FPC_ERRORS_ARRAY_SIZE_; ++i)
+		//for (long long int i=0; i < errors_array_size; ++i)
 		{
 			/* --- Print error reports ---- */
 			long long int errors = _FPC_READ_GLOBAL_ERRORS_ARRAY_(i);
@@ -509,7 +493,7 @@ static void _FPC_FP32_CHECK_OPERATION_(float x, float y, float z, int loc, int o
 }
 
 /// Returns non-zero value if operation returned zero,
-/// but none of arguments of the operation was zero
+/// but none of arguments of the operation were zero
 __device__
 static int _FPC_FP32_IS_FLUSH_TO_ZERO(float x, float y, float z, int op)
 {
@@ -635,7 +619,7 @@ static void _FPC_FP64_CHECK_OPERATION_(double x, double y, double z, int loc, in
 }
 
 /// Returns non-zero value if operation returned zero,
-/// but none of arguments of the operation was zero
+/// but none of arguments of the operation were zero
 __device__
 static int _FPC_FP64_IS_FLUSH_TO_ZERO(double x, double y, double z, int op)
 {
@@ -644,8 +628,8 @@ static int _FPC_FP64_IS_FLUSH_TO_ZERO(double x, double y, double z, int op)
 	{
 		if (y != 0.0 && y != -0.0 && z != 0.0 && z != -0.0)
 		{
-                        if (op != 0 && op != 1) // for now, we check on MUL, DIV
-                                ret = 1;
+			if (op != 0 && op != 1) // for now, we check on MUL, DIV
+				ret = 1;
 		}
 	}
 

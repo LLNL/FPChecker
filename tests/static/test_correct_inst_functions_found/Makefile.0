@@ -1,8 +1,4 @@
-
-CC	= $(LLVM_PATH)/bin/clang++
-
-LLVM_PASS       = -Xclang -load -Xclang $(PWD)/../../../src/libcudakernels.so \
--include Runtime.h -I$(PWD)/../../../src
+include ../../Makefile.config
 
 OP_LEVEL = -O0
 OP	= $(LLVM_PASS) -x cuda --cuda-gpu-arch=sm_60 -g $(OP_LEVEL)
