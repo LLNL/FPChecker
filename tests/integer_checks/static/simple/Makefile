@@ -1,0 +1,17 @@
+
+CXX		= $(LLVM_PATH)/bin/clang++
+FPCHECKER_PATH	= $(PWD)/../../../../
+LLVM_PASS       = -Xclang -load -Xclang $(FPCHECKER_PATH)/src/libfpchecker.so \
+		-include Runtime_int.h -I$(FPCHECKER_PATH)/src
+
+OP	= $(LLVM_PASS) -O0 -g
+
+CXX = $(LLVM_PATH)/bin/clang++
+
+all:
+	$(CXX) -c $(OP) comp.cpp
+	$(CXX) -c $(OP) main.cpp
+	$(CXX) -o main comp.o main.o
+
+clean:
+	rm -rf main *.o

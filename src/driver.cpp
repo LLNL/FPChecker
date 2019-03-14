@@ -44,6 +44,7 @@ public:
 	{
 		Module *m = &M;
 		FPInstrumentation *fpInstrumentation = new FPInstrumentation(m);
+		IntegerInstrumentation *intInstrumentation = new IntegerInstrumentation(m);
 
 #ifdef FPC_DEBUG
 		std::string out = "Running Module pass on: " + m->getName().str();
@@ -58,8 +59,12 @@ public:
 
 			Function *F = &(*f);
 
+			if (CodeMatching::isUnwantedFunction(F))
+				continue;
+
 			if (CodeMatching::isDeviceCode(m))
 			{
+				/*
 				if (CodeMatching::isUnwantedFunction(F))
 						continue;
 
@@ -77,15 +82,24 @@ public:
 #endif
 					fpInstrumentation->instrumentEndOfKernel(F);
 				}
+				*/
 			}
 			else // host code
 			{
+#ifdef FPC_DEBUG
+					std::string out = "[ host function ] " + f->getName().str();
+					Logging::info(out.c_str());
+#endif
+				intInstrumentation->instrumentFunction(F);
+
 				if (CodeMatching::isMainFunction(F))
 				{
+					/*
 #ifdef FPC_DEBUG
 					Logging::info("main() found");
 #endif
 					fpInstrumentation->instrumentMainFunction(F);
+					*/
 				}
 			}
 		}
@@ -97,6 +111,7 @@ public:
 		}
 
 		delete fpInstrumentation;
+		delete intInstrumentation;
 		return false;
 	}
 
