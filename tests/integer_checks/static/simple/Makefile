@@ -14,4 +14,4 @@ all:
 	$(CXX) -o main comp.o main.o
 
 clean:
-	rm -rf main *.o
+	rm -rf main *.o *.bc *.ll

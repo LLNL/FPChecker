@@ -1,5 +1,5 @@
 
-
+#include <unistd.h>
 #include "comp.h"
 #include <stdio.h>
 

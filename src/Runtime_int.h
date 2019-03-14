@@ -19,23 +19,28 @@ static char *_FPC_FILE_NAME_;
 typedef std::pair<char*, int> LineLocation;
 typedef std::pair<int, int> MinMaxPair;
 typedef std::map<LineLocation, MinMaxPair> LocationsMap;
-LocationsMap _FPC_LOCATIONS_MAP_;
+LocationsMap *_FPC_LOCATIONS_MAP_ = nullptr;
 
 /* ------------------------ Generic Functions ------------------------------ */
 
-void _FPC_UNUSED_FUNC_()
-{
-	asm ("");
-	printf("#FPCHECKER: %s\n", _FPC_FILE_NAME_);
-}
+//void _FPC_UNUSED_FUNC_()
+//{
+//	asm ("");
+//	printf("#FPCHECKER: %s\n", _FPC_FILE_NAME_);
+//}
 
-void _FPC_INSERT_LOCATIONS_MAP_(const LineLocation &loc, const MinMaxPair &v)
-{
-	auto it = _FPC_LOCATIONS_MAP_.find(loc);
-	if (it == _FPC_LOCATIONS_MAP_.end())
+//void _FPC_INSERT_LOCATIONS_MAP_(const LineLocation &loc, const MinMaxPair &v)
+//{
+	/*if (_FPC_LOCATIONS_MAP_ == nullptr)
+	{
+		_FPC_LOCATIONS_MAP_ = new LocationsMap();
+	}
+
+	auto it = _FPC_LOCATIONS_MAP_->find(loc);
+	if (it == _FPC_LOCATIONS_MAP_->end())
 	{
 		std::pair<LineLocation, MinMaxPair> tmp(loc, v);
-		_FPC_LOCATIONS_MAP_.insert(tmp);
+		_FPC_LOCATIONS_MAP_->insert(tmp);
 		//_FPC_LOCATIONS_MAP_[loc] = v;
 	}
 	else
@@ -46,6 +51,20 @@ void _FPC_INSERT_LOCATIONS_MAP_(const LineLocation &loc, const MinMaxPair &v)
 			it->second.first = minVal;
 		if (maxVal > it->second.second)
 			it->second.second = maxVal;
+	}*/
+//}
+
+void _FPC_PRINT_LOCATIONS_MAP_()
+{
+	for (auto it =_FPC_LOCATIONS_MAP_->begin(), end = _FPC_LOCATIONS_MAP_->end();
+			it != end; ++it)
+	{
+		char *fileName = it->first.first;
+		int lineNumber = it->first.second;
+		int minVal = it->second.first;
+		int maxVal = it->second.second;
+
+		printf("LOC: %s:%d (%d, %d)\n", fileName, lineNumber, minVal, maxVal);
 	}
 }
 
@@ -56,24 +75,30 @@ void _FPC_FP32_CHECK_ADD_(int x, int y, int z, int loc, char *fileName)
 {
 	printf("fileName: %s %p\n", fileName, fileName);
 	//uint64_t locLargeInt = (uint64_t)fileName;
-	LineLocation lineLoc(fileName, loc);
-	MinMaxPair v(x, x);
-	_FPC_INSERT_LOCATIONS_MAP_(lineLoc, v);
+	//LineLocation lineLoc(fileName, loc);
+	//MinMaxPair v(x, x);
+	//_FPC_INSERT_LOCATIONS_MAP_(lineLoc, v);
 }
 
 void _FPC_FP32_CHECK_SUB_(int x, int y, int z, int loc, char *fileName)
 {
-
+	//LineLocation lineLoc(fileName, loc);
+	//MinMaxPair v(x, x);
+	//_FPC_INSERT_LOCATIONS_MAP_(lineLoc, v);
 }
 
 void _FPC_FP32_CHECK_MUL_(int x, int y, int z, int loc, char *fileName)
 {
-
+	//LineLocation lineLoc(fileName, loc);
+	//MinMaxPair v(x, x);
+	//_FPC_INSERT_LOCATIONS_MAP_(lineLoc, v);
 }
 
 void _FPC_FP32_CHECK_DIV_(int x, int y, int z, int loc, char *fileName)
 {
-
+	//LineLocation lineLoc(fileName, loc);
+	//MinMaxPair v(x, x);
+	//_FPC_INSERT_LOCATIONS_MAP_(lineLoc, v);
 }
 
 /* ------------------------ FP64 Functions --------------------------------- */

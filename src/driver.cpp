@@ -90,16 +90,16 @@ public:
 					std::string out = "[ host function ] " + f->getName().str();
 					Logging::info(out.c_str());
 #endif
-				intInstrumentation->instrumentFunction(F);
+				//intInstrumentation->instrumentFunction(F);
 
 				if (CodeMatching::isMainFunction(F))
 				{
-					/*
 #ifdef FPC_DEBUG
 					Logging::info("main() found");
 #endif
-					fpInstrumentation->instrumentMainFunction(F);
-					*/
+					//fpInstrumentation->instrumentMainFunction(F);
+					//intInstrumentation->instrumentMainFunction(F);
+
 				}
 			}
 		}
@@ -111,7 +111,7 @@ public:
 		}
 
 		delete fpInstrumentation;
-		delete intInstrumentation;
+		//delete intInstrumentation;
 		return false;
 	}
 

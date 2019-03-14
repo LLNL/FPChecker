@@ -51,7 +51,8 @@ IntegerInstrumentation::IntegerInstrumentation(Module *M) :
 		fp64_check_add_function(nullptr),
 		fp64_check_sub_function(nullptr),
 		fp64_check_mul_function(nullptr),
-		fp64_check_div_function(nullptr)
+		fp64_check_div_function(nullptr),
+		_fpc_print_locations_map_(nullptr)
 {
 
 #ifdef FPC_DEBUG
@@ -92,11 +93,17 @@ IntegerInstrumentation::IntegerInstrumentation(Module *M) :
     	confFunction(f, nullptr,
     	GlobalValue::LinkageTypes::LinkOnceODRLinkage, "_FPC_INSERT_LOCATIONS_MAP_");
     }
+    else if (f->getName().str().find("_FPC_PRINT_LOCATIONS_MAP_") != std::string::npos)
+    {
+    	confFunction(f, &_fpc_print_locations_map_,
+    	GlobalValue::LinkageTypes::LinkOnceODRLinkage, "_FPC_PRINT_LOCATIONS_MAP_");
+    }
   }
 
   // Globals initialization
   GlobalVariable *table = nullptr;
   table = mod->getGlobalVariable ("_FPC_LOCATIONS_MAP_", true);
+  assert(table && "Invalid table!");
   table->setLinkage(GlobalValue::LinkageTypes::LinkOnceODRLinkage);
 
 }
@@ -173,18 +180,18 @@ void IntegerInstrumentation::instrumentFunction(Function *f)
 				if (inst->getOpcode() == Instruction::Add)
 				{
 					outs() << "====> In ADD......\n";
-					callInst = builder.CreateCall(fp32_check_add_function, args_ref);
+					//callInst = builder.CreateCall(fp32_check_add_function, args_ref);
 					instrumentedOps++;
 				}
 				else if (inst->getOpcode() == Instruction::Sub)
 				{
-					callInst = builder.CreateCall(fp32_check_sub_function, args_ref);
+					//callInst = builder.CreateCall(fp32_check_sub_function, args_ref);
 					instrumentedOps++;
 
 				}
 				else if (inst->getOpcode() == Instruction::Mul)
 				{
-					callInst = builder.CreateCall(fp32_check_mul_function, args_ref);
+					//callInst = builder.CreateCall(fp32_check_mul_function, args_ref);
 					instrumentedOps++;
 				}
 				/*else if (inst->getOpcode() == Instruction::FDiv)
@@ -202,8 +209,8 @@ void IntegerInstrumentation::instrumentFunction(Function *f)
 				}
 				*/
 
-				assert(callInst && "Invalid call instruction!");
-				setFakeDebugLocation(f, callInst);
+				//assert(callInst && "Invalid call instruction!");
+				//setFakeDebugLocation(f, callInst);
 			}
 		}
 	}
@@ -267,7 +274,7 @@ void IntegerInstrumentation::setFakeDebugLocation(Function *f, Instruction *inst
 }
 
 /* Returns the return instructions of a function */
-/*InstSet FPInstrumentation::finalInstrutions(Function *f)
+/*InstSet IntegerInstrumentation::finalInstrutions(Function *f)
 {
 	InstSet finalInstructions;
 	for (auto bb=f->begin(), end=f->end(); bb != end; ++bb)
@@ -340,10 +347,10 @@ Instruction* IntegerInstrumentation::firstInstrution()
 }
 */
 
-/*
-void FPInstrumentation::instrumentMainFunction(Function *f)
+
+void IntegerInstrumentation::instrumentMainFunction(Function *f)
 {
-	BasicBlock *bb = &(*(f->begin()));
+	/*BasicBlock *bb = &(*(f->begin()));
 	Instruction *inst = bb->getFirstNonPHIOrDbg();
 	IRBuilder<> builder = createBuilderBefore(inst);
 	std::vector<Value *> args;
@@ -351,9 +358,26 @@ void FPInstrumentation::instrumentMainFunction(Function *f)
 	CallInst *callInst = nullptr;
 	callInst = builder.CreateCall(print_at_main, args);
 	assert(callInst && "Invalid call instruction!");
-	setFakeDebugLocation(f, callInst);
+	setFakeDebugLocation(f, callInst);*/
+
+	/// Print table before end of function
+	for (auto bb=f->begin(), end=f->end(); bb != end; ++bb)
+	{
+		for (auto i=bb->begin(), iend=bb->end(); i != iend; ++i)
+		{
+			Instruction *inst = &(*i);
+			if (isa<ReturnInst>(inst))
+			{
+				std::vector<Value *> args;
+				ArrayRef<Value *> args_ref(args);
+				IRBuilder<> builder = createBuilderBefore(inst);
+				auto callInst = builder.CreateCall(_fpc_print_locations_map_, args_ref);
+				assert(callInst && "Invalid call instruction!");
+			}
+		}
+	}
 }
-*/
+
 
 
 // Generates a global array on n integers, initialized to zero

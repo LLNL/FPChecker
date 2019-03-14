@@ -32,6 +32,8 @@ private:
   Function *fp64_check_mul_function;
   Function *fp64_check_div_function;
 
+  Function *_fpc_print_locations_map_;
+
   // maximum number for a code line
   int maxNumLocations = 0;
 
@@ -48,7 +50,7 @@ private:
 public:
   IntegerInstrumentation(Module *M);
   void instrumentFunction(Function *f);
-  //void instrumentMainFunction(Function *f);
+  void instrumentMainFunction(Function *f);
   //void generateCodeForInterruption();
   //void instrumentErrorArray();
   //void instrumentEndOfKernel(Function *f);
