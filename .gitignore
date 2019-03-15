@@ -11,3 +11,5 @@
 main
 *.swp
 .nfs*
+*.json
+*.dSYM

@@ -8,64 +8,33 @@
 #ifndef SRC_RUNTIME_INT_H_
 #define SRC_RUNTIME_INT_H_
 
+#include "FPC_Hash.h"
 #include <stdio.h>
-#include <map>
+
 
 /* ----------------------------- Global Data ------------------------------- */
 
 /// We store the file name and directory in this variable
 static char *_FPC_FILE_NAME_;
-
-typedef std::pair<char*, int> LineLocation;
-typedef std::pair<int, int> MinMaxPair;
-typedef std::map<LineLocation, MinMaxPair> LocationsMap;
-LocationsMap *_FPC_LOCATIONS_MAP_ = nullptr;
+_FPC_HTABLE_T *_FPC_HTABLE_;
 
 /* ------------------------ Generic Functions ------------------------------ */
 
-//void _FPC_UNUSED_FUNC_()
-//{
-//	asm ("");
-//	printf("#FPCHECKER: %s\n", _FPC_FILE_NAME_);
-//}
-
-//void _FPC_INSERT_LOCATIONS_MAP_(const LineLocation &loc, const MinMaxPair &v)
-//{
-	/*if (_FPC_LOCATIONS_MAP_ == nullptr)
-	{
-		_FPC_LOCATIONS_MAP_ = new LocationsMap();
-	}
-
-	auto it = _FPC_LOCATIONS_MAP_->find(loc);
-	if (it == _FPC_LOCATIONS_MAP_->end())
-	{
-		std::pair<LineLocation, MinMaxPair> tmp(loc, v);
-		_FPC_LOCATIONS_MAP_->insert(tmp);
-		//_FPC_LOCATIONS_MAP_[loc] = v;
-	}
-	else
-	{
-		int minVal = v.first;
-		int maxVal = v.second;
-		if (minVal < it->second.first)
-			it->second.first = minVal;
-		if (maxVal > it->second.second)
-			it->second.second = maxVal;
-	}*/
-//}
-
-void _FPC_PRINT_LOCATIONS_MAP_()
+void _FPC_UNUSED_FUNC_()
 {
-	for (auto it =_FPC_LOCATIONS_MAP_->begin(), end = _FPC_LOCATIONS_MAP_->end();
-			it != end; ++it)
-	{
-		char *fileName = it->first.first;
-		int lineNumber = it->first.second;
-		int minVal = it->second.first;
-		int maxVal = it->second.second;
+	asm ("");
+	printf("#FPCHECKER: %s\n", _FPC_FILE_NAME_);
+}
 
-		printf("LOC: %s:%d (%d, %d)\n", fileName, lineNumber, minVal, maxVal);
-	}
+void _FPC_INIT_HASH_TABLE_()
+{
+	int size = 1000;
+	_FPC_HTABLE_ = _FPC_HT_CREATE_(size);
+}
+
+void _FPC_PRINT_LOCATIONS_()
+{
+	_FPC_PRINT_HASH_TABLE_(_FPC_HTABLE_);
 }
 
 
@@ -73,25 +42,33 @@ void _FPC_PRINT_LOCATIONS_MAP_()
 
 void _FPC_FP32_CHECK_ADD_(int x, int y, int z, int loc, char *fileName)
 {
-	printf("fileName: %s %p\n", fileName, fileName);
-	//uint64_t locLargeInt = (uint64_t)fileName;
-	//LineLocation lineLoc(fileName, loc);
-	//MinMaxPair v(x, x);
-	//_FPC_INSERT_LOCATIONS_MAP_(lineLoc, v);
+	//printf("fileName: %s %p\n", fileName, fileName);
+	_FPC_ENTRY_T_ t;
+	t.fileName = fileName;
+	t.line = loc;
+	t.minVal = (uint64_t)x;
+	t.maxVal = (uint64_t)x;
+	_FPC_HT_SET_(_FPC_HTABLE_, &t);
 }
 
 void _FPC_FP32_CHECK_SUB_(int x, int y, int z, int loc, char *fileName)
 {
-	//LineLocation lineLoc(fileName, loc);
-	//MinMaxPair v(x, x);
-	//_FPC_INSERT_LOCATIONS_MAP_(lineLoc, v);
+	_FPC_ENTRY_T_ t;
+	t.fileName = fileName;
+	t.line = loc;
+	t.minVal = (uint64_t)x;
+	t.maxVal = (uint64_t)x;
+	_FPC_HT_SET_(_FPC_HTABLE_, &t);
 }
 
 void _FPC_FP32_CHECK_MUL_(int x, int y, int z, int loc, char *fileName)
 {
-	//LineLocation lineLoc(fileName, loc);
-	//MinMaxPair v(x, x);
-	//_FPC_INSERT_LOCATIONS_MAP_(lineLoc, v);
+	_FPC_ENTRY_T_ t;
+	t.fileName = fileName;
+	t.line = loc;
+	t.minVal = (uint64_t)x;
+	t.maxVal = (uint64_t)x;
+	_FPC_HT_SET_(_FPC_HTABLE_, &t);
 }
 
 void _FPC_FP32_CHECK_DIV_(int x, int y, int z, int loc, char *fileName)

@@ -43,7 +43,7 @@ public:
 	virtual bool runOnModule(Module &M)
 	{
 		Module *m = &M;
-		FPInstrumentation *fpInstrumentation = new FPInstrumentation(m);
+		//FPInstrumentation *fpInstrumentation = new FPInstrumentation(m);
 		IntegerInstrumentation *intInstrumentation = new IntegerInstrumentation(m);
 
 #ifdef FPC_DEBUG
@@ -90,7 +90,7 @@ public:
 					std::string out = "[ host function ] " + f->getName().str();
 					Logging::info(out.c_str());
 #endif
-				//intInstrumentation->instrumentFunction(F);
+				intInstrumentation->instrumentFunction(F);
 
 				if (CodeMatching::isMainFunction(F))
 				{
@@ -98,7 +98,7 @@ public:
 					Logging::info("main() found");
 #endif
 					//fpInstrumentation->instrumentMainFunction(F);
-					//intInstrumentation->instrumentMainFunction(F);
+					intInstrumentation->instrumentMainFunction(F);
 
 				}
 			}
@@ -106,12 +106,12 @@ public:
 		
 		if (CodeMatching::isDeviceCode(m))
 		{
-			fpInstrumentation->generateCodeForInterruption();
-			fpInstrumentation->instrumentErrorArray();
+			//fpInstrumentation->generateCodeForInterruption();
+			//fpInstrumentation->instrumentErrorArray();
 		}
 
-		delete fpInstrumentation;
-		//delete intInstrumentation;
+		//delete fpInstrumentation;
+		delete intInstrumentation;
 		return false;
 	}
 

@@ -22,17 +22,20 @@ private:
 
   Module *mod;
 
-  Function *fp32_check_add_function;
-  Function *fp32_check_sub_function;
-  Function *fp32_check_mul_function;
-  Function *fp32_check_div_function;
+  Function *int32_check_add_function;
+  Function *int32_check_sub_function;
+  Function *int32_check_mul_function;
+  Function *int32_check_div_function;
 
-  Function *fp64_check_add_function;
-  Function *fp64_check_sub_function;
-  Function *fp64_check_mul_function;
-  Function *fp64_check_div_function;
+  //Function *fp64_check_add_function;
+  //Function *fp64_check_sub_function;
+  //Function *fp64_check_mul_function;
+  //Function *fp64_check_div_function;
 
-  Function *_fpc_print_locations_map_;
+
+  Function *_fpc_init_htable_;
+  Function *_fpc_print_locations_;
+
 
   // maximum number for a code line
   int maxNumLocations = 0;
