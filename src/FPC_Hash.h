@@ -20,6 +20,8 @@ struct _FPC_ENTRY_S_ {
 	int line;
 	int64_t minVal;
 	int64_t maxVal;
+	int overflow;
+	int64_t overRes; /// result of overflow
 	struct _FPC_ENTRY_S_ *next;
 };
 
@@ -91,6 +93,8 @@ _FPC_ENTRY_T_ *_FPC_HT_NEWPAIR_(_FPC_ENTRY_T_ *val)
 	newpair->line = val->line;
 	newpair->minVal = val->minVal;
 	newpair->maxVal = val->maxVal;
+	newpair->overflow = val->overflow;
+	newpair->overRes = val->overRes;
 
 	newpair->next = NULL;
 
@@ -132,6 +136,11 @@ void _FPC_HT_SET_(_FPC_HTABLE_T *hashtable, _FPC_ENTRY_T_ *newVal)
 			next->minVal = newVal->minVal;
 		if (newVal->maxVal > next->maxVal)
 			next->maxVal = newVal->maxVal;
+		if (newVal->overflow > next->overflow)
+		{
+			next->overflow = newVal->overflow;
+			next->overRes = newVal->overRes;
+		}
 	}
 	else // Nope, could't find it
 	{
@@ -166,22 +175,27 @@ void _FPC_PRINT_HASH_TABLE_(_FPC_HTABLE_T *hashtable)
 	size_t len=128;
 	char nodeName[len];
 	nodeName[0] = '\0';
-	if(gethostname(nodeName, len)!=0)
+	if(gethostname(nodeName, len) != 0)
 		strcpy(nodeName, "node-unknown");
+
+	char fileName[len];
+	fileName[0] = '\0';
+	strcpy(fileName, "fpc_");
+	strcat(fileName, nodeName);
 
 	int pid = (int)getpid();
 	char pidStr[len];
 	pidStr[0] = '\0';
 	sprintf(pidStr, "%d", pid);
-	strcat(nodeName, "_");
-	strcat(nodeName, pidStr);
-	strcat(nodeName, ".json");
+	strcat(fileName, "_");
+	strcat(fileName, pidStr);
+	strcat(fileName, ".json");
 
 	int n = hashtable->n;
 	int printed = 0;
 
 	FILE *fp;
-	fp = fopen(nodeName, "w");
+	fp = fopen(fileName, "w");
 
 	fprintf(fp, "[\n");
 
@@ -197,7 +211,9 @@ void _FPC_PRINT_HASH_TABLE_(_FPC_HTABLE_T *hashtable)
 			fprintf(fp, "\t\"file\": \"%s\",\n", next->fileName);
 			fprintf(fp, "\t\"line\": %d,\n", next->line);
 			fprintf(fp, "\t\"min\": %lld,\n", next->minVal);
-			fprintf(fp, "\t\"max\": %lld\n", next->maxVal);
+			fprintf(fp, "\t\"max\": %lld,\n", next->maxVal);
+			fprintf(fp, "\t\"over\": %d,\n", next->overflow);
+			fprintf(fp, "\t\"over_res\": %lld\n", next->overRes);
 
 			next = next->next;
 			printed++;

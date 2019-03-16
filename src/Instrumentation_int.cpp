@@ -126,6 +126,11 @@ IntegerInstrumentation::IntegerInstrumentation(Module *M) :
    	confFunction(f, nullptr,
    	GlobalValue::LinkageTypes::LinkOnceODRLinkage, "_FPC_PRINT_HASH_TABLE_");
    }
+	   else if (f->getName().str().find("_FPC_CHECK_OVERFLOW_") != std::string::npos)
+	   {
+	   	confFunction(f, nullptr,
+	   	GlobalValue::LinkageTypes::LinkOnceODRLinkage, "_FPC_CHECK_OVERFLOW_");
+	   }
   }
 
   // Globals initialization

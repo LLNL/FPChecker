@@ -3,10 +3,12 @@
 import argparse
 import os
 import json
+import datetime
 
 locTable = {}
 INT_MIN = -2147483648
 INT_MAX = 2147483647
+filesAnalyzed = 0
 
 htmlHeader = """
 <!DOCTYPE html>
@@ -20,6 +22,12 @@ table, th, td, tr {
     font-family: courier;
     font-size: 90%;
     text-align: left;
+}
+
+style1 {
+    font-family: courier;
+    font-size: 100%;
+    color: #703A10;
 }
 
 h3 {
@@ -36,6 +44,7 @@ h1 {
 
 p {
     font-family: Arial;
+    color: #667CAD;
 }
 
 </style>
@@ -58,11 +67,10 @@ def generateHTML():
     fd.write("FPChecker Report")
     fd.write("</h1>\n")
     
+    now = datetime.datetime.now()
+    d = str(now.year) + "-" + str(now.month) + "-" + str(now.day)
     fd.write("<p>\n")
-    fd.write("Date: XXXX")
-    fd.write("</p>\n")
-    
-    fd.write("<p>\n")
+    fd.write("Date: " + d + " <br>")
     fd.write("Lines of code: XXXX")
     fd.write("</p>\n")
     
@@ -70,6 +78,19 @@ def generateHTML():
     fd.write("Signed 32-bit Integer Overflows")
     fd.write("</h3>\n")
     
+    fd.write("<table>\n")
+    overflows = []
+    for k in locTable.keys():
+        if locTable[k][2] > 0:
+            overflows.append("(" + str(locTable[k][3]) + ")" + k)
+    
+    if (len(overflows) == 0):
+        fd.write("<tr> <tr><td>NONE</td></tr> </tr>\n")
+    else:
+        for e in overflows:
+            fd.write("<tr> <tr><td><style1>" + e + "</style1></td></tr> </tr>\n")
+    fd.write("</table>\n")
+        
     
     for i in [0, 1]:
         fileData = genTable(i)
@@ -123,10 +144,8 @@ def printBar(val):
     #emptyChar = '-'
     #filledChar = 'X'
     emptyChar = '&#9634;'
-    filledChar = '&#9726;'
+    filledChar = '&#9609;'
     numChars = 20
-    
-
     
     ret = ''
     total = INT_MAX - INT_MIN
@@ -144,14 +163,16 @@ def printBar(val):
 
 def isFPCFile(input):
     v = input.split(".")[-1:]
-    if v[0] == 'json':
+    if v[0] == 'json' and 'fpc' in input.split('_')[0]:
         return True
     return False
 
 def analyzeFile(input):
-    global locTable
+    global locTable, filesAnalyzed
+    
     if isFPCFile(input):
         print "File found:", input
+        filesAnalyzed = filesAnalyzed + 1
         
         with open(input) as f:
             data = json.load(f)
@@ -160,14 +181,19 @@ def analyzeFile(input):
             fileName = data[i]['file'] + ":" + str(data[i]['line'])
             minVal = data[i]['min']
             maxVal = data[i]['max']
+            over = data[i]['over']
+            overRes = data[i]['over_res']
             
             if fileName in locTable.keys():
                 if minVal < locTable[fileName][0]:
                     locTable[fileName][0] = minVal
                 if maxVal > locTable[fileName][1]:
                     locTable[fileName][1] = maxVal
+                if over > locTable[fileName][2]:
+                    locTable[fileName][2] = over
+                    locTable[fileName][3] = overRes
             else:
-                locTable[fileName] = [minVal, maxVal]
+                locTable[fileName] = [minVal, maxVal, over, overRes]
 
 def genTable(sortedBy):
     global locTable
@@ -214,6 +240,10 @@ def main():
             analyzeFile(input)
     else:
         print "Error:", input, "does not exist"
+        exit()
+
+    if (filesAnalyzed == 0):
+        print "No fpc_*.json files found"
         exit()
 
     generateHTML()
