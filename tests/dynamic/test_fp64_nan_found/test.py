@@ -32,7 +32,7 @@ def main():
         cmdOutput = subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True)
     except subprocess.CalledProcessError as e:
         print e.output
-	exit()
+        exit()
 
     # --- run code ---
     cmd = ["./main"]

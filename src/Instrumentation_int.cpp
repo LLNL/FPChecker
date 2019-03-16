@@ -164,7 +164,7 @@ void IntegerInstrumentation::instrumentFunction(Function *f)
 				DebugLoc loc = inst->getDebugLoc();
 				IRBuilder<> builder = createBuilderAfter(inst);
 
-				outs() << "==> inst: " << inst2str(inst) << "\n";
+				//outs() << "==> inst: " << inst2str(inst) << "\n";
 
 				// Push parameters
 				std::vector<Value *> args;
@@ -203,7 +203,6 @@ void IntegerInstrumentation::instrumentFunction(Function *f)
 
 				if (inst->getOpcode() == Instruction::Add)
 				{
-					outs() << "====> In ADD......\n";
 					callInst = builder.CreateCall(int32_check_add_function, args_ref);
 					instrumentedOps++;
 				}

@@ -206,7 +206,7 @@ void _FPC_PRINT_HASH_TABLE_(_FPC_HTABLE_T *hashtable)
 
 		while(next != NULL)
 		{
-			printf("file: %s, line: %d, min %lld, max %lld\n", next->fileName, next->line, next->minVal, next->maxVal);
+			//printf("file: %s, line: %d, min %lld, max %lld\n", next->fileName, next->line, next->minVal, next->maxVal);
 			fprintf(fp, "  {\n");
 			fprintf(fp, "\t\"file\": \"%s\",\n", next->fileName);
 			fprintf(fp, "\t\"line\": %d,\n", next->line);

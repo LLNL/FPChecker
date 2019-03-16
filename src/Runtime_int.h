@@ -29,6 +29,12 @@ void _FPC_INIT_HASH_TABLE_()
 {
 	int size = 1000;
 	_FPC_HTABLE_ = _FPC_HT_CREATE_(size);
+
+	printf("\n");
+	printf("========================================\n");
+	printf(" FPChecker (v0.0.4, %s)\n", __DATE__);
+	printf("========================================\n");
+	printf("\n");
 }
 
 void _FPC_PRINT_LOCATIONS_()
