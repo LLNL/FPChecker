@@ -46,8 +46,8 @@ void _FPC_FP32_CHECK_ADD_(int x, int y, int z, int loc, char *fileName)
 	_FPC_ENTRY_T_ t;
 	t.fileName = fileName;
 	t.line = loc;
-	t.minVal = (uint64_t)x;
-	t.maxVal = (uint64_t)x;
+	t.minVal = (int64_t)x;
+	t.maxVal = (int64_t)x;
 	_FPC_HT_SET_(_FPC_HTABLE_, &t);
 }
 
@@ -56,8 +56,8 @@ void _FPC_FP32_CHECK_SUB_(int x, int y, int z, int loc, char *fileName)
 	_FPC_ENTRY_T_ t;
 	t.fileName = fileName;
 	t.line = loc;
-	t.minVal = (uint64_t)x;
-	t.maxVal = (uint64_t)x;
+	t.minVal = (int64_t)x;
+	t.maxVal = (int64_t)x;
 	_FPC_HT_SET_(_FPC_HTABLE_, &t);
 }
 
@@ -66,8 +66,8 @@ void _FPC_FP32_CHECK_MUL_(int x, int y, int z, int loc, char *fileName)
 	_FPC_ENTRY_T_ t;
 	t.fileName = fileName;
 	t.line = loc;
-	t.minVal = (uint64_t)x;
-	t.maxVal = (uint64_t)x;
+	t.minVal = (int64_t)x;
+	t.maxVal = (int64_t)x;
 	_FPC_HT_SET_(_FPC_HTABLE_, &t);
 }
 

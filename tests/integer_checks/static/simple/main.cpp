@@ -9,7 +9,8 @@ int main()
 
   int res = foo(x, y, z);
   res++;
-  printf("res = %d\n", res);
+  int k = res - 1024;
+  printf("res = %d, x: %d\n", res, k);
 
   return 0;
 }

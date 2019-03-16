@@ -18,8 +18,8 @@
 struct _FPC_ENTRY_S_ {
 	char *fileName;
 	int line;
-	uint64_t minVal;
-	uint64_t maxVal;
+	int64_t minVal;
+	int64_t maxVal;
 	struct _FPC_ENTRY_S_ *next;
 };
 
@@ -192,12 +192,12 @@ void _FPC_PRINT_HASH_TABLE_(_FPC_HTABLE_T *hashtable)
 
 		while(next != NULL)
 		{
-			printf("file: %s, line: %d, min %llu, max %llu\n", next->fileName, next->line, next->minVal, next->maxVal);
+			printf("file: %s, line: %d, min %lld, max %lld\n", next->fileName, next->line, next->minVal, next->maxVal);
 			fprintf(fp, "  {\n");
 			fprintf(fp, "\t\"file\": \"%s\",\n", next->fileName);
 			fprintf(fp, "\t\"line\": %d,\n", next->line);
-			fprintf(fp, "\t\"min\": %llu,\n", next->minVal);
-			fprintf(fp, "\t\"max\": %llu\n", next->maxVal);
+			fprintf(fp, "\t\"min\": %lld,\n", next->minVal);
+			fprintf(fp, "\t\"max\": %lld\n", next->maxVal);
 
 			next = next->next;
 			printed++;
