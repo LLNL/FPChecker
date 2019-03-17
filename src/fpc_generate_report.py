@@ -71,7 +71,8 @@ def generateHTML():
     d = str(now.year) + "-" + str(now.month) + "-" + str(now.day)
     fd.write("<p>\n")
     fd.write("Date: " + d + " <br>")
-    fd.write("Lines of code: XXXX")
+    lines = str(len(locTable.keys()))
+    fd.write("Lines of code: " + lines)
     fd.write("</p>\n")
     
     fd.write("<h3>\n")

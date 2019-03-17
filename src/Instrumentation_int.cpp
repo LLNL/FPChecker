@@ -291,6 +291,12 @@ IRBuilder<> IntegerInstrumentation::createBuilderBefore(Instruction *inst)
 void IntegerInstrumentation::setFakeDebugLocation(Function *f, Instruction *inst)
 {
 	MDNode *node = f->getMetadata(0);
+	if (node == nullptr)
+	{
+		errs() << "\n\nERROR!!!\n";
+		errs() << "#FPCHECKER: No debug information found\n";
+		errs() << "#FPCHECKER: Make sure program is compiled with -g\n\n";
+	}
 	assert(node && "Invalid node!");
 	DebugLoc newLoc = DebugLoc::get(1, 1, node);
 	inst->setDebugLoc(newLoc);
