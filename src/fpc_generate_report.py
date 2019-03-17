@@ -45,6 +45,7 @@ h1 {
 p {
     font-family: Arial;
     color: #667CAD;
+    font-size: 90%;
 }
 
 </style>
@@ -174,6 +175,13 @@ def analyzeFile(input):
     if isFPCFile(input):
         print "File found:", input
         filesAnalyzed = filesAnalyzed + 1
+        
+        # Check files are not empty
+        with open(input) as f:
+            content = f.readlines()
+        if (len(content) == 0):
+            print "\nJson file " + input + " appears to be empty!\n\n"
+            exit()
         
         with open(input) as f:
             data = json.load(f)

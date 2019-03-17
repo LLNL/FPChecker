@@ -6,16 +6,16 @@ import os
 import glob
 import json
 
-
 class TestFPChecker(unittest.TestCase):
     
-    def setUp(self):
-        THIS_DIR = os.path.dirname(os.path.abspath(__file__))
-        os.chdir(THIS_DIR)
+    #def setUp(self):
+    #    THIS_DIR = os.path.dirname(os.path.abspath(__file__))
+    #    os.chdir(THIS_DIR)
     
     def test_1(self):
-        #p = Popen(['make', '-f', 'Makefile.0', 'clean'], stdout=PIPE, stderr=PIPE)
-        p = Popen(['make', '-f', 'Makefile.0'], stdout=PIPE, stderr=PIPE)
+        THIS_DIR = os.path.dirname(os.path.abspath(__file__))
+        #os.chdir(THIS_DIR)
+        p = Popen(['make', '-f', 'Makefile.0'], stdout=PIPE, stderr=PIPE, cwd=THIS_DIR)
         output, error = p.communicate()
         
         correctOutput = False
@@ -23,7 +23,6 @@ class TestFPChecker(unittest.TestCase):
             correctOutput = True
         
         self.assertTrue(correctOutput, "Should indicate to compile with -g")
-
 
 if __name__ == '__main__':
     unittest.main()
