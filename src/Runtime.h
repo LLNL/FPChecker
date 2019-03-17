@@ -463,6 +463,9 @@ void _FPC_PRINT_ERRORS_()
 __device__
 static void _FPC_FP32_CHECK_OPERATION_(float x, float y, float z, int loc, int op)
 {
+#ifdef FPC_PRINT_ON_CHECK
+        printf("#FPCHECKER: Checking FP32 %e\n", x);
+#endif
 	if (isinf(x))
 	{
 		_FPC_INTERRUPT_(1, op, loc, x, 0);
@@ -589,6 +592,9 @@ void _FPC_FP32_CHECK_DIV_(float x, float y, float z, int loc)
 __device__
 static void _FPC_FP64_CHECK_OPERATION_(double x, double y, double z, int loc, int op)
 {
+#ifdef FPC_PRINT_ON_CHECK
+	printf("#FPCHECKER: Checking FP64 %e\n", x);
+#endif
 	if (isinf(x))
 	{
 		_FPC_INTERRUPT_(1, op, loc, 0, x);
