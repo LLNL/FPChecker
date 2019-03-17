@@ -14,16 +14,17 @@
 /* ----------------------------- Global Data ------------------------------- */
 
 /// We store the file name and directory in this variable
-static char *_FPC_FILE_NAME_;
+__attribute__((used)) static char *_FPC_FILE_NAME_;
 _FPC_HTABLE_T *_FPC_HTABLE_;
 
 /* ------------------------ Generic Functions ------------------------------ */
 
-void _FPC_UNUSED_FUNC_()
+/*void _FPC_UNUSED_FUNC_()
 {
 	asm ("");
+	//__asm__ ("" : : "" (_FPC_FILE_NAME_));
 	printf("#FPCHECKER: %s\n", _FPC_FILE_NAME_);
-}
+}*/
 
 void _FPC_INIT_HASH_TABLE_()
 {
