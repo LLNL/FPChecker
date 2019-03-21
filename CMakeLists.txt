@@ -43,14 +43,19 @@ install(TARGETS fpchecker
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
 )
 
+install(FILES src/Runtime.h 
+        DESTINATION src
+)
+
 # Tests
 file(COPY tests DESTINATION ${CMAKE_BINARY_DIR})
 file(COPY src/Runtime.h DESTINATION ${CMAKE_BINARY_DIR}/src)
 configure_file(tests/tests_Makefile.in tests/Makefile.config)
 configure_file(tests/static/test_config.py.in tests/static/test_config.py)
+configure_file(tests/dynamic/test_config.py.in tests/dynamic/test_config.py)
 enable_testing()
-#add_test(NAME static_tests COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/static/test.py)
 add_test(NAME static_tests COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_BINARY_DIR}/tests/static/test.py)
+add_test(NAME dynamic_tests COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_BINARY_DIR}/tests/dynamic/test.py)
 
 message(STATUS "CMAKE_CXX_COMPILE_FLAGS: " ${CMAKE_CXX_COMPILE_FLAGS})
 message(STATUS "CMAKE_CXX_COMPILER: " ${CMAKE_CXX_COMPILER})
