@@ -10,21 +10,29 @@ FPChecker detects floating-point computations that produce:
 
 When at least one of the threads in a CUDA grid produces any of the above cases, an error report is generated.
 
-FPChecker also generates **warning reports** for computations that are very close to become overflows or underflows, i.e., `x%` from the limits of normal values, where `x` is configurable.
+FPChecker also generates **warning reports** for computations that are close to become overflows or underflows, i.e., `x%` from the limits of normal values, where `x` is configurable.
 
 # Getting Started
 
-## Building
-.... TBD
-
 ## Requirements to Use FPChecker
 The primary requirement for using FPChecker is to be able to compile your CUDA code with a recent version of the clang/LLVM compiler. Pure CUDA code or RAJA (with CUDA execution) are supported.
+
+For more information about compiling CUDA with clang, plese refer to [Compiling CUDA with clang](https://llvm.org/docs/CompileCudaWithLLVM.html).
 
 We have tested FPChecker so far with these versions of clang/LLVM:
 - clang 7.x
 - clang 8.0
 
-For more information about compiling CUDA with clang, plese refer to [Compiling CUDA with clang](https://llvm.org/docs/CompileCudaWithLLVM.html).
+## Building
+You can build using `cmake`:
+```sh
+mkdir build
+cd build
+cmake -DCMAKE_INSTALL_PREFIX=/path/to/install ../
+make
+make install
+```
+`cmake` will attempt to search for `clang++` and `llvm-config` in your invironment. Make sure these commands are visible.
 
 ## Using FPChecker
 Once you are able to compile and run your CUDA application with clang, follow this to enable FPChecker:
@@ -32,9 +40,9 @@ Once you are able to compile and run your CUDA application with clang, follow th
 1. Add this to your Makefile:
 
 ```sh
-FPCHECKER_PATH  = /path/to/fpchecker
+FPCHECKER_PATH  = /path/to/install
 LLVM_PASS       = -Xclang -load -Xclang $(FPCHECKER_PATH)/lib/libcudakernels.so \
--include Runtime.h -I$(FPCHECKER_PATH)/runtime
+-include Runtime.h -I$(FPCHECKER_PATH)/src
 CXXFLAGS += $(LLVM_PASS)
 ```
 
@@ -48,22 +56,22 @@ When your applications begins to run, you should see the following, indicating t
 
 ```sh
 ========================================
- FPChecker (v0.0.3, Feb 21 2019)
+FPChecker (v0.1.0, Feb 21 2019)
 ========================================
 ```
 
 If an exception is found, your kernel will be aborted and an error report like the following will be shown:
 ```sh
 +--------------------------- FPChecker Error Report ---------------------------+
- Error         : Underflow                                                     
- Operation     : MUL (9.999888672e-321)                                            
- File          : dot_product_raja.cpp                                          
- Line          : 32                                                            
+Error         : Underflow                                                     
+Operation     : MUL (9.999888672e-321)                                            
+File          : dot_product_raja.cpp                                          
+Line          : 32                                                            
 +------------------------------------------------------------------------------+
 ```
 
 ## MPI Awareness
-The current version is not MPI aware, so every MPI process that encounters an error/warning will print a report. Future versions will allow only a single MPI process rank (e.g., rank 0) to print reports.
+The current version is not MPI aware, so every MPI process that encounters an error/warning will print a report.
 
 # Configuration Options
 Configuration options are passed via -D macros when invoking clang to compile your code.
@@ -73,3 +81,13 @@ Configuration options are passed via -D macros when invoking clang to compile yo
 
 ### Contact
 For questions, contact Ignacio Laguna <ilaguna@llnl.gov>.
+
+### License
+
+FPChecker is distributed under the terms of the Apache License (Version 2.0).
+
+All new contributions must be made under the Apache-2.0 license.
+
+See LICENSE and NOTICE for details.
+
+LLNL-CODE-647188

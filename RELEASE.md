@@ -1,3 +1,6 @@
+## Release 0.1.0
+- First stable release
+
 ## Release 0.0.4
 - When errors-dont-abort, it reports the class of error
 - Various code cleaning commits

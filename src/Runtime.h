@@ -359,7 +359,7 @@ void _FPC_PRINT_AT_MAIN_()
 {
 	printf("\n");
 	printf("========================================\n");
-	printf(" FPChecker (v0.0.4, %s)\n", __DATE__);
+	printf(" FPChecker (v0.1.0, %s)\n", __DATE__);
 	printf("========================================\n");
 	printf("\n");
 }
