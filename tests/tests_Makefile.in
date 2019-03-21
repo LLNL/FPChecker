@@ -1,0 +1,7 @@
+
+
+CC              = clang++
+FPCHECKER_PATH  = @CMAKE_BINARY_DIR@
+LLVM_PASS       = -Xclang -load -Xclang $(FPCHECKER_PATH)/@CMAKE_SHARED_LIBRARY_PREFIX@@PROJECT_NAME@@CMAKE_SHARED_LIBRARY_SUFFIX@ \
+                -include Runtime.h -I$(FPCHECKER_PATH)/src
+
