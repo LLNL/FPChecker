@@ -10,4 +10,4 @@ all:
 	$(CC) -o main dot_product_raja.o $(LINK)
 
 clean:
-	rm *.o *.core main 
+	rm -rf *.o *.core main __pycache__

@@ -9,4 +9,4 @@ all:
 	$(CC) -o main dot_product.o main.o $(LINK)
 
 clean:
-	rm *.o main
+	rm -rf *.o main __pycache__

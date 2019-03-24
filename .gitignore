@@ -12,3 +12,4 @@ main
 *.swp
 .nfs*
 *.pytest_cache*
+.cache

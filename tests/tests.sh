@@ -1,5 +1,6 @@
 
 echo "*** static tests ***"
-python -m pytest ./tests/static/
+python -m pytest -v ./tests/static/
 
-#python -m pytest ./tests/dynamic/
+echo "*** dynamic tests ***"
+python -m pytest -v ./tests/dynamic/
