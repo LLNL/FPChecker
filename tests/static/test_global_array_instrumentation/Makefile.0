@@ -8,4 +8,4 @@ all:
 	$(CC) -c compute.cu $(OP)
 
 clean:
-	rm *.o *.ll *.bc main
+	rm -rf *.o __pycache__

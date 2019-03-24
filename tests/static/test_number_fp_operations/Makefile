@@ -7,4 +7,4 @@ all:
 	$(CC) -c compute.cu $(OP)
 
 clean:
-	rm *.o main
+	rm -rf *.o __pycache__
