@@ -1,6 +1,6 @@
 # FPChecker
 
-**FPChecker** (or Floating-Point Checker) is a compiler framework to check for floating-point exceptions in CUDA. It is designed as a Clang/LLVM extension that instruments CUDA code to catch floating-point exceptions at runtime.
+**FPChecker** (or Floating-Point Checker) is a framework to check for floating-point exceptions in CUDA. It is designed as a Clang/LLVM extension that instruments CUDA code to catch floating-point exceptions at runtime.
 
 ## Detectable Errors and Warnings
 FPChecker detects floating-point computations that produce:
@@ -32,7 +32,10 @@ cmake -DCMAKE_INSTALL_PREFIX=/path/to/install ../
 make
 make install
 ```
+
 `cmake` will attempt to search for `clang++` and `llvm-config` in your invironment. Make sure these commands are visible.
+
+Optionally you can run tests by running `make tests` after executing `make`. Tests are executed in `python` version 2.7.x, and require the `pytest` module. Also, the the envirorment variable `CUDA_PATH` needs to be set to the location of the CUDA toolkit before running the tests.
 
 ## Using FPChecker
 Once you are able to compile and run your CUDA application with clang, follow this to enable FPChecker:
@@ -73,7 +76,7 @@ Line          : 32
 ## MPI Awareness
 The current version is not MPI aware, so every MPI process that encounters an error/warning will print a report.
 
-# Configuration Options
+## Configuration Options
 Configuration options are passed via -D macros when invoking clang to compile your code.
 
 - **-D FPC_DANGER_ZONE_PERCENT=x.x:** Changes the size of the danger zone. By default, x.x is 0.10, and it should be a number between 0.0 and 1.0. Warning reports can be almost completely disabled by using a small danger zone, such as 0.01.
@@ -82,7 +85,7 @@ Configuration options are passed via -D macros when invoking clang to compile yo
 ### Contact
 For questions, contact Ignacio Laguna <ilaguna@llnl.gov>.
 
-### License
+## License
 
 FPChecker is distributed under the terms of the Apache License (Version 2.0).
 
