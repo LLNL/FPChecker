@@ -1,6 +1,11 @@
 
 language: cpp
 compiler: clang
-os: linux
+sudo: false
+dist: xenial
 
-
+script:
+  - mkdir build
+  - cd build
+  - cmake ../
+  - cmake --build ../ -- j1
