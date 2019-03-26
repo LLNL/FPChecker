@@ -69,13 +69,16 @@ public:
 #endif
 				fpInstrumentation->instrumentFunction(F);
 
-				if (CodeMatching::isAKernelFunction(*F))
+				if (fpInstrumentation->errorsDontAbortMode())
 				{
-#ifdef FPC_DEBUG
-					std::string out = "<<< kernel >>> " + f->getName().str();
-					Logging::info(out.c_str());
-#endif
-					fpInstrumentation->instrumentEndOfKernel(F);
+					if (CodeMatching::isAKernelFunction(*F))
+					{
+	#ifdef FPC_DEBUG
+						std::string out = "<<< kernel >>> " + f->getName().str();
+						Logging::info(out.c_str());
+	#endif
+						fpInstrumentation->instrumentEndOfKernel(F);
+					}
 				}
 			}
 			else // host code

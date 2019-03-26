@@ -76,6 +76,10 @@ void _FPC_PRINT_AT_MAIN_();
 #define DANGER_ZONE_PERCENTAGE 0.10
 #endif
 
+#ifdef FPC_ERRORS_DONT_ABORT
+__attribute__((used)) __device__ static int ERRORS_DONT_ABORT = 1;
+#endif
+
 /* ----------------------------- Global Data ------------------------------- */
 
 /// We store the file name and directory in this variable

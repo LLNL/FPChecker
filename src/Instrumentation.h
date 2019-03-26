@@ -36,6 +36,9 @@ private:
   Function *_fpc_warning_;
   Function *_fpc_print_errors_;
 
+  // device globals
+  bool errors_dont_abort = false;
+
   // maximum number for a code line
   int maxNumLocations = 0;
 
@@ -67,6 +70,7 @@ public:
   static bool isDoubleFPOperation(const Instruction *inst);
   static bool isSingleFPOperation(const Instruction *inst);
   //static bool isMainFunction(Function *f);
+  bool errorsDontAbortMode();
 };
 
 }

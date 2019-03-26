@@ -130,6 +130,16 @@ FPInstrumentation::FPInstrumentation(Module *M) :
     }
   }
 
+  // --- Find device global variables ---
+	GlobalVariable *globalVar1 = nullptr;
+	globalVar1 = mod->getGlobalVariable("_ZL17ERRORS_DONT_ABORT", true);
+	if (globalVar1 != nullptr) // we found that ERRORS_DONT_ABORT mode is set
+		errors_dont_abort = true;
+#ifdef FPC_DEBUG
+	std::string out = std::string("FPC_ERRORS_DONT_ABORT set");
+  Logging::info(out.c_str());
+#endif
+
   // ---- Find instrumentation functions in HOST code ----
   for(auto F = M->begin(), e = M->end(); F!=e; ++F)
   {
@@ -140,6 +150,11 @@ FPInstrumentation::FPInstrumentation(Module *M) :
     			GlobalValue::LinkageTypes::LinkOnceODRLinkage, "_FPC_PRINT_AT_MAIN_");
     }
   }
+}
+
+bool FPInstrumentation::errorsDontAbortMode()
+{
+	return errors_dont_abort;
 }
 
 void FPInstrumentation::instrumentFunction(Function *f)

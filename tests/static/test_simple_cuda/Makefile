@@ -1,11 +1,14 @@
+include ../../Makefile.config
 
 CUDA_PATH = /usr/tce/packages/cuda/cuda-9.2.148
 
 #CC	=	/usr/workspace/wsa/laguna/latest_llvm/install/bin/clang++
-CC	=	/collab/usr/global/tools/fpchecker/llvm/ppc64le/7.0/release/bin/clang++
-LLVM_PASS       = -Xclang -load -Xclang /usr/workspace/wsa/laguna/fpchecker/FPChecker/src/libcudakernels.so \
+CC	=	clang++
+
+#LLVM_PASS       = -Xclang -load -Xclang /usr/workspace/wsa/laguna/fpchecker/FPChecker/src/libfpchecker.so \
 -include Runtime.h -I/usr/workspace/wsa/laguna/fpchecker/FPChecker/src
 #OP	= -arch=sm_60 -O0 
+
 OP	= $(LLVM_PASS) -O0  -x cuda --cuda-gpu-arch=sm_60 -g
 LINK	= -L${CUDA_PATH}/lib64/ -lcuda -lcudart
 
