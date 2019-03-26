@@ -1,5 +1,7 @@
 # FPChecker
 
+[![Build Status](https://travis-ci.org/LLNL/FPChecker.svg?branch=master)](https://travis-ci.org/LLNL/FPChecker)
+
 **FPChecker** (or Floating-Point Checker) is a framework to check for floating-point exceptions in CUDA. It is designed as a Clang/LLVM extension that instruments CUDA code to catch floating-point exceptions at runtime.
 
 ## Detectable Errors and Warnings
