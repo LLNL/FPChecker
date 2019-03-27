@@ -136,8 +136,8 @@ FPInstrumentation::FPInstrumentation(Module *M) :
 	if (globalVar1 != nullptr) // we found that ERRORS_DONT_ABORT mode is set
 		errors_dont_abort = true;
 #ifdef FPC_DEBUG
-	std::string out = std::string("FPC_ERRORS_DONT_ABORT set");
-  Logging::info(out.c_str());
+	std::string out2 = std::string("FPC_ERRORS_DONT_ABORT set");
+  	Logging::info(out2.c_str());
 #endif
 
   // ---- Find instrumentation functions in HOST code ----
