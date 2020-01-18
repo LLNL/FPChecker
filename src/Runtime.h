@@ -716,4 +716,163 @@ void _FPC_FP64_CHECK_DIV_(double x, double y, double z, int loc)
 	_FPC_FP64_CHECK_OPERATION_(x, y, z, loc, 3);
 }
 
+/* --------------------- Clang Plug-in Functions ---------------------- */
+
+/// errorType: 0:NaN, 1:INF, 2:Underflow
+/// op: 0:ADD, 1:SUB, 2:MUL, 3:DIV
+__device__
+__attribute__((noinline)) static void _FPC_PLUGIN_INTERRUPT_(int errorType, int op, int loc, float fp32_val, double fp64_val, const char* fileName)
+{
+	bool blocked = true;
+	while(blocked) {
+			if(0 == atomicCAS(&_FPC_LOCK_STATE_, 0, 1)) {
+
+				char e[64]; e[0] = '\0';
+				char o[64]; o[0] = '\0';
+
+				if 			(errorType == 0) _FPC_CPY_(e, "NaN");
+				else if	(errorType == 1) _FPC_CPY_(e, "INF");
+				else if	(errorType == 2) _FPC_CPY_(e, "Underflow");
+				else _FPC_CPY_(e, "NONE");
+
+				if 			(op == 0) _FPC_CPY_(o, "ADD");
+				else if	(op == 1) _FPC_CPY_(o, "SUB");
+				else if	(op == 2) _FPC_CPY_(o, "MUL");
+				else if	(op == 3) _FPC_CPY_(o, "DIV");
+				else _FPC_CPY_(o, "NONE");
+
+				_FPC_PRINT_REPORT_HEADER_(0);
+				_FPC_PRINT_REPORT_ROW_("Error", REPORT_COL1_SIZE, 0, ':');
+				_FPC_PRINT_REPORT_ROW_(e, REPORT_COL2_SIZE, 1, ' ');
+				_FPC_PRINT_REPORT_ROW_("Operation", REPORT_COL1_SIZE, 0, ':');
+				if (errorType == 2)
+				{
+					_FPC_PRINT_REPORT_ROW_(o, 4, 0, ' ');
+					if (fp32_val != 0)
+						_FPC_PRINT_REPORT_ROW_(fp32_val, REPORT_COL2_SIZE, 1);
+					else
+						_FPC_PRINT_REPORT_ROW_(fp64_val, REPORT_COL2_SIZE, 1);
+				}
+				else
+				{
+					_FPC_PRINT_REPORT_ROW_(o, REPORT_COL2_SIZE, 1, ' ');
+				}
+				_FPC_PRINT_REPORT_ROW_("File", REPORT_COL1_SIZE, 0, ':');
+				_FPC_PRINT_REPORT_ROW_(fileName, REPORT_COL2_SIZE, 1, ' ');
+				_FPC_PRINT_REPORT_ROW_("Line", REPORT_COL1_SIZE, 0, ':');
+				//_FPC_PRINT_REPORT_ROW_(l, REPORT_COL2_SIZE, 1);
+				_FPC_PRINT_REPORT_ROW_(loc, REPORT_COL2_SIZE, 1);
+				_FPC_PRINT_REPORT_LINE_('+');
+
+				asm("trap;");
+		}
+	}
+}
+
+__device__
+static void _FPC_PLUGIN_WARNING_(int errorType, int op, int loc, float fp32_val, double fp64_val, const char* fileName)
+{
+	bool blocked = true;
+  	while(blocked) {
+			if(0 == atomicCAS(&_FPC_LOCK_STATE_, 0, 1)) {
+
+				char e[64]; e[0] = '\0';
+				char o[64]; o[0] = '\0';
+
+				if 			(errorType == 0) _FPC_CPY_(e, "NaN");
+				else if	(errorType == 1) _FPC_CPY_(e, "INF");
+				else if	(errorType == 2) _FPC_CPY_(e, "Underflow");
+				else _FPC_CPY_(e, "NONE");
+
+				if 			(op == 0) _FPC_CPY_(o, "ADD");
+				else if	(op == 1) _FPC_CPY_(o, "SUB");
+				else if	(op == 2) _FPC_CPY_(o, "MUL");
+				else if	(op == 3) _FPC_CPY_(o, "DIV");
+				else _FPC_CPY_(o, "NONE");
+
+				_FPC_PRINT_REPORT_HEADER_(1);
+				_FPC_PRINT_REPORT_ROW_("Error", REPORT_COL1_SIZE, 0, ':');
+				_FPC_PRINT_REPORT_ROW_(e, REPORT_COL2_SIZE, 1, ' ');
+				_FPC_PRINT_REPORT_ROW_("Operation", REPORT_COL1_SIZE, 0, ':');
+				if (errorType == 1 || errorType == 2)
+				{
+					_FPC_PRINT_REPORT_ROW_(o, 4, 0, ' ');
+					if (fp32_val != 0)
+						_FPC_PRINT_REPORT_ROW_(fp32_val, REPORT_COL2_SIZE, 1);
+					else
+						_FPC_PRINT_REPORT_ROW_(fp64_val, REPORT_COL2_SIZE, 1);
+				}
+				else
+				{
+					_FPC_PRINT_REPORT_ROW_(o, REPORT_COL2_SIZE, 1, ' ');
+				}
+				_FPC_PRINT_REPORT_ROW_("File", REPORT_COL1_SIZE, 0, ':');
+				_FPC_PRINT_REPORT_ROW_(fileName, REPORT_COL2_SIZE, 1, ' ');
+				_FPC_PRINT_REPORT_ROW_("Line", REPORT_COL1_SIZE, 0, ':');
+				//_FPC_PRINT_REPORT_ROW_(l, REPORT_COL2_SIZE, 1);
+				_FPC_PRINT_REPORT_ROW_(loc, REPORT_COL2_SIZE, 1);
+				_FPC_PRINT_REPORT_LINE_('+');
+
+				asm("trap;");
+		}
+	}
+}
+
+void _FPC_FP64_CHECK_(double x, int loc, const char *fileName)
+{
+	int op = -1;
+	if (isinf(x))
+	{
+		_FPC_PLUGIN_INTERRUPT_(1, op, loc, 0, x, fileName);
+	}
+	else if (isnan(x))
+	{
+		_FPC_PLUGIN_INTERRUPT_(0, op, loc, 0, x, fileName);
+	}
+	else /// subnormals check
+	{
+		if (_FPC_FP64_IS_SUBNORMAL(x))
+		{
+			_FPC_PLUGIN_INTERRUPT_(2, op, loc, 0, x, fileName);
+		}
+		else if (_FPC_FP64_IS_ALMOST_SUBNORMAL(x))
+		{
+			_FPC_PLUGIN_WARNING_(2, op, loc, 0, x, fileName);
+		}
+		else if (_FPC_FP64_IS_ALMOST_OVERFLOW(x))
+		{
+			_FPC_PLUGIN_WARNING_(1, op, loc, 0, x, fileName);
+		}
+	}
+}
+
+void _FPC_FP32_CHECK_(float x, int loc, const char *fileName)
+{
+	int op = -1;
+	if (isinf(x))
+	{
+		_FPC_PLUGIN_INTERRUPT_(1, op, loc, x, 0, fileName);
+	}
+	else if (isnan(x))
+	{
+		_FPC_PLUGIN_INTERRUPT_(0, op, loc, x, 0, fileName);
+	}
+	else /// subnormals check
+	{
+		if (_FPC_FP64_IS_SUBNORMAL(x))
+		{
+			_FPC_PLUGIN_INTERRUPT_(2, op, loc, x, 0, fileName);
+		}
+		else if (_FPC_FP64_IS_ALMOST_SUBNORMAL(x))
+		{
+			_FPC_PLUGIN_WARNING_(2, op, loc, x, 0, fileName);
+		}
+		else if (_FPC_FP64_IS_ALMOST_OVERFLOW(x))
+		{
+			_FPC_PLUGIN_WARNING_(1, op, loc, x, 0, fileName);
+		}
+	}
+}
+
+
 #endif /* SRC_RUNTIME_H_ */
