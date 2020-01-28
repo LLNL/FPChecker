@@ -1,0 +1,16 @@
+
+void comp()
+{
+
+  double x = 9.0;
+  double y = 10.3;
+  auto sum = [] __device__ (double x, double y) -> double {
+     double z = x + y;
+     x = y;
+     return x / 2.29; 
+  };
+
+  double *r;
+  r[2] = x;
+
+}

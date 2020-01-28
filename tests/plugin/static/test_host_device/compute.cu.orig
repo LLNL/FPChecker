@@ -1,0 +1,29 @@
+
+#include <stdio.h>
+
+__device__
+double compute(double x)
+{
+  double y = 0.0;
+  y += (x+1.25)*10.0;
+  return y;
+}
+
+__host__ __device__
+void bar(double *x)
+{
+  *x = *x / 1.2;
+}
+
+__host__ 
+void foo(double *x)
+{
+  *x = (*x - 128.0) / (*x);
+}
+
+__global__
+void kernel1(double *x, double *y)
+{
+  *x = (64+*y) * (*x);
+  return;
+}

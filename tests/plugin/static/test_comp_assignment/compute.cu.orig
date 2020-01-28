@@ -1,0 +1,11 @@
+
+#include <stdio.h>
+
+__device__
+double compute(double x)
+{
+  double y = 0.0;
+  y += (x+1.25)*10.0;
+  return y;
+}
+

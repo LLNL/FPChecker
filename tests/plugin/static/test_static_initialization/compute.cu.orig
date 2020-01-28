@@ -1,0 +1,26 @@
+
+#include <stdio.h>
+
+
+
+class Box {
+  public:
+    static double energy;
+    Box();
+    double getEnergy() const
+    {
+      return energy + 10.5;
+    }
+};
+
+// this should not be instrumented
+double Box::energy = 3.25;
+
+__device__
+double compute(double x)
+{
+  double y = 0.0;
+  y += (x + (int)128); // should be instrumented
+  return y;
+}
+

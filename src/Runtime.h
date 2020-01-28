@@ -29,6 +29,17 @@ __device__ void _FPC_DEVICE_CODE_FUNC_(){};
 #endif
 
 /* --- non-static ----------------------------------------------------------- */
+#ifdef __NVCC__
+__device__ static void _FPC_PRINT_ERRORS_();
+__device__ static void _FPC_FP32_CHECK_ADD_(float x, float y, float z, int loc);
+__device__ static void _FPC_FP32_CHECK_SUB_(float x, float y, float z, int loc);
+__device__ static void _FPC_FP32_CHECK_MUL_(float x, float y, float z, int loc);
+__device__ static void _FPC_FP32_CHECK_DIV_(float x, float y, float z, int loc);
+__device__ static void _FPC_FP64_CHECK_ADD_(double x, double y, double z, int loc);
+__device__ static void _FPC_FP64_CHECK_SUB_(double x, double y, double z, int loc);
+__device__ static void _FPC_FP64_CHECK_MUL_(double x, double y, double z, int loc);
+__device__ static void _FPC_FP64_CHECK_DIV_(double x, double y, double z, int loc);
+#else
 __device__ void _FPC_PRINT_ERRORS_();
 __device__ void _FPC_FP32_CHECK_ADD_(float x, float y, float z, int loc);
 __device__ void _FPC_FP32_CHECK_SUB_(float x, float y, float z, int loc);
@@ -38,6 +49,7 @@ __device__ void _FPC_FP64_CHECK_ADD_(double x, double y, double z, int loc);
 __device__ void _FPC_FP64_CHECK_SUB_(double x, double y, double z, int loc);
 __device__ void _FPC_FP64_CHECK_MUL_(double x, double y, double z, int loc);
 __device__ void _FPC_FP64_CHECK_DIV_(double x, double y, double z, int loc);
+#endif
 
 /* --- static --------------------------------------------------------------- */
 __device__ __attribute__((noinline)) static void _FPC_INTERRUPT_(int errorType, int op, int loc, float fp32_val, double fp64_val);
@@ -64,7 +76,7 @@ __device__ static int _FPC_FP32_IS_FLUSH_TO_ZERO(float x, float y, float z, int 
 __device__ static int _FPC_FP64_IS_FLUSH_TO_ZERO(double x, double y, double z, int op);
 
 /// Host function to print @ main()
-void _FPC_PRINT_AT_MAIN_();
+static void _FPC_PRINT_AT_MAIN_();
 
 #define REPORT_LINE_SIZE 80
 #define REPORT_COL1_SIZE 15
@@ -195,7 +207,7 @@ static void _FPC_PRINT_REPORT_ROW_(const char *val, int space, int last, char la
 __device__
 static void _FPC_PRINT_REPORT_ROW_(int val, int space, int last)
 {
-	int numChars = floor(log10 (abs (val))) + 1;
+	int numChars = floor(log10 ((double)abs (val))) + 1;
 	printf(" %d", val);
 
 	char msg[255];
@@ -372,6 +384,7 @@ void _FPC_PRINT_AT_MAIN_()
 /*         Warning: DO NOT MODIFY!        */
 /*      Functions will be instrumented    */
 /* -------------------------------------- */
+#ifndef __NVCC__
 __device__
 __attribute__((noinline))  long long int _FPC_READ_GLOBAL_ERRORS_ARRAY_(long long int i)
 {
@@ -396,6 +409,7 @@ __attribute__((noinline))  void _FPC_WRITE_FP64_GLOBAL_ARRAY_(long long int i, l
 	asm ("");
 	_FPC_ARR_NOT_USED_[i] = val;
 }
+#endif
 /* -------------------------------------- */
 
 __device__
@@ -409,6 +423,7 @@ static int _FPC_GET_GLOBAL_IDX_3D_3D()
 	return threadId;
 }
 
+#ifndef __NVCC__
 __device__
 void _FPC_PRINT_ERRORS_()
 {
@@ -461,6 +476,7 @@ void _FPC_PRINT_ERRORS_()
 		}
 	}
 }
+#endif
 
 /* ------------------------ FP32 Functions --------------------------------- */
 
@@ -723,7 +739,8 @@ void _FPC_FP64_CHECK_DIV_(double x, double y, double z, int loc)
 __device__
 __attribute__((noinline)) static void _FPC_PLUGIN_INTERRUPT_(int errorType, int op, int loc, float fp32_val, double fp64_val, const char* fileName)
 {
-	bool blocked = true;
+	//printf("-- _FPC_PLUGIN_INTERRUPT_\n");
+	volatile bool blocked = true;
 	while(blocked) {
 			if(0 == atomicCAS(&_FPC_LOCK_STATE_, 0, 1)) {
 
@@ -770,9 +787,10 @@ __attribute__((noinline)) static void _FPC_PLUGIN_INTERRUPT_(int errorType, int 
 }
 
 __device__
-static void _FPC_PLUGIN_WARNING_(int errorType, int op, int loc, float fp32_val, double fp64_val, const char* fileName)
+__attribute__((noinline)) static void _FPC_PLUGIN_WARNING_(int errorType, int op, int loc, float fp32_val, double fp64_val, const char* fileName)
 {
-	bool blocked = true;
+	//printf("-- _FPC_PLUGIN_WAR_\n");
+	volatile bool blocked = true;
   	while(blocked) {
 			if(0 == atomicCAS(&_FPC_LOCK_STATE_, 0, 1)) {
 
@@ -818,8 +836,22 @@ static void _FPC_PLUGIN_WARNING_(int errorType, int op, int loc, float fp32_val,
 	}
 }
 
-void _FPC_FP64_CHECK_(double x, int loc, const char *fileName)
+#ifdef __NVCC__
+
+#ifdef __CUDA_ARCH__
+// NOTE: we rely on CUDA function overloading for FP32 and FP64 versions
+// FP64 version
+__device__ static
+double _FPC_CHECK_(double x, int loc, const char *fileName)
 {
+#ifdef FPC_VERBOSE
+  int id = _FPC_GET_GLOBAL_IDX_3D_3D();
+  if (id == 0)
+  {
+    printf("#FPCHECKER: checking on %f\n", x);
+  }
+#endif
+
 	int op = -1;
 	if (isinf(x))
 	{
@@ -844,10 +876,21 @@ void _FPC_FP64_CHECK_(double x, int loc, const char *fileName)
 			_FPC_PLUGIN_WARNING_(1, op, loc, 0, x, fileName);
 		}
 	}
+	return x;
 }
 
-void _FPC_FP32_CHECK_(float x, int loc, const char *fileName)
+// FP32 version
+__device__ static
+float _FPC_CHECK_(float x, int loc, const char *fileName)
 {
+#ifdef FPC_VERBOSE
+  int id = _FPC_GET_GLOBAL_IDX_3D_3D();
+  if (id == 0)
+  {
+    printf("#FPCHECKER: checking on %f\n", x);
+  }
+#endif
+
 	int op = -1;
 	if (isinf(x))
 	{
@@ -872,7 +915,38 @@ void _FPC_FP32_CHECK_(float x, int loc, const char *fileName)
 			_FPC_PLUGIN_WARNING_(1, op, loc, x, 0, fileName);
 		}
 	}
+	return x;
 }
+
+#else // not __CUDA_ARCH__
+__host__ static
+double _FPC_CHECK_(double x, int loc, const char *fileName)
+{
+  return x;
+}
+
+__host__ static
+double _FPC_CHECK_(float x, int loc, const char *fileName)
+{
+  return x;
+}
+#endif // __CUDA_ARCH__
+
+#else // not __NVCC__
+
+__host__ __device__ static
+double _FPC_CHECK_(double x, int loc, const char *fileName)
+{
+  return x;
+}
+
+__host__ __device__ static
+float _FPC_CHECK_(float x, int loc, const char *fileName)
+{
+  return x;
+}
+
+#endif //__NVCC__
 
 
 #endif /* SRC_RUNTIME_H_ */

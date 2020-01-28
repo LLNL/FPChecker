@@ -1,0 +1,14 @@
+
+#include <stdio.h>
+
+__device__
+double compute(double x)
+{
+  double y = 0.0, z = 2.0;
+  y += (x + (int)128); // should be instrumented
+  int r = 3;
+  r = r*((int)y); // should not be instrumented
+
+  return y+r;
+}
+

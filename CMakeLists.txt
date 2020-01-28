@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.9)
 set(CMAKE_CXX_COMPILER "clang++")
 set(CMAKE_C_COMPILER "clang")
 
-project(fpchecker VERSION 0.1.0 DESCRIPTION "FPChecker" LANGUAGES CXX)
+project(fpchecker VERSION 0.2.0 DESCRIPTION "FPChecker" LANGUAGES CXX)
 
 execute_process(COMMAND llvm-config --ldflags 
 OUTPUT_VARIABLE CMAKE_SHARED_LINKER_FLAGS 
@@ -29,8 +29,13 @@ add_library(fpchecker SHARED
 	src/driver.cpp
 )
 
+add_library(fpchecker_plugin SHARED
+	plugin/instrumentation_plugin.cpp
+)
+
 if(APPLE)
 	TARGET_LINK_LIBRARIES(fpchecker "-undefined dynamic_lookup")
+	TARGET_LINK_LIBRARIES(fpchecker_plugin "-Wl,-flat_namespace -Wl,-undefined -Wl,suppress")
 endif()
 
 set_target_properties(fpchecker PROPERTIES
