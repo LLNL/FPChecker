@@ -44,11 +44,11 @@ set_target_properties(fpchecker PROPERTIES
 
 target_include_directories(fpchecker PRIVATE src)
 
-install(TARGETS fpchecker
+install(TARGETS fpchecker fpchecker_plugin
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
 )
 
-install(FILES src/Runtime.h 
+install(FILES src/Runtime.h src/Runtime_plugin.h 
         DESTINATION src
 )
 
@@ -56,8 +56,8 @@ install(FILES src/Runtime.h
 file(COPY tests DESTINATION ${CMAKE_BINARY_DIR})
 file(COPY src/Runtime.h DESTINATION ${CMAKE_BINARY_DIR}/src)
 configure_file(tests/tests_Makefile.in tests/Makefile.config)
-configure_file(tests/static/test_config.py.in tests/static/test_config.py)
-configure_file(tests/dynamic/test_config.py.in tests/dynamic/test_config.py)
+configure_file(tests/llvm/static/test_config.py.in tests/static/test_config.py)
+configure_file(tests/llvm/dynamic/test_config.py.in tests/dynamic/test_config.py)
 #enable_testing()
 #add_test(NAME static_tests COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_BINARY_DIR}/tests/static/test.py)
 #add_test(NAME dynamic_tests COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_BINARY_DIR}/tests/dynamic/test.py)
