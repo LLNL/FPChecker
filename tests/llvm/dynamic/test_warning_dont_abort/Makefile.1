@@ -1,0 +1,16 @@
+
+CC		= $(LLVM_PATH)/bin/clang++
+
+LLVM_PASS       = -Xclang -load -Xclang $(PWD)/../../../src/libcudakernels.so \
+-include Runtime.h -I$(PWD)/../../../src
+
+OP	= $(LLVM_PASS) -O1  -x cuda --cuda-gpu-arch=sm_60 -g -DFPC_ERRORS_DONT_ABORT -DFPC_DANGER_ZONE_PERCENT=0.15
+LINK	= -L${CUDA_PATH}/lib64/ -lcuda -lcudart
+
+all:
+	$(CC) -c dot_product.cu $(OP)
+	$(CC) -c main.cu $(OP)
+	$(CC) -o main dot_product.o main.o $(LINK)
+
+clean:
+	rm *.o *.bc *.ll *.core main

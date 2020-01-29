@@ -1,0 +1,13 @@
+include ../../Makefile.config
+
+OP_LEVEL = -O0
+
+OP	= $(LLVM_PASS) $(OP_LEVEL) -std=c++11 -x cuda --cuda-gpu-arch=sm_60 -g -I$(RAJA_PATH)/include
+LINK	= -L${CUDA_PATH}/lib64/ -lcuda -lcudart \
+	-L$(RAJA_PATH)/lib -lRAJA
+all:
+	$(CC) $(OP) -c dot_product_raja.cpp
+	$(CC) -o main dot_product_raja.o $(LINK)
+
+clean:
+	rm -rf *.o *.core main __pycache__

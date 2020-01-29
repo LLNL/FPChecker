@@ -1,0 +1,6 @@
+
+
+# Config of test framework
+
+textWidth = "{:60}"
+path = "@CMAKE_BINARY_DIR@/tests/static"

@@ -1,0 +1,12 @@
+include ../../Makefile.config
+
+OP_LEVEL = -O2
+OP	= $(LLVM_PASS) -x cuda --cuda-gpu-arch=sm_60 -g $(OP_LEVEL)
+
+LINK	= -L${CUDA_PATH}/lib64/ -lcuda -lcudart
+
+all:
+	$(CC) -c compute.cu $(OP)
+
+clean:
+	rm *.o main
