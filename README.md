@@ -18,15 +18,15 @@ FPChecker also generates **warning reports** for computations that are close to 
 
 ## How to Use FPChecker
 
-FPChecker instruments the CUDA application code. This instrumentation can be executed via the *clang* frontend, or via the *llvm* intermediate representation. We call these two ways of using FPChcker the **Clang version** and the **LLVM version**, respectively.
+FPChecker instruments the CUDA application code. This instrumentation can be executed via the *clang* frontend, or via the *llvm* intermediate representation. We call these two ways of using FPChecker the **Clang version** and the **LLVM version**, respectively.
 
 The **Clang version** instruments the source code of the application using a clang plugin. The instrumentation changes every expression `E` that evaluates to a floating-point value, to `_FPC_CHECK_(E)`. After theses transformations are performed, the code can be compiled with nvcc.
 
-The **LLVM version** on the other hand, performs instumentation in the LLVM compiler itself (in the intermediate representation, or IR, of the code).
+The **LLVM version** on the other hand, performs instrumentation in the LLVM compiler itself (in the intermediate representation, or IR, of the code).
 
-Both versions have advantges and disadvantages:
+Both versions have advantages and disadvantages:
 - **Clang version**: the final code can be compiled with nvcc; however, this version can be slower than the LLVM version and requires a two-pass compilation process (i.e., first instrument using clang and then compile/link with nvcc).
-- **LLVM version**: it is faster than the Clang version as code instrumneted *after* optimizations are applied; however, it requires the application to be  compiled completely using clang (clang does not support the same funtionality than nvcc, and some CUDA applications cannot be compiled with clang).
+- **LLVM version**: it is faster than the Clang version as code instrumented *after* optimizations are applied; however, it requires the application to be  compiled completely using clang (clang does not support the same functionality than nvcc, and some CUDA applications cannot be compiled with clang).
 
 ## Building
 You can build using `cmake`:
@@ -38,9 +38,9 @@ make
 make install
 ```
 
-`cmake` will attempt to search for `clang++` and `llvm-config` in your invironment. Make sure these commands are visible.
+`cmake` will attempt to search for `clang++` and `llvm-config` in your environment. Make sure these commands are visible.
 
-Optionally you can run tests by running `make tests` after executing `make`. Tests are executed in `python` version 2.7.x, and require the `pytest` module. Also, the the envirorment variable `CUDA_PATH` needs to be set to the location of the CUDA toolkit before running the tests.
+Optionally you can run tests by running `make tests` after executing `make`. Tests are executed in `python` version 2.7.x, and require the `pytest` module. Also, the envirorment variable `CUDA_PATH` needs to be set to the location of the CUDA toolkit before running the tests.
 
 ## Using the FPChecker Clang Version
 
@@ -74,7 +74,7 @@ Finally, make sure you use clang (not nvcc) as the compiler for this step:
 CXX = clang++
 ```
 
-Note that the compilation commans should not contain the `-o` flag to generate object files (we are not generating object code in this step, only transforming the source code). If the `-o` flag is added you will see this error:
+Note that the compilation commands should not contain the `-o` flag to generate object files (we are not generating object code in this step, only transforming the source code). If the `-o` flag is added you will see this error:
 
 ```sh
 clang++ $(CLANG_PLUGIN) -include $(FPCHECKER_RUNTIME) -emit-llvm .... -c file.cu -o file.o
@@ -90,7 +90,7 @@ In this step, you compile the instrumented code with nvcc, as you regularly do. 
 ## Requirements to the LLVM version
 The primary requirement for using this version is to be able to compile your CUDA code with a recent version of the clang/LLVM compiler. Pure CUDA code or RAJA (with CUDA execution) are supported.
 
-For more information about compiling CUDA with clang, plese refer to [Compiling CUDA with clang](https://llvm.org/docs/CompileCudaWithLLVM.html). In particular, you hsould pay attention to the differences between clang/LLVM and nvcc with respect to overloading based on `__host__` and `__device__` attributes.
+For more information about compiling CUDA with clang, please refer to [Compiling CUDA with clang](https://llvm.org/docs/CompileCudaWithLLVM.html). In particular, you should pay attention to the differences between clang/LLVM and nvcc with respect to overloading based on `__host__` and `__device__` attributes.
 
 We have tested this version so far with these versions of clang/LLVM:
 - clang 7.x
