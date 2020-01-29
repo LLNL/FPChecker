@@ -836,6 +836,8 @@ __attribute__((noinline)) static void _FPC_PLUGIN_WARNING_(int errorType, int op
 	}
 }
 
+__device__ static int _FPC_HAS_PRINTED_ = 0;
+
 #ifdef __NVCC__
 
 #ifdef __CUDA_ARCH__
@@ -844,13 +846,16 @@ __attribute__((noinline)) static void _FPC_PLUGIN_WARNING_(int errorType, int op
 __device__ static
 double _FPC_CHECK_(double x, int loc, const char *fileName)
 {
-#ifdef FPC_VERBOSE
+//#ifdef FPC_VERBOSE
   int id = _FPC_GET_GLOBAL_IDX_3D_3D();
   if (id == 0)
   {
-    printf("#FPCHECKER: checking on %f\n", x);
+    if (_FPC_HAS_PRINTED_==0) {
+      printf("#FPCHECKER: checking on %f\n", x);
+      _FPC_HAS_PRINTED_=1;
+    }
   }
-#endif
+//#endif
 
 	int op = -1;
 	if (isinf(x))
@@ -883,13 +888,16 @@ double _FPC_CHECK_(double x, int loc, const char *fileName)
 __device__ static
 float _FPC_CHECK_(float x, int loc, const char *fileName)
 {
-#ifdef FPC_VERBOSE
+//#ifdef FPC_VERBOSE
   int id = _FPC_GET_GLOBAL_IDX_3D_3D();
   if (id == 0)
   {
-    printf("#FPCHECKER: checking on %f\n", x);
+    if (_FPC_HAS_PRINTED_==0) {
+      printf("#FPCHECKER: checking on %f\n", x);
+      _FPC_HAS_PRINTED_=1;
+    }
   }
-#endif
+//#endif
 
 	int op = -1;
 	if (isinf(x))
@@ -918,6 +926,12 @@ float _FPC_CHECK_(float x, int loc, const char *fileName)
 	return x;
 }
 
+__device__ static
+double _FPC_CHECK_(int x, int loc, const char *fileName)
+{
+  return (double)x;
+}
+
 #else // not __CUDA_ARCH__
 __host__ static
 double _FPC_CHECK_(double x, int loc, const char *fileName)
@@ -926,10 +940,18 @@ double _FPC_CHECK_(double x, int loc, const char *fileName)
 }
 
 __host__ static
-double _FPC_CHECK_(float x, int loc, const char *fileName)
+float _FPC_CHECK_(float x, int loc, const char *fileName)
 {
   return x;
 }
+
+__host__ static
+double _FPC_CHECK_(int x, int loc, const char *fileName)
+{
+  return (double)x;
+}
+
+
 #endif // __CUDA_ARCH__
 
 #else // not __NVCC__
@@ -944,6 +966,12 @@ __host__ __device__ static
 float _FPC_CHECK_(float x, int loc, const char *fileName)
 {
   return x;
+}
+
+__host__ __device__ static
+double _FPC_CHECK_(int x, int loc, const char *fileName)
+{
+  return (double)x;
 }
 
 #endif //__NVCC__
