@@ -8,7 +8,7 @@
 FPChecker detects floating-point computations that produce:
 - Overflows: +INF and -INF values
 - Underflows: subnormal (or denormalized) values
-- NANs:  coming, for example, from 0/0
+- NANs:  coming, for example, from 0.0/0.0
 
 When at least one of the threads in a CUDA grid produces any of the above cases, an error report is generated.
 
@@ -16,14 +16,17 @@ FPChecker also generates **warning reports** for computations that are close to 
 
 # Getting Started
 
-## Requirements to Use FPChecker
-The primary requirement for using FPChecker is to be able to compile your CUDA code with a recent version of the clang/LLVM compiler. Pure CUDA code or RAJA (with CUDA execution) are supported.
+## How to Use FPChecker
 
-For more information about compiling CUDA with clang, plese refer to [Compiling CUDA with clang](https://llvm.org/docs/CompileCudaWithLLVM.html).
+FPChecker instruments the CUDA application code. This instrumentation can be executed via the *clang* frontend, or via the *llvm* intermediate representation. We call these two ways of using FPChcker the **Clang version** and the **LLVM version**, respectively.
 
-We have tested FPChecker so far with these versions of clang/LLVM:
-- clang 7.x
-- clang 8.0
+The **Clang version** instruments the source code of the application using a clang plugin. The instrumentation changes every expression `E` that evaluates to a floating-point value, to `_FPC_CHECK_(E)`. After theses transformations are performed, the code can be compiled with nvcc.
+
+The **LLVM version** on the other hand, performs instumentation in the LLVM compiler itself (in the intermediate representation, or IR, of the code).
+
+Both versions have advantges and disadvantages:
+- **Clang version**: the final code can be compiled with nvcc; however, this version can be slower than the LLVM version and requires a two-pass compilation process (i.e., first instrument using clang and then compile/link with nvcc).
+- **LLVM version**: it is faster than the Clang version as code instrumneted *after* optimizations are applied; however, it requires the application to be  compiled completely using clang (clang does not support the same funtionality than nvcc, and some CUDA applications cannot be compiled with clang).
 
 ## Building
 You can build using `cmake`:
@@ -39,7 +42,61 @@ make install
 
 Optionally you can run tests by running `make tests` after executing `make`. Tests are executed in `python` version 2.7.x, and require the `pytest` module. Also, the the envirorment variable `CUDA_PATH` needs to be set to the location of the CUDA toolkit before running the tests.
 
-## Using FPChecker
+## Using the FPChecker Clang Version
+
+Using this version requires following two steps: (1) instrumenting the source code (with a clang plugin), (2) compiling the code (with nvcc).
+
+#### Step 1: Instrumenting the source code
+
+Add the following to your CUDA compilation flags (e.g., to CXXFLAGS):
+
+```sh
+FPCHECKER_PATH      =/path/to/install
+FPCHECKER_LIB       =$(FPCHECKER_PATH)/lib64/libfpchecker_plugin.so
+FPCHECKER_RUNTIME   =$(FPCHECKER_PATH)/src/Runtime_plugin.h
+CLANG_PLUGIN        =-Xclang -load -Xclang $(FPCHECKER_LIB) -Xclang -plugin -Xclang instrumentation_plugin
+CXXFLAGS            += $(CLANG_PLUGIN) -include $(FPCHECKER_RUNTIME) -emit-llvm
+```
+The `$(CLANG_PLUGIN)` flag telsl clang where the plugin library is and that it must load it. The `-include $(FPCHECKER_RUNTIME)` pre-includes the runtime header file. The `-emit-llvm` indicates to clang to avoid the code generation phase (we don't want to generate object files in this step; we only want to instrument the source code).
+
+Since we will parse the CUDA source code with clang, we also need to add the following flags:
+
+```sh
+CUDA_OPTIONS    = --cuda-gpu-arch=sm_60 -x cuda
+CXXFLAGS        += $(CUDA_OPTIONS)
+```
+The `--cuda-gpu-arch` flag specifies the compute architecture (note that in nvcc, this is usually set by `-arch`). The `-x cuda` indicates to clang that we are handling a CUDA file (if you are handling a pure C/C++ file, we don't need this flag).
+
+Finally, make sure you use clang (not nvcc) as the compiler for this step:
+
+```sh
+#CXX = nvcc
+CXX = clang++
+```
+
+Note that the compilation commans should not contain the `-o` flag to generate object files (we are not generating object code in this step, only transforming the source code). If the `-o` flag is added you will see this error:
+
+```sh
+clang++ $(CLANG_PLUGIN) -include $(FPCHECKER_RUNTIME) -emit-llvm .... -c file.cu -o file.o
+clang-9: error: cannot specify -o when generating multiple output files
+```
+
+After this step, floating-point expressions in the code should look similar to this: `_FPC_CHECK_(x+y, ...)`.
+
+#### Step 2: Compiling with nvcc
+
+In this step, you compile the instrumented code with nvcc, as you regularly do. The only addition is that you need to pre-include the runtime header file using `-include $(FPCHECKER_RUNTIME)`; otherwise nvcc will complain about not being able to understand the `_FPC_CHECK_()` function calls.
+
+## Requirements to the LLVM version
+The primary requirement for using this version is to be able to compile your CUDA code with a recent version of the clang/LLVM compiler. Pure CUDA code or RAJA (with CUDA execution) are supported.
+
+For more information about compiling CUDA with clang, plese refer to [Compiling CUDA with clang](https://llvm.org/docs/CompileCudaWithLLVM.html). In particular, you hsould pay attention to the differences between clang/LLVM and nvcc with respect to overloading based on `__host__` and `__device__` attributes.
+
+We have tested this version so far with these versions of clang/LLVM:
+- clang 7.x
+- clang 8.0
+
+## Using the FPChecker LLVM Version
 Once you are able to compile and run your CUDA application with clang, follow this to enable FPChecker:
 
 1. Add this to your Makefile:
@@ -51,13 +108,13 @@ LLVM_PASS       = -Xclang -load -Xclang $(FPCHECKER_PATH)/lib/libcudakernels.so 
 CXXFLAGS += $(LLVM_PASS)
 ```
 
-This will tell clang where the FPChecker runtime is located. FPCHECKER_PATH is the where FPChecker is installed.
+This will tell clang/LLVM where the FPChecker runtime is located. FPCHECKER_PATH is the where FPChecker is installed.
 
 2. Compile your code and run it.
 
 ## Expected Output
 
-When your applications begins to run, you should see the following, indicating that your application was instrumented by FPChecker:
+When your applications begins to run, you should see the following (this is only visible in the LLVM version):
 
 ```sh
 ========================================
@@ -76,7 +133,7 @@ Line          : 32
 ```
 
 ## MPI Awareness
-The current version is not MPI aware, so every MPI process that encounters an error/warning will print a report.
+The current version is not MPI aware, so every MPI process that encounters an error/warning will print a report. You should include the location of `mpi.h`; otherwise clang will not find the MPI call definitions.
 
 ## Configuration Options
 Configuration options are passed via -D macros when invoking clang to compile your code.
