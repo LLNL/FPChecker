@@ -54,21 +54,21 @@ __device__ void _FPC_FP64_CHECK_DIV_(double x, double y, double z, int loc);
 /* --- static --------------------------------------------------------------- */
 __device__ __attribute__((noinline)) static void _FPC_INTERRUPT_(int errorType, int op, int loc, float fp32_val, double fp64_val);
 __device__ __attribute__((noinline)) static void _FPC_WARNING_(int errorType, int op, int loc, float fp32_val, double fp64_val);
-__device__ static int _FPC_LEN_(const char *s);
-__device__ static void _FPC_CPY_(char *d, const char *s);
-__device__ static void _FPC_CAT_(char *d, const char *s);
-__device__ static void _FPC_PRINT_REPORT_LINE_(const char border);
-__device__ static void _FPC_PRINT_REPORT_HEADER_(int type);
-__device__ static void _FPC_PRINT_REPORT_ROW_(const char *val, int space, int last, char lastChar);
-__device__ static void _FPC_PRINT_REPORT_ROW_(int val, int space, int last);
-__device__ static void _FPC_PRINT_REPORT_ROW_(float val, int space, int last);
-__device__ static void _FPC_PRINT_REPORT_ROW_(double val, int space, int last);
+__device__ __host__ static int _FPC_LEN_(const char *s);
+__device__ __host__ static void _FPC_CPY_(char *d, const char *s);
+__device__ __host__ static void _FPC_CAT_(char *d, const char *s);
+__device__ __host__ static void _FPC_PRINT_REPORT_LINE_(const char border);
+__device__ __host__ static void _FPC_PRINT_REPORT_HEADER_(int type);
+__device__ __host__ static void _FPC_PRINT_REPORT_ROW_(const char *val, int space, int last, char lastChar);
+__device__ __host__ static void _FPC_PRINT_REPORT_ROW_(int val, int space, int last);
+__device__ __host__ static void _FPC_PRINT_REPORT_ROW_(float val, int space, int last);
+__device__ __host__ static void _FPC_PRINT_REPORT_ROW_(double val, int space, int last);
 __device__ static void _FPC_FP32_CHECK_OPERATION_(float x, float y, float z, int loc, int op);
 __device__ static int _FPC_FP32_IS_SUBNORMAL(float x);
 __device__ static int _FPC_FP32_IS_ALMOST_OVERFLOW(float x);
 __device__ static int _FPC_FP32_IS_ALMOST_SUBNORMAL(float x);
 __device__ static void _FPC_FP64_CHECK_OPERATION_(double x, double y, double z, int loc, int op);
-__device__ static int _FPC_FP64_IS_SUBNORMAL(double x);
+__device__ __host__ static int _FPC_FP64_IS_SUBNORMAL(double x);
 __device__ static int _FPC_FP64_IS_ALMOST_OVERFLOW(double x);
 __device__ static int _FPC_FP64_IS_ALMOST_SUBNORMAL(double x);
 __device__ static int _FPC_GET_GLOBAL_IDX_3D_3D();
@@ -118,7 +118,7 @@ __device__ static long long int _FPC_ARR_NOT_USED_[10]; // not used at runtime
 ///  Line      : 23
 /// +----------------------------------------------------------+
 
-__device__
+__device__ __host__
 static int _FPC_LEN_(const char *s)
 {
 	int maxLen = 1024; // to check correctness and avid infinite loop
@@ -128,7 +128,7 @@ static int _FPC_LEN_(const char *s)
 	return i;
 }
 
-__device__
+__device__ __host__
 static void _FPC_CPY_(char *d, const char *s)
 {
 	int len = _FPC_LEN_(s);
@@ -138,7 +138,7 @@ static void _FPC_CPY_(char *d, const char *s)
 	d[i] = '\0';
 }
 
-__device__
+__device__ __host__
 static void _FPC_CAT_(char *d, const char *s)
 {
 	int lenS = _FPC_LEN_(s);
@@ -149,7 +149,7 @@ static void _FPC_CAT_(char *d, const char *s)
 	d[i+lenD] = '\0';
 }
 
-__device__
+__device__ __host__
 static void _FPC_PRINT_REPORT_LINE_(const char border)
 {
 	printf("%c",border);
@@ -158,7 +158,7 @@ static void _FPC_PRINT_REPORT_LINE_(const char border)
 	printf("%c\n",border);
 }
 
-__device__
+__device__ __host__
 static void _FPC_PRINT_REPORT_HEADER_(int type)
 {
 	//_FPC_PRINT_REPORT_LINE_('.');
@@ -186,7 +186,7 @@ static void _FPC_PRINT_REPORT_HEADER_(int type)
 	printf("%s\n",line);
 }
 
-__device__
+__device__ __host__
 static void _FPC_PRINT_REPORT_ROW_(const char *val, int space, int last, char lastChar)
 {
 	char msg[255];
@@ -204,7 +204,7 @@ static void _FPC_PRINT_REPORT_ROW_(const char *val, int space, int last, char la
 		printf("\n");
 }
 
-__device__
+__device__ __host__
 static void _FPC_PRINT_REPORT_ROW_(int val, int space, int last)
 {
 	int numChars = floor(log10 ((double)abs (val))) + 1;
@@ -223,7 +223,7 @@ static void _FPC_PRINT_REPORT_ROW_(int val, int space, int last)
 		printf("\n");
 }
 
-__device__
+__device__ __host__
 static void _FPC_PRINT_REPORT_ROW_(float val, int space, int last)
 {
 	int numChars = 18;
@@ -243,7 +243,7 @@ static void _FPC_PRINT_REPORT_ROW_(float val, int space, int last)
 		printf("\n");
 }
 
-__device__
+__device__ __host__
 static void _FPC_PRINT_REPORT_ROW_(double val, int space, int last)
 {
 	int numChars = 18;
@@ -658,18 +658,18 @@ static int _FPC_FP64_IS_FLUSH_TO_ZERO(double x, double y, double z, int op)
 
 /// Returns non-zero value if FP argument is a sub-normal.
 /// Check that the exponent bits are zero.
-__device__
+__device__ __host__
 static int _FPC_FP64_IS_SUBNORMAL(double x)
 {
-	int ret = 0;
-	uint64_t val;
+  int ret = 0;
+  uint64_t val;
   memcpy((void *) &val, (void *) &x, sizeof(val));
   val = val << 1; 	// get rid of sign bit
   val = val >> 53; 	// get rid of the mantissa bits
   if (x != 0.0 && x != -0.0)
   {
-  	if (val == 0)
-  		ret = 1;
+    if (val == 0)
+      ret = 1;
   }
   return ret;
 }
@@ -831,7 +831,8 @@ __attribute__((noinline)) static void _FPC_PLUGIN_INTERRUPT_(int errorType, int 
   _FPC_PRINT_REPORT_ROW_(loc, REPORT_COL2_SIZE, 1);
   _FPC_PRINT_REPORT_LINE_('+');
 
-  asm("trap;");
+  exit(0);
+  //asm("trap;");
 }
 
 #endif
