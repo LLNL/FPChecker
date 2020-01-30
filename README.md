@@ -144,6 +144,19 @@ Configuration options are passed via -D macros when invoking clang to compile yo
 ### Contact
 For questions, contact Ignacio Laguna <ilaguna@llnl.gov>.
 
+To cite FPChecker please use
+
+```
+@inproceedings{laguna2019fpchecker,
+title={{FPChecker: Detecting Floating-Point Exceptions in GPU Applications}},
+  author={Laguna, Ignacio},
+  booktitle={2019 34th IEEE/ACM International Conference on Automated Software Engineering (ASE)},
+  pages={1126--1129},
+  year={2019},
+  organization={IEEE}
+}
+```
+
 ## License
 
 FPChecker is distributed under the terms of the Apache License (Version 2.0).
