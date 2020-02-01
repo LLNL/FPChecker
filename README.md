@@ -48,7 +48,7 @@ Using this version requires following two steps: (1) instrumenting the source co
 
 ### Step 1: Instrumenting the source code
 
-This step can be executed either by using the `clang-fpchecker` wrapper script or by directly loading the plugin (the `clang-fpchecker` script automatically calls the required options to load the plugin). We explain both methods as follows.
+This step can be executed either by using the `clang-fpchecker` wrapper script or by directly loading the plugin (the `clang-fpchecker` warpper automatically calls the required options to load the plugin). We explain both methods as follows.
 
 #### Using the clang-fpchecker Wrapper Script
 
