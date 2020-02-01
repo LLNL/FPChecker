@@ -40,7 +40,7 @@ make install
 
 `cmake` will attempt to search for `clang++` and `llvm-config` in your environment. Make sure these commands are visible.
 
-Optionally you can run tests by running `make tests` after executing `make`. Tests are executed in `python` version 2.7.x, and require the `pytest` module. Also, the envirorment variable `CUDA_PATH` needs to be set to the location of the CUDA toolkit before running the tests.
+Optionally you can run tests by running `make tests` after executing `make`. Tests are executed in `python` version 2.7.x, and require the `pytest` module. Also, the environment variable `CUDA_PATH` needs to be set to the location of the CUDA toolkit before running the tests.
 
 ## Using the FPChecker Clang Version
 
@@ -48,7 +48,7 @@ Using this version requires following two steps: (1) instrumenting the source co
 
 ### Step 1: Instrumenting the source code
 
-This step can be executed either by using the `clang-fpchecker` wrapper script or by directly loading the plugin (the `clang-fpchecker` warpper automatically calls the required options to load the plugin). We explain both methods as follows.
+This step can be executed either by using the `clang-fpchecker` wrapper script or by directly loading the plugin (the `clang-fpchecker` wrapper automatically calls the required options to load the plugin). We explain both methods as follows.
 
 #### Using the clang-fpchecker Wrapper Script
 
