@@ -906,7 +906,7 @@ __device__ static int _FPC_HAS_PRINTED_ = 0;
 __device__ static
 double _FPC_CHECK_(double x, int loc, const char *fileName)
 {
-//#ifdef FPC_VERBOSE
+#ifndef FPC_DISABLE_VERBOSE
   int id = _FPC_GET_GLOBAL_IDX_3D_3D();
   if (id == 0)
   {
@@ -915,7 +915,7 @@ double _FPC_CHECK_(double x, int loc, const char *fileName)
       _FPC_HAS_PRINTED_=1;
     }
   }
-//#endif
+#endif
 
 	int op = -1;
 	if (isinf(x))
@@ -948,7 +948,7 @@ double _FPC_CHECK_(double x, int loc, const char *fileName)
 __device__ static
 float _FPC_CHECK_(float x, int loc, const char *fileName)
 {
-//#ifdef FPC_VERBOSE
+#ifndef FPC_DISABLE_VERBOSE
   int id = _FPC_GET_GLOBAL_IDX_3D_3D();
   if (id == 0)
   {
@@ -957,7 +957,7 @@ float _FPC_CHECK_(float x, int loc, const char *fileName)
       _FPC_HAS_PRINTED_=1;
     }
   }
-//#endif
+#endif
 
 	int op = -1;
 	if (isinf(x))

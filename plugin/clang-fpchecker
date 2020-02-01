@@ -1,0 +1,42 @@
+#!/bin/bash
+
+# Important paths
+FPCHECKER_PATH="/usr/global/tools/fpchecker/blueos_3_ppc64le_ib_p9/fpchecker-0.1.1-clang-9.0.0"
+FPCHECKER_LIB="$FPCHECKER_PATH/lib64/libfpchecker_plugin.so"
+FPCHECKER_RUNTIME="$FPCHECKER_PATH/src/Runtime_plugin.h"
+CLANG_PLUGIN="-Xclang -load -Xclang $FPCHECKER_LIB -Xclang -plugin -Xclang instrumentation_plugin"
+
+args=("$@")
+
+# Check if we have access to a valid version of clang
+clang_version=$(clang --version | head -n 1 | awk '{print $3}')
+if [ "${clang_version}" != "9.0.0" ] && [ "${clang_version}" != "9.0.1" ]; then
+    echo "Error: clang ${clang_version} is not supported"
+    exit 1
+fi
+
+# This loop removes the -o option
+new_args=()
+for arg in "${args[@]}"
+do
+    # Check if the -o option is set
+    if [[ "-o" == $arg ]]; then
+        # we found the output flag
+        found_output_flag=true
+    else
+        if [[ "$found_output_flag" = true ]]; then
+            # do not same output file name
+            found_output_flag=false
+        else
+            new_args=("${new_args[@]}" "${arg}")
+        fi
+    fi 
+done
+
+#clang_path=$(which clang)
+
+# Prepend flags
+new_args="clang ${CLANG_PLUGIN} -include ${FPCHECKER_RUNTIME} -emit-llvm ${new_args[@]}"
+
+#echo "${new_args[@]}"
+eval "${new_args[@]}"
