@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/LLNL/FPChecker.svg?branch=master)](https://travis-ci.org/LLNL/FPChecker)
 
-**FPChecker** (or Floating-Point Checker) is a framework to check for floating-point exceptions in CUDA. It is designed as a Clang/LLVM extension that instruments CUDA code to catch floating-point exceptions at runtime.
+**FPChecker** (or Floating-Point Checker) is a framework to detect floating-point exceptions in CUDA. It is designed as a Clang/LLVM extension that instruments CUDA code to catch floating-point exceptions at runtime.
 
 ## Detectable Errors and Warnings
 FPChecker detects floating-point computations that produce:
@@ -22,7 +22,7 @@ FPChecker instruments the CUDA application code. This instrumentation can be exe
 
 The **Clang version** instruments the source code of the application using a clang plugin. The instrumentation changes every expression `E` that evaluates to a floating-point value, to `_FPC_CHECK_(E)`. After theses transformations are performed, the code can be compiled with nvcc.
 
-The **LLVM version** on the other hand, performs instrumentation in the LLVM compiler itself (in the intermediate representation, or IR, of the code).
+The **LLVM version** on the other hand, performs instrumentation in the LLVM compiler itself (in the intermediate representation, or IR).
 
 Both versions have advantages and disadvantages:
 - **Clang version**: the final code can be compiled with nvcc; however, this version can be slower than the LLVM version and requires a two-pass compilation process (i.e., first instrument using clang and then compile/link with nvcc).
@@ -44,9 +44,29 @@ Optionally you can run tests by running `make tests` after executing `make`. Tes
 
 ## Using the FPChecker Clang Version
 
-Using this version requires following two steps: (1) instrumenting the source code (with a clang plugin), (2) compiling the code (with nvcc).
+Using this version requires following two steps: (1) instrumenting the source code (with a clang plugin) and (2) compiling the code with nvcc.
 
-#### Step 1: Instrumenting the source code
+### Step 1: Instrumenting the source code
+
+This step can be executed either by using the `clang-fpchecker` wrapper script or by directly loading the plugin (the `clang-fpchecker` script automatically calls the required options to load the plugin). We explain both methods as follows.
+
+#### Using the clang-fpchecker Wrapper Script
+
+The `clang-fpchecker` wrapper can be used as if we are using `clang` to compile files. For example, suppose we are instrumenting the `compute.cu` CUDA file; the wrapper is called this way:
+
+```sh
+clang-fpchecker --cuda-gpu-arch=sm_60 -x cuda -c compute.cu
+```
+
+Note that in clang, the `--cuda-gpu-arch` flag specifies the compute architecture (in nvcc, this is usually set by `-arch`). The `-x cuda` indicates to clang that we are handling a CUDA file (if you are handling a pure C/C++ file, we don't need this flag).
+
+Also note that this step does not generate object files; we only instrument the code.
+
+After this step, floating-point expressions in `compute.cu` should be instrumented. For example, if an expression originally was `y = a+b;`, it now should look like this: `y = _FPC_CHECK_(a+b, ...)`.
+
+#### Directly Loading the Plugin
+
+Instead of using the `clang-fpchecker` wrapper, we can directly load the plugin by adding several flags to our compilation commands.
 
 Add the following to your CUDA compilation flags (e.g., to CXXFLAGS):
 
@@ -57,15 +77,14 @@ FPCHECKER_RUNTIME   =$(FPCHECKER_PATH)/src/Runtime_plugin.h
 CLANG_PLUGIN        =-Xclang -load -Xclang $(FPCHECKER_LIB) -Xclang -plugin -Xclang instrumentation_plugin
 CXXFLAGS            += $(CLANG_PLUGIN) -include $(FPCHECKER_RUNTIME) -emit-llvm
 ```
-The `$(CLANG_PLUGIN)` flag telsl clang where the plugin library is and that it must load it. The `-include $(FPCHECKER_RUNTIME)` pre-includes the runtime header file. The `-emit-llvm` indicates to clang to avoid the code generation phase (we don't want to generate object files in this step; we only want to instrument the source code).
+The `$(CLANG_PLUGIN)` flag tells clang where the plugin library is and that it must load it. The `-include $(FPCHECKER_RUNTIME)` pre-includes the runtime header file. The `-emit-llvm` indicates to clang to avoid the code generation phase (we don't want to generate object files in this step; we only want to instrument the source code).
 
-Since we will parse the CUDA source code with clang, we also need to add the following flags:
+Note that since we will parse the CUDA source code with clang, we also need to add the following flags:
 
 ```sh
 CUDA_OPTIONS    = --cuda-gpu-arch=sm_60 -x cuda
 CXXFLAGS        += $(CUDA_OPTIONS)
 ```
-The `--cuda-gpu-arch` flag specifies the compute architecture (note that in nvcc, this is usually set by `-arch`). The `-x cuda` indicates to clang that we are handling a CUDA file (if you are handling a pure C/C++ file, we don't need this flag).
 
 Finally, make sure you use clang (not nvcc) as the compiler for this step:
 
@@ -81,9 +100,9 @@ clang++ $(CLANG_PLUGIN) -include $(FPCHECKER_RUNTIME) -emit-llvm .... -c file.cu
 clang-9: error: cannot specify -o when generating multiple output files
 ```
 
-After this step, floating-point expressions in the code should look similar to this: `_FPC_CHECK_(x+y, ...)`.
+Like when using the `clang-fpchecker` wrapper, after this step, floating-point expressions in the code should be instrumented.
 
-#### Step 2: Compiling with nvcc
+### Step 2: Compiling with nvcc
 
 In this step, you compile the instrumented code with nvcc, as you regularly do. The only addition is that you need to pre-include the runtime header file using `-include $(FPCHECKER_RUNTIME)`; otherwise nvcc will complain about not being able to understand the `_FPC_CHECK_()` function calls.
 
