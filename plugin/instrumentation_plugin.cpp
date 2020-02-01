@@ -135,7 +135,8 @@ public:
          e = stmt->child_end(); j != e; ++j) {
       const Stmt *child = *j;
       if (child == nullptr)
-        return false;
+        continue; // continue with next child
+
       if (const CallExpr *call = dyn_cast<CallExpr>(child)) {
         std::string str = getStmtString(call);
         if (str.find("_FPC_CHECK_") != std::string::npos)
@@ -152,6 +153,10 @@ public:
     }
     return ret;
   }
+
+  /// check if this is a call to the runtime, i.e., an instrumented expr
+  //bool isFPCheckerCall(const BinaryOperator *bo) {
+  //}
 
   /// Check if the parent is a compound statement
   /*bool isParentCompoundStatement(const Stmt *s) {
@@ -216,7 +221,7 @@ public:
       rewriter->ReplaceText(range, txt);
       instrumentedCode.insert(loc);
     } else {
-      llvm::errs() << "FPChecker Warning: instrumenting repeated location: " << expr << "\n";
+      llvm::errs() << "FPChecker warning: instrumenting repeated location: " << expr << "\n";
       //exit(EXIT_FAILURE);
     }
   }
@@ -245,22 +250,11 @@ public:
         if (E->getOpcode() == BO_AddAssign || E->getOpcode() == BO_SubAssign ||
             E->getOpcode() == BO_MulAssign || E->getOpcode() == BO_DivAssign ||
             E->getOpcode() == BO_Assign) {
-
-          // Instrument only if it has not been instrumented before
-          //if (!hasBeenInstrumented(E)) {
-
-          // Instrument expression
-          //llvm::outs() << "\t\t INSTRUMENT: " << getStmtString(lhs) << "\n";
-          //getLocation(E);
-          /// Source instrumentation using re-writer
-          //std::string txt("_FPC_CHECK_(" + getStmtString(rhs) +", 35, \"file.cpp\" " + ");");
-          //rewriter->InsertText(lhs->getBeginLoc(), txt,true, true);
 #ifdef FPC_DEBUG
           printInstrumentedLocation(E);
 #endif
           std::string txt("_FPC_CHECK_(" + getStmtString(rhs) +", "+lineNumber+", \""+getShortFileName()+"\"" + ")");
           SourceRange range(rhs->getBeginLoc(), rhs->getEndLoc());
-          //rewriter->ReplaceText(range, txt);
           rewriteCode(range, txt, E);
           ret = true;
           //}
@@ -271,7 +265,6 @@ public:
 #endif
           std::string txt("_FPC_CHECK_(" + getStmtString(E) +", "+lineNumber+", \""+getShortFileName()+"\"" + ")");
           SourceRange range(lhs->getBeginLoc(), rhs->getEndLoc());
-          //rewriter->ReplaceText(range, txt);
           rewriteCode(range, txt, E);
           ret = true;
         }

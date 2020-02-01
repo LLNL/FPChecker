@@ -1,0 +1,13 @@
+include ../../../Makefile.config
+
+OP_LEVEL = -O0
+OP	= $(CLANG_PASS) -emit-llvm -x cuda -nocudalib --cuda-gpu-arch=sm_60 -g $(OP_LEVEL)
+
+LINK	= -L${CUDA_PATH}/lib64/ -lcuda -lcudart
+
+all:
+	#cp -rf compute.cu.orig compute.cu
+	$(CC) -c compute.cu $(OP)
+
+clean:
+	rm -rf *.o __pycache__ *.cu

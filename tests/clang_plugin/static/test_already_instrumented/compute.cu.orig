@@ -1,0 +1,74 @@
+
+#include <vector>
+
+using namespace std;
+
+#define Real_t double
+#define Int_t int
+#define Index_t int
+#define Vector_h vector
+
+int m_tp, m_planeLoc, m_rowLoc, m_colLoc;
+vector<double> x,y,z;
+
+Real_t myfunc(Real_t x, Real_t y);
+
+void BuildMesh(Int_t nx, Int_t edgeNodes, Int_t edgeElems, Int_t domNodes, Int_t padded_domElems, Vector_h<Real_t> &x_h, Vector_h<Real_t> &y_h, Vector_h<Real_t> &z_h, Vector_h<Int_t> &nodelist_h)
+{
+  Index_t meshEdgeElems = m_tp*nx ;
+
+  x_h.resize(domNodes);
+  y_h.resize(domNodes);
+  z_h.resize(domNodes);
+
+  // initialize nodal coordinates 
+  Index_t nidx = 0 ;
+  Real_t tz = Real_t(1.125)*Real_t(m_planeLoc*nx)/Real_t(meshEdgeElems) ;
+  for (Index_t plane=0; plane<edgeNodes; ++plane) {
+    Real_t ty = Real_t(1.125)*Real_t(m_rowLoc*nx)/Real_t(meshEdgeElems) ;
+    for (Index_t row=0; row<edgeNodes; ++row) {
+      Real_t tx = Real_t(1.125)*Real_t(m_colLoc*nx)/Real_t(meshEdgeElems) ;
+      for (Index_t col=0; col<edgeNodes; ++col) {
+        x_h[nidx] = tx ;
+        y_h[nidx] = ty ;
+        z_h[nidx] = tz ;
+	
+	tz = myfunc(ty, tz);
+        ++nidx ;
+        // tx += ds ; // may accumulate roundoff... 
+        tx = Real_t(1.125)*Real_t(m_colLoc*nx+col+1)/Real_t(meshEdgeElems) ;
+      }
+      // ty += ds ;  // may accumulate roundoff... 
+      ty = Real_t(1.125)*Real_t(m_rowLoc*nx+row+1)/Real_t(meshEdgeElems) ;
+    }
+    // tz += ds ;  // may accumulate roundoff... 
+    tz = Real_t(1.125)*Real_t(m_planeLoc*nx+plane+1)/Real_t(meshEdgeElems) ;
+  }
+
+  x = x_h;
+  y = y_h;
+  z = z_h;
+}
+
+#define RAJA_STORAGE static inline
+#define RAJA_HOST_DEVICE __host__ __device__
+
+RAJA_STORAGE
+RAJA_HOST_DEVICE
+void SumElemStressesToNodeForces( const Real_t B[][8],
+                                  const Real_t stress_xx,
+                                  const Real_t stress_yy,
+                                  const Real_t stress_zz,
+                                  Real_t* fx, Real_t* fy, Real_t* fz )
+{
+   for(Index_t i = 0; i < 8; i++) {
+      fx[i] = -( stress_xx * B[0][i] );
+      fy[i] = -( stress_yy * B[1][i]  );
+      fz[i] = -( stress_zz * B[2][i] );
+   }
+}
+
+__device__ double simple(double x)
+{
+  return x*x + 1.3;
+}
