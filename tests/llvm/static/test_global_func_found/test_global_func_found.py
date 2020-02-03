@@ -16,7 +16,7 @@ def test_1():
     cmdOutput = subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True)
 
     passed = False
-    for l in cmdOutput.split("\n"):
+    for l in cmdOutput.decode('utf-8').split("\n"):
         if "#FPCHECKER: Instrumenting function:" in l and "computed" in l:
             passed = True
 

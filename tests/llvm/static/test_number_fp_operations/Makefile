@@ -1,7 +1,8 @@
-include ../../Makefile.config
+include ../../../Makefile.config
 
 OP	= $(LLVM_PASS) -O0  -x cuda --cuda-gpu-arch=sm_60 -g
-LINK	= -L${CUDA_PATH}/lib64/ -lcuda -lcudart
+
+#LINK	= -L${CUDA_PATH}/lib64/ -lcuda -lcudart
 
 all:
 	$(CC) -c compute.cu $(OP)

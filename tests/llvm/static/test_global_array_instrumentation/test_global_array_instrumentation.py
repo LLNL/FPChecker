@@ -43,25 +43,25 @@ def test_1():
     # -----------------------
     cmd = ["make -f Makefile.0"]
     cmdOutput = subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True)
-    op0_passed = check(cmdOutput.split("\n"))
+    op0_passed = check(cmdOutput.decode('utf-8').split("\n"))
     # ------------------------
 
     # -----------------------
     cmd = ["make -f Makefile.1"]
     cmdOutput = subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True)
-    op1_passed = check(cmdOutput.split("\n"))
+    op1_passed = check(cmdOutput.decode('utf-8').split("\n"))
     # ------------------------
 
     # -----------------------
     cmd = ["make -f Makefile.2"]
     cmdOutput = subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True)
-    op2_passed = check(cmdOutput.split("\n"))
+    op2_passed = check(cmdOutput.decode('utf-8').split("\n"))
     # ------------------------
 
     # -----------------------
     cmd = ["make -f Makefile.3"]
     cmdOutput = subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True)
-    op3_passed = check(cmdOutput.split("\n"))
+    op3_passed = check(cmdOutput.decode('utf-8').split("\n"))
     # ------------------------
 
     assert op0_passed == True

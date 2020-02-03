@@ -43,7 +43,7 @@ private:
   int maxNumLocations = 0;
 
   /* Host */
-  Function *print_at_main;
+  Function *print_at_main = nullptr;
 
   IRBuilder<> createBuilderAfter(Instruction *inst);
   IRBuilder<> createBuilderBefore(Instruction *inst);

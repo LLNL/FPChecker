@@ -18,7 +18,7 @@ def test_1():
 
     passed = False
     ontargetFunc = False
-    for l in cmdOutput.split("\n"):
+    for l in cmdOutput.decode('utf-8').split("\n"):
         if "#FPCHECKER: Instrumenting function:" in l and "powerd" in l:
             ontargetFunc = True
         
@@ -26,5 +26,5 @@ def test_1():
             if "#FPCHECKER: Instrumented operations:" in l:
                 val = int(l.split()[-1:][0])
                 assert val == 6
-		break
+                break
 	

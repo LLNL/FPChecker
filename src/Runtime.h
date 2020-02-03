@@ -76,7 +76,7 @@ __device__ static int _FPC_FP32_IS_FLUSH_TO_ZERO(float x, float y, float z, int 
 __device__ static int _FPC_FP64_IS_FLUSH_TO_ZERO(double x, double y, double z, int op);
 
 /// Host function to print @ main()
-static void _FPC_PRINT_AT_MAIN_();
+//static void _FPC_PRINT_AT_MAIN_();
 
 #define REPORT_LINE_SIZE 80
 #define REPORT_COL1_SIZE 15
@@ -96,7 +96,7 @@ __attribute__((used)) __device__ static int ERRORS_DONT_ABORT = 1;
 
 /// We store the file name and directory in this variable
 //char *_FPC_LOCATIONS_TABLE_[100];// = {"NONE1"};
-__device__ static char *_FPC_FILE_NAME_[1];
+__device__ static const char *_FPC_FILE_NAME_[1] = {"none"};
 
 /// Lock to print from one thread only
 //__device__ static int lock_state = 0;
@@ -371,6 +371,8 @@ static void _FPC_WARNING_(int errorType, int op, int loc, float fp32_val, double
 	}
 }
 
+/// We do not make it static. It seems to cause issues with clang 9.0.1
+/// We transform linkage to ODR anyway in the LLVM pass.
 void _FPC_PRINT_AT_MAIN_()
 {
 	printf("\n");

@@ -399,8 +399,8 @@ void FPInstrumentation::instrumentMainFunction(Function *f)
 	Instruction *inst = bb->getFirstNonPHIOrDbg();
 	IRBuilder<> builder = createBuilderBefore(inst);
 	std::vector<Value *> args;
-
 	CallInst *callInst = nullptr;
+	assert(print_at_main && "print_at_main not set!");
 	callInst = builder.CreateCall(print_at_main, args);
 	assert(callInst && "Invalid call instruction!");
 	setFakeDebugLocation(f, callInst);

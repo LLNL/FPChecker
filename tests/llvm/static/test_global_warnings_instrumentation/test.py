@@ -35,25 +35,25 @@ def main():
     # -----------------------
     cmd = ["make -f Makefile.0"]
     cmdOutput = subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True)
-    op0_passed = check(cmdOutput.split("\n"))
+    op0_passed = check(cmdOutput.decode('utf-8').split("\n"))
     # ------------------------
 
     # -----------------------
     cmd = ["make -f Makefile.1"]
     cmdOutput = subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True)
-    op1_passed = check(cmdOutput.split("\n"))
+    op1_passed = check(cmdOutput.decode('utf-8').split("\n"))
     # ------------------------
 
     # -----------------------
     cmd = ["make -f Makefile.2"]
     cmdOutput = subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True)
-    op2_passed = check(cmdOutput.split("\n"))
+    op2_passed = check(cmdOutput.decode('utf-8').split("\n"))
     # ------------------------
 
     # -----------------------
     cmd = ["make -f Makefile.3"]
     cmdOutput = subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True)
-    op3_passed = check(cmdOutput.split("\n"))
+    op3_passed = check(cmdOutput.decode('utf-8').split("\n"))
     # ------------------------
 
     if op0_passed == True and op1_passed == True and op2_passed == True and op3_passed == True:
