@@ -41,25 +41,25 @@ def test_1():
     try:
         cmdOutput = subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True)
     except subprocess.CalledProcessError as e:
-        print e.output
-	exit()
+        print(e.output)
+        exit()
 
     # --- run code ---
     cmd = ["./main"]
     try:
         cmdOutput = subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True)
     except subprocess.CalledProcessError as e:
-        print e.output
+        print(e.output)
         exit()
 
-    rep1 = getFPCReport(cmdOutput.split("\n"))
+    rep1 = getFPCReport(cmdOutput.decode('utf-8').split("\n"))
 
     # --- compile code ---
     cmd = ["make -f Makefile.2"]
     try:
         cmdOutput = subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True)
     except subprocess.CalledProcessError as e:
-        print e.output
+        print(e.output)
         exit()
 
     # --- run code ---
@@ -67,10 +67,10 @@ def test_1():
     try:
         cmdOutput = subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True)
     except subprocess.CalledProcessError as e:
-        print e.output
+        print(e.output)
         exit()
 
-    rep2 = getFPCReport(cmdOutput.split("\n"))
+    rep2 = getFPCReport(cmdOutput.decode('utf-8').split("\n"))
 
     assert rep1[0] == 'INF' and rep1[3] == '10' and rep2[0] == 'INF' and rep2[3] == '12'
 

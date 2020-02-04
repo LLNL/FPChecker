@@ -41,7 +41,7 @@ def compileAndRun(op_level):
     try:
         cmdOutput = subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True)
     except subprocess.CalledProcessError as e:
-        print e.output
+        print(e.output)
         exit()
 
     # --- run code ---
@@ -49,10 +49,10 @@ def compileAndRun(op_level):
     try:
         cmdOutput = subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True)
     except subprocess.CalledProcessError as e:
-        print e.output
+        print(e.output)
         exit()
 
-    ret = cmdOutput.split("\n")
+    ret = cmdOutput.decode('utf-8').split("\n")
     #print ret
     return ret
 

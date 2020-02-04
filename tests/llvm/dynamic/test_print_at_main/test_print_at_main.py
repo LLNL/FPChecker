@@ -41,19 +41,19 @@ def test_1():
     try:
         cmdOutput = subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True)
     except subprocess.CalledProcessError as e:
-        print e.output
-	exit()
+        print(e.output)
+        exit()
 
     # --- run code ---
     cmd = ["./main"]
     try:
         cmdOutput = subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True)
     except subprocess.CalledProcessError as e:
-        print e.output
+        print(e.output)
         exit()
 
     passed = False
-    for l in cmdOutput.split("\n"):
+    for l in cmdOutput.decode('utf-8').split("\n"):
         if "FPChecker (v" in l:
             passed = True
 

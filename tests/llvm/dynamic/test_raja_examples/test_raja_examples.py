@@ -41,8 +41,8 @@ def test_1():
     try:
         cmdOutput = subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True)
     except subprocess.CalledProcessError as e:
-        print e.output
-	exit()
+        print(e.output)
+        exit()
 
     # --- run code ---
     cmd = ["./main"]
@@ -54,14 +54,14 @@ def test_1():
         #exit()
         error = True
 
-    rep = getFPCReport(cmdOutput.split("\n"))
+    rep = getFPCReport(cmdOutput.decode('utf-8').split("\n"))
 
     # --- compile code ---
     cmd = ["make -f Makefile.errors_dont_abort"]
     try:
         cmdOutput = subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True)
     except subprocess.CalledProcessError as e:
-        print e.output
+        print(e.output)
         exit()
 
     # --- run code ---
@@ -75,7 +75,7 @@ def test_1():
         error = True
 
     error_no_aborts = False
-    for l in cmdOutput.split("\n"):
+    for l in cmdOutput.decode('utf-8').split("\n"):
         if "#FPCHECKER: Underflow Error at dot_product_raja.cpp:32" in l:
             error_no_aborts = True
 

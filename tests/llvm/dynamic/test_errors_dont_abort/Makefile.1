@@ -1,7 +1,7 @@
-include ../../Makefile.config
+include ../../../Makefile.config
 
 OP	= $(LLVM_PASS) -O1  -x cuda --cuda-gpu-arch=sm_60 -g -DFPC_ERRORS_DONT_ABORT
-LINK	= -L${CUDA_PATH}/lib64/ -lcuda -lcudart
+LINK	= -L$(shell ../get_cuda_lib_path.sh)  -lcuda -lcudart
 
 all:
 	$(CC) -c dot_product.cu $(OP)

@@ -42,15 +42,15 @@ def test_1():
     try:
         cmdOutput_1 = subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True)
     except subprocess.CalledProcessError as e:
-        print e.output
-	exit()
+        print(e.output)
+        exit()
 
     # --- run code ---
     cmd = ["./main"]
     try:
         cmdOutput_1 = subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True)
     except subprocess.CalledProcessError as e:
-        print e.output
+        print(e.output)
         exit()
 
 
@@ -59,7 +59,7 @@ def test_1():
     try:
         cmdOutput_2 = subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True)
     except subprocess.CalledProcessError as e:
-        print e.output
+        print(e.output)
         exit()
 
     # --- run code ---
@@ -67,12 +67,12 @@ def test_1():
     try:
         cmdOutput_2 = subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True)
     except subprocess.CalledProcessError as e:
-        print e.output
+        print(e.output)
         exit()
 
 
-    rep1 = getFPCReport(cmdOutput_1.split("\n"))
-    rep2 = getFPCReport(cmdOutput_2.split("\n"))
+    rep1 = getFPCReport(cmdOutput_1.decode('utf-8').split("\n"))
+    rep2 = getFPCReport(cmdOutput_2.decode('utf-8').split("\n"))
 
     assert rep1[0] == 'Warning' and rep1[1] == 'Underflow' and rep1[4] == '8' and rep2[0] == ""
 

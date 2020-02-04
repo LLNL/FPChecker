@@ -40,18 +40,18 @@ def test_1():
     try:
         cmdOutput = subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True)
     except subprocess.CalledProcessError as e:
-        print e.output
-	exit()
+        print(e.output)
+        exit()
 
     # --- run code ---
     cmd = ["./main"]
     try:
         cmdOutput = subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True)
     except subprocess.CalledProcessError as e:
-        print e.output
+        print(e.output)
         exit()
 
-    rep = getFPCReport(cmdOutput.split("\n"))
+    rep = getFPCReport(cmdOutput.decode('utf-8').split("\n"))
 
     assert rep[0] == 'Underflow' and rep[3] == '8'
 
