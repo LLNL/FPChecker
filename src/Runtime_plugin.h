@@ -917,30 +917,41 @@ double _FPC_CHECK_(double x, int loc, const char *fileName)
   }
 #endif
 
-	int op = -1;
+	//int op = -1;
 	if (isinf(x))
 	{
-		_FPC_PLUGIN_INTERRUPT_(1, op, loc, 0, x, fileName);
+#ifdef FPC_SHORT_REPORTS
+		printf("#FPCHECKER: INF error: %f @ %s:%d\n", x, fileName, loc);
+#else
+		_FPC_PLUGIN_INTERRUPT_(1, -1, loc, 0, x, fileName);
+#endif
 	}
 	else if (isnan(x))
 	{
-		_FPC_PLUGIN_INTERRUPT_(0, op, loc, 0, x, fileName);
+#ifdef FPC_SHORT_REPORTS
+		printf("#FPCHECKER: NaN error: %f @ %s:%d\n", x, fileName, loc);
+#else
+		_FPC_PLUGIN_INTERRUPT_(0, -1, loc, 0, x, fileName);
+#endif
 	}
+#ifndef FPC_DISABLE_SUBNORMAL
 	else /// subnormals check
 	{
 		if (_FPC_FP64_IS_SUBNORMAL(x))
 		{
-			_FPC_PLUGIN_INTERRUPT_(2, op, loc, 0, x, fileName);
+			_FPC_PLUGIN_INTERRUPT_(2, -1, loc, 0, x, fileName);
 		}
 		else if (_FPC_FP64_IS_ALMOST_SUBNORMAL(x))
 		{
-			_FPC_PLUGIN_WARNING_(2, op, loc, 0, x, fileName);
+			_FPC_PLUGIN_WARNING_(2, -1, loc, 0, x, fileName);
 		}
 		else if (_FPC_FP64_IS_ALMOST_OVERFLOW(x))
 		{
-			_FPC_PLUGIN_WARNING_(1, op, loc, 0, x, fileName);
+			_FPC_PLUGIN_WARNING_(1, -1, loc, 0, x, fileName);
 		}
 	}
+#endif
+
 	return x;
 }
 
@@ -959,30 +970,41 @@ float _FPC_CHECK_(float x, int loc, const char *fileName)
   }
 #endif
 
-	int op = -1;
+	//int op = -1;
 	if (isinf(x))
 	{
-		_FPC_PLUGIN_INTERRUPT_(1, op, loc, x, 0, fileName);
+#ifdef FPC_SHORT_REPORTS
+		printf("#FPCHECKER: INF error: %f @ %s:%d\n", x, fileName, loc);
+#else
+		_FPC_PLUGIN_INTERRUPT_(1, -1, loc, x, 0, fileName);
+#endif
 	}
 	else if (isnan(x))
 	{
-		_FPC_PLUGIN_INTERRUPT_(0, op, loc, x, 0, fileName);
+#ifdef FPC_SHORT_REPORTS
+		printf("#FPCHECKER: NaN error: %f @ %s:%d\n", x, fileName, loc);
+#else
+		_FPC_PLUGIN_INTERRUPT_(0, -1, loc, x, 0, fileName);
+#endif
 	}
+#ifndef FPC_DISABLE_SUBNORMAL
 	else /// subnormals check
 	{
 		if (_FPC_FP64_IS_SUBNORMAL(x))
 		{
-			_FPC_PLUGIN_INTERRUPT_(2, op, loc, x, 0, fileName);
+			_FPC_PLUGIN_INTERRUPT_(2, -1, loc, x, 0, fileName);
 		}
 		else if (_FPC_FP64_IS_ALMOST_SUBNORMAL(x))
 		{
-			_FPC_PLUGIN_WARNING_(2, op, loc, x, 0, fileName);
+			_FPC_PLUGIN_WARNING_(2, -1, loc, x, 0, fileName);
 		}
 		else if (_FPC_FP64_IS_ALMOST_OVERFLOW(x))
 		{
-			_FPC_PLUGIN_WARNING_(1, op, loc, x, 0, fileName);
+			_FPC_PLUGIN_WARNING_(1, -1, loc, x, 0, fileName);
 		}
 	}
+#endif
+
 	return x;
 }
 
