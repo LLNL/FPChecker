@@ -1014,6 +1014,36 @@ double _FPC_CHECK_(int x, int loc, const char *fileName)
   return (double)x;
 }
 
+__device__ static
+double _FPC_CHECK_(unsigned int x, int loc, const char *fileName)
+{
+  return (double)x;
+}
+
+__device__ static
+double _FPC_CHECK_(const unsigned long long x, int loc, const char *fileName)
+{
+  return (double)x;
+}
+
+__device__ static
+double _FPC_CHECK_(long x, int loc, const char *fileName)
+{
+  return (double)x;
+}
+
+__device__ static
+double _FPC_CHECK_(unsigned long x, int loc, const char *fileName)
+{
+  return (double)x;
+}
+
+//__device__ static
+//double _FPC_CHECK_(size_t x, int loc, const char *fileName)
+//{
+//  return (double)x;
+//}
+
 #else // not __CUDA_ARCH__ (host)
 
 __host__ static
@@ -1066,6 +1096,35 @@ double _FPC_CHECK_(int x, int loc, const char *fileName)
   return (double)x;
 }
 
+__host__ static
+double _FPC_CHECK_(unsigned int x, int loc, const char *fileName)
+{
+  return (double)x;
+}
+
+__host__ static
+double _FPC_CHECK_(const unsigned long long x, int loc, const char *fileName)
+{
+  return (double)x;
+}
+
+__host__ static
+double _FPC_CHECK_(long x, int loc, const char *fileName)
+{
+  return (double)x;
+}
+
+__host__ static
+double _FPC_CHECK_(unsigned long x, int loc, const char *fileName)
+{
+  return (double)x;
+}
+
+//__host__ static
+//double _FPC_CHECK_(size_t x, int loc, const char *fileName)
+//{
+//  return (double)x;
+//}
 
 #endif // __CUDA_ARCH__
 
@@ -1088,6 +1147,36 @@ double _FPC_CHECK_(int x, int loc, const char *fileName)
 {
   return (double)x;
 }
+
+__host__ __device__ static
+double _FPC_CHECK_(unsigned int x, int loc, const char *fileName)
+{
+  return (double)x;
+}
+
+__host__ __device__ static
+double _FPC_CHECK_(const unsigned long long x, int loc, const char *fileName)
+{
+  return (double)x;
+}
+
+__host__ __device__ static
+double _FPC_CHECK_(long x, int loc, const char *fileName)
+{
+  return (double)x;
+}
+
+__host__ __device__ static
+double _FPC_CHECK_(unsigned long x, int loc, const char *fileName)
+{
+  return (double)x;
+}
+
+//__host__ __device__ static
+//double _FPC_CHECK_(size_t x, int loc, const char *fileName)
+//{
+//  return (double)x;
+//}
 
 #endif //__NVCC__
 
