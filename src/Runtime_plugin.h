@@ -25,7 +25,7 @@
 
 #ifdef __CUDA_ARCH__
 /// Symbol used to determine whether we are compiling device code or not
-__device__ void _FPC_DEVICE_CODE_FUNC_(){};
+//__device__ void _FPC_DEVICE_CODE_FUNC_(){};
 #endif
 
 /* --- non-static ----------------------------------------------------------- */
