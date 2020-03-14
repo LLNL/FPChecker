@@ -85,7 +85,7 @@ static void _FPC_PRINT_AT_MAIN_();
 #ifdef FPC_DANGER_ZONE_PERCENT
 #define DANGER_ZONE_PERCENTAGE FPC_DANGER_ZONE_PERCENT
 #else
-#define DANGER_ZONE_PERCENTAGE 0.10
+#define DANGER_ZONE_PERCENTAGE 0.05
 #endif
 
 #ifdef FPC_ERRORS_DONT_ABORT
@@ -920,7 +920,7 @@ double _FPC_CHECK_(double x, int loc, const char *fileName)
 	//int op = -1;
 	if (isinf(x))
 	{
-#ifdef FPC_SHORT_REPORTS
+#if defined(FPC_SHORT_REPORTS) || defined(FPC_ERRORS_DONT_ABORT)
 		printf("#FPCHECKER: INF error: %f @ %s:%d\n", x, fileName, loc);
 #else
 		_FPC_PLUGIN_INTERRUPT_(1, -1, loc, 0, x, fileName);
@@ -928,29 +928,46 @@ double _FPC_CHECK_(double x, int loc, const char *fileName)
 	}
 	else if (isnan(x))
 	{
-#ifdef FPC_SHORT_REPORTS
+#if defined(FPC_SHORT_REPORTS) || defined(FPC_ERRORS_DONT_ABORT)
 		printf("#FPCHECKER: NaN error: %f @ %s:%d\n", x, fileName, loc);
 #else
 		_FPC_PLUGIN_INTERRUPT_(0, -1, loc, 0, x, fileName);
 #endif
 	}
-#ifndef FPC_DISABLE_SUBNORMAL
 	else /// subnormals check
 	{
+
+#ifndef FPC_DISABLE_SUBNORMAL
 		if (_FPC_FP64_IS_SUBNORMAL(x))
 		{
+#if defined(FPC_SHORT_REPORTS) || defined(FPC_ERRORS_DONT_ABORT)
+			printf("#FPCHECKER: underflow error: %f @ %s:%d\n", x, fileName, loc);
+#else
 			_FPC_PLUGIN_INTERRUPT_(2, -1, loc, 0, x, fileName);
+#endif
 		}
-		else if (_FPC_FP64_IS_ALMOST_SUBNORMAL(x))
+#endif // FPC_DISABLE_SUBNORMAL
+
+#ifndef FPC_DISABLE_WARNINGS
+		if (_FPC_FP64_IS_ALMOST_SUBNORMAL(x))
 		{
+#if defined(FPC_SHORT_REPORTS) || defined(FPC_ERRORS_DONT_ABORT)
+			printf("#FPCHECKER: underflow warning: %f @ %s:%d\n", x, fileName, loc);
+#else
 			_FPC_PLUGIN_WARNING_(2, -1, loc, 0, x, fileName);
+#endif
 		}
 		else if (_FPC_FP64_IS_ALMOST_OVERFLOW(x))
 		{
+#if defined(FPC_SHORT_REPORTS) || defined(FPC_ERRORS_DONT_ABORT)
+			printf("#FPCHECKER: overflow warning: %f @ %s:%d\n", x, fileName, loc);
+#else
 			_FPC_PLUGIN_WARNING_(1, -1, loc, 0, x, fileName);
-		}
-	}
 #endif
+		}
+#endif // FPC_DISABLE_WARNINGS
+
+	}
 
 	return x;
 }
@@ -973,7 +990,7 @@ float _FPC_CHECK_(float x, int loc, const char *fileName)
 	//int op = -1;
 	if (isinf(x))
 	{
-#ifdef FPC_SHORT_REPORTS
+#if defined(FPC_SHORT_REPORTS) || defined(FPC_ERRORS_DONT_ABORT)
 		printf("#FPCHECKER: INF error: %f @ %s:%d\n", x, fileName, loc);
 #else
 		_FPC_PLUGIN_INTERRUPT_(1, -1, loc, x, 0, fileName);
@@ -981,29 +998,47 @@ float _FPC_CHECK_(float x, int loc, const char *fileName)
 	}
 	else if (isnan(x))
 	{
-#ifdef FPC_SHORT_REPORTS
+#if defined(FPC_SHORT_REPORTS) || defined(FPC_ERRORS_DONT_ABORT)
 		printf("#FPCHECKER: NaN error: %f @ %s:%d\n", x, fileName, loc);
 #else
 		_FPC_PLUGIN_INTERRUPT_(0, -1, loc, x, 0, fileName);
 #endif
 	}
-#ifndef FPC_DISABLE_SUBNORMAL
 	else /// subnormals check
 	{
+
+#ifndef FPC_DISABLE_SUBNORMAL
 		if (_FPC_FP64_IS_SUBNORMAL(x))
 		{
+#if defined(FPC_SHORT_REPORTS) || defined(FPC_ERRORS_DONT_ABORT)
+			printf("#FPCHECKER: underflow error: %f @ %s:%d\n", x, fileName, loc);
+#else
 			_FPC_PLUGIN_INTERRUPT_(2, -1, loc, x, 0, fileName);
+#endif
 		}
-		else if (_FPC_FP64_IS_ALMOST_SUBNORMAL(x))
+#endif // FPC_DISABLE_SUBNORMAL
+
+
+#ifndef FPC_DISABLE_WARNINGS
+		if (_FPC_FP64_IS_ALMOST_SUBNORMAL(x))
 		{
+#if defined(FPC_SHORT_REPORTS) || defined(FPC_ERRORS_DONT_ABORT)
+			printf("#FPCHECKER: underflow warning: %f @ %s:%d\n", x, fileName, loc);
+#else
 			_FPC_PLUGIN_WARNING_(2, -1, loc, x, 0, fileName);
+#endif
 		}
 		else if (_FPC_FP64_IS_ALMOST_OVERFLOW(x))
 		{
+#if defined(FPC_SHORT_REPORTS) || defined(FPC_ERRORS_DONT_ABORT)
+			printf("#FPCHECKER: overflow warning: %f @ %s:%d\n", x, fileName, loc);
+#else
 			_FPC_PLUGIN_WARNING_(1, -1, loc, x, 0, fileName);
-		}
-	}
 #endif
+		}
+#endif // FPC_DISABLE_WARNINGS
+
+	}
 
 	return x;
 }

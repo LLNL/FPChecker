@@ -1,0 +1,35 @@
+
+namespace SAMRAI {
+namespace pdat {
+
+class CellIndex {
+double my_x;
+
+public:
+	CellIndex(double x) : my_x(x) {};
+};
+}
+
+namespace hier {
+class Box {
+public:
+  typedef SAMRAI::pdat::CellIndex* iterator;
+};
+
+}
+}
+
+__device__
+double calc(SAMRAI::pdat::CellIndex x)
+{
+  return 1.1;
+}
+
+__device__
+void test(double *fptr, size_t idx_dst)
+{
+  SAMRAI::hier::Box::iterator bi;
+  double (*fine_volumes)(SAMRAI::pdat::CellIndex) = &calc;
+  fptr[idx_dst] = _FPC_CHECK_((*fine_volumes)(SAMRAI::pdat::CellIndex(*bi)), 33, "compute.cu"); 
+}
+

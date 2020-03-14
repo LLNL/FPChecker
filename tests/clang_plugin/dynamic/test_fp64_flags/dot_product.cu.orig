@@ -1,0 +1,28 @@
+
+#include <stdio.h>
+
+__device__ void mul(double a, double b, double *res)
+{
+  *res = a * b;
+  double tmp1 = (*res)-(*res) / (*res)-(*res); // NaN
+  double tmp2 = (*res) * (1e307 * 1e10); // +Inf
+  double tmp3 = (*res) * (1e-300 * 1e-22); // subnormal/underflow
+  double tmp4 = (*res) * 1e-275; // almost underflow
+  double tmp5 = (*res) * 1e+290; // almost overflow
+}
+
+__global__ void dot_prod(double *x, double *y, int size)
+{
+  double d;
+  for (int i=0; i < size; ++i)
+  {
+    double tmp;
+    mul(x[i], y[i], &tmp);
+    d += tmp;
+  }
+
+  int tid = blockIdx.x * blockDim.x + threadIdx.x;
+  if (tid == 0) {
+    printf("dot: %f\n", d);
+  }
+}
