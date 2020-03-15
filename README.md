@@ -155,10 +155,16 @@ Line          : 32
 The current version is not MPI aware, so every MPI process that encounters an error/warning will print a report. You should include the location of `mpi.h`; otherwise clang will not find the MPI call definitions.
 
 ## Configuration Options
-Configuration options are passed via -D macros when invoking clang to compile your code.
+Configuration options are passed via -D macros when invoking nvcc (for the clang version) or when invoking clang (for the llvm version).
 
-- **-D FPC_DANGER_ZONE_PERCENT=x.x:** Changes the size of the danger zone. By default, x.x is 0.10, and it should be a number between 0.0 and 1.0. Warning reports can be almost completely disabled by using a small danger zone, such as 0.01.
-- **-D FPC_ERRORS_DONT_ABORT:** By default FPChecker aborts the kernel that first encounters an error (i.e., floating-point exception). Depending on your application, this may make the host code abort as well. This option allows FPChecker to print error/warning reports without aborting. This allows you to check for errors/warnings in the entire execution of your program. The performance of this mode is not as good as in the default mode.
+In the clang version, if you are only interested in detecting the most critical exceptions, i.e., generation of NaN and Infinity numbers, use these options: `-DFPC_DISABLE_SUBNORMAL -DFPC_DISABLE_WARNINGS`.
+
+| Option | Description | Version Available |
+|--------|-------------|-----------|
+| -D FPC_DISABLE_SUBNORMAL | Disable checking for subnormal numbers (underflows) | clang |
+| -D FPC_DISABLE_WARNINGS | Disable warnings of small or large numbers (overflows and underflows) | clang |
+| -D FPC_ERRORS_DONT_ABORT | By default FPChecker aborts the kernel that first encounters an error or warning. This option allows FPChecker to print reports without aborting. This allows you to check for errors/warnings in the entire execution of your program. | clang, llvm |
+| -D FPC_DANGER_ZONE_PERCENT=x.x | Changes the size of the danger zone for warnings. By default, x.x is 0.05, and it should be a number between 0.0 and 1.0. Warning reports can be almost completely disabled by using a small danger zone, such as 0.01. | clang, llvm |
 
 ### Contact
 For questions, contact Ignacio Laguna <ilaguna@llnl.gov>.
