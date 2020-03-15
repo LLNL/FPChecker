@@ -1,3 +1,8 @@
+## Release 0.1.2
+- Added clang version. It instruments source code via clang plugin. Instrumented code can be compiled with nvcc.
+- Added new flags: FPC_DISABLE_SUBNORMAL, FPC_DISABLE_WARNINGS 
+- Added clang wrapper to instrument code: clang-fpchecker
+
 ## Release 0.1.0
 - First stable release
 - Tests use pytest
