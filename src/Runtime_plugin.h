@@ -783,6 +783,7 @@ __attribute__((noinline)) static void _FPC_PLUGIN_INTERRUPT_(int errorType, int 
 				_FPC_PRINT_REPORT_ROW_("Line", REPORT_COL1_SIZE, 0, ':');
 				//_FPC_PRINT_REPORT_ROW_(l, REPORT_COL2_SIZE, 1);
 				_FPC_PRINT_REPORT_ROW_(loc, REPORT_COL2_SIZE, 1);
+        printf(" Block (%d,%d,%d), Thread (%d,%d,%d)\n", blockIdx.x, blockIdx.y, blockIdx.z, threadIdx.x, threadIdx.y, threadIdx.z);
 				_FPC_PRINT_REPORT_LINE_('+');
 
 				asm("trap;");
@@ -889,6 +890,7 @@ __attribute__((noinline)) static void _FPC_PLUGIN_WARNING_(int errorType, int op
 				_FPC_PRINT_REPORT_ROW_("Line", REPORT_COL1_SIZE, 0, ':');
 				//_FPC_PRINT_REPORT_ROW_(l, REPORT_COL2_SIZE, 1);
 				_FPC_PRINT_REPORT_ROW_(loc, REPORT_COL2_SIZE, 1);
+        printf(" Block (%d,%d,%d), Thread (%d,%d,%d)\n", blockIdx.x, blockIdx.y, blockIdx.z, threadIdx.x, threadIdx.y, threadIdx.z);
 				_FPC_PRINT_REPORT_LINE_('+');
 
 				asm("trap;");
@@ -906,6 +908,10 @@ __device__ static int _FPC_HAS_PRINTED_ = 0;
 __device__ static
 double _FPC_CHECK_(double x, int loc, const char *fileName)
 {
+#ifdef FPC_DISABLE_CHECKING
+  return x;
+#else
+
 #ifndef FPC_DISABLE_VERBOSE
   int id = _FPC_GET_GLOBAL_IDX_3D_3D();
   if (id == 0)
@@ -970,12 +976,17 @@ double _FPC_CHECK_(double x, int loc, const char *fileName)
 	}
 
 	return x;
+#endif // FPC_DISABLE_CHECKING
 }
 
 // FP32 version
 __device__ static
 float _FPC_CHECK_(float x, int loc, const char *fileName)
 {
+#ifdef FPC_DISABLE_CHECKING
+  return x;
+#else
+
 #ifndef FPC_DISABLE_VERBOSE
   int id = _FPC_GET_GLOBAL_IDX_3D_3D();
   if (id == 0)
@@ -1041,6 +1052,7 @@ float _FPC_CHECK_(float x, int loc, const char *fileName)
 	}
 
 	return x;
+#endif // FPC_DISABLE_CHECKING
 }
 
 __device__ static
@@ -1073,6 +1085,13 @@ double _FPC_CHECK_(unsigned long x, int loc, const char *fileName)
   return (double)x;
 }
 
+__device__ static
+double _FPC_CHECK_(long long x, int loc, const char *fileName)
+{
+  return (double)x;
+}
+
+
 //__device__ static
 //double _FPC_CHECK_(size_t x, int loc, const char *fileName)
 //{
@@ -1084,6 +1103,10 @@ double _FPC_CHECK_(unsigned long x, int loc, const char *fileName)
 __host__ static
 double _FPC_CHECK_(double x, int loc, const char *fileName)
 {
+#ifdef FPC_DISABLE_CHECKING
+  return x;
+#else
+
   int op = -1;
   if (isinf(x))
   {
@@ -1101,11 +1124,16 @@ double _FPC_CHECK_(double x, int loc, const char *fileName)
     }
   }
   return x;
+#endif // FPC_DISABLE_CHECKING
 }
 
 __host__ static
 float _FPC_CHECK_(float x, int loc, const char *fileName)
 {
+#ifdef FPC_DISABLE_CHECKING
+  return x;
+#else
+
   int op = -1;
   if (isinf(x))
   {
@@ -1123,6 +1151,7 @@ float _FPC_CHECK_(float x, int loc, const char *fileName)
     }
   }
   return x;
+#endif // FPC_DISABLE_CHECKING
 }
 
 __host__ static
@@ -1151,6 +1180,12 @@ double _FPC_CHECK_(long x, int loc, const char *fileName)
 
 __host__ static
 double _FPC_CHECK_(unsigned long x, int loc, const char *fileName)
+{
+  return (double)x;
+}
+
+__host__ static
+double _FPC_CHECK_(long long x, int loc, const char *fileName)
 {
   return (double)x;
 }
@@ -1203,6 +1238,12 @@ double _FPC_CHECK_(long x, int loc, const char *fileName)
 
 __host__ __device__ static
 double _FPC_CHECK_(unsigned long x, int loc, const char *fileName)
+{
+  return (double)x;
+}
+
+__host__ __device__ static
+double _FPC_CHECK_(long long x, int loc, const char *fileName)
 {
   return (double)x;
 }

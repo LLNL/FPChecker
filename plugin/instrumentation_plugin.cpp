@@ -79,7 +79,7 @@ public:
   std::string getShortFileName()
   {
     std::string ret("unknown");
-    unsigned n=15;
+    unsigned n=25;
     if (globalFileName.size() <= n)
       ret = globalFileName;
     else
