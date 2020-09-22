@@ -5,6 +5,8 @@ import argparse
 import subprocess
 import sys
 import os
+from nvcc_parser import ClangCommand
+from colors import prGreen,prCyan,prRed
 
 FPCHECKER_PATH      ='/usr/global/tools/fpchecker/blueos_3_ppc64le_ib_p9/fpchecker-0.1.2-clang-9.0.0'
 
@@ -20,9 +22,9 @@ FPCHECKER_RUNTIME   ='/usr/workspace/wsa/laguna/fpchecker/FPChecker/src/Runtime_
 CLANG_PLUGIN        ='-Xclang -load -Xclang '+FPCHECKER_LIB+' -Xclang -plugin -Xclang instrumentation_plugin'
 LLVM_PASS_CLANG     =CLANG_PLUGIN+' -include '+FPCHECKER_RUNTIME+' -emit-llvm'
 
-REPLACE_SINGLE_OPTIONS = {'--device-c':'-fcuda-rdc', '-dc':'-fcuda-rdc', '-arch':'--cuda-gpu-arch', '--gpu-architecture':'--cuda-gpu-arch', '-G':' '}
-REPLACE_OPT_VALUES = {'-x':('cu', 'cuda')}
-REMOVE_OPTS_WITH_VALUES = ['--compiler-bindir', '-ccbin', '--ptxas-options', '-Xptxas']
+#REPLACE_SINGLE_OPTIONS = {'--device-c':'-fcuda-rdc', '-dc':'-fcuda-rdc', '-arch':'--cuda-gpu-arch', '--gpu-architecture':'--cuda-gpu-arch', '-G':' '}
+#REPLACE_OPT_VALUES = {'-x':('cu', 'cuda')}
+#REMOVE_OPTS_WITH_VALUES = ['--compiler-bindir', '-ccbin', '--ptxas-options', '-Xptxas']
 ADD_OPTIONS = ['-Qunused-arguments', '-g']
 
 CUDA_EXTENSION = ['.cu', '.cuda'] + ['.C', '.cc', '.cpp', '.CPP', '.c++', '.cp', '.cxx']
@@ -134,38 +136,11 @@ def convertCommand(line):
   if not isNVCC(line):
     COMMANDS_DB.append([line, ''])
     return
+  
+  newLine = ClangCommand(line).to_str()
 
-  # Replace nvcc by clang
   # Add options after clang command
-  newLine = line.replace('nvcc ', 'clang++ '+' '.join(ADD_OPTIONS)+' ', 1)
-
-  for k in REPLACE_SINGLE_OPTIONS.keys():
-    newLine = newLine.replace(k,REPLACE_SINGLE_OPTIONS[k])
-
-  for k in REPLACE_OPT_VALUES.keys():
-    if k+' ' in newLine:
-      tokens = newLine.split()
-      idx = tokens.index(k) + 1
-      if tokens[idx] == REPLACE_OPT_VALUES[k][0]:
-        tokens[idx] = REPLACE_OPT_VALUES[k][1]
-      newLine = ' '.join(tokens)
-
-  for k in REMOVE_OPTS_WITH_VALUES:
-    # option (space) value
-    if k+' ' in newLine:
-      print('k', k, 'in', newLine)
-      tokens = newLine.split()
-      idx = tokens.index(k)
-      del(tokens[idx])
-      del(tokens[idx])
-      newLine = ' '.join(tokens)
-    # option=value
-    if k+'=' in newLine:
-      tokens = newLine.split()
-      for i, elem in enumerate(tokens):
-        if k+'=' in elem:
-          tokens[i] = ''
-      newLine = ' '.join(tokens)
+  newLine = newLine.replace('clang++ ', 'clang++ '+' '.join(ADD_OPTIONS)+' ', 1)
 
   if CLANG_VERSION:
     newLine, origFileName = replaceFileNameAndCopy(newLine)
@@ -245,15 +220,6 @@ def replayCommands():
           prRed('Error:')
           print(e.output.decode('utf-8'))
           exit(-1)
-
-def prGreen(skk):
-  print("\033[92m{}\033[00m" .format(skk))
-
-def prCyan(skk):
-  print("\033[96m{}\033[00m" .format(skk))
-
-def prRed(skk):
-  print("\033[91m{}\033[00m" .format(skk))
 
 if __name__ == '__main__':
   parser = argparse.ArgumentParser(description='FPChecker tool')
