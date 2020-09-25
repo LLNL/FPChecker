@@ -3,6 +3,7 @@ import sys
 from nvcc_options_table import BOOLEAN_OPTIONS, SINGLE_VALUE_OPTIONS, SINGLE_VALUE_OPTIONS_TRANS, LIST_OPTIONS  
 
 class ClangCommand:
+
   def __init__(self, line):
     # Split into multiple commands
     #newCommand = []
@@ -31,8 +32,14 @@ class ClangCommand:
       self.newCommand = self.newCommand + newCommand
 
   def to_str(self):
+    for elem in self.newCommand:
+      if elem == 'nvcc' or elem.endswith('/nvcc'):
+        idx = self.newCommand.index(elem)
+        self.newCommand[idx] = 'clang++'
+    
     ret = ' '.join(self.newCommand)
-    ret = ret.replace('nvcc ', 'clang++ ')
+    #ret = ret.replace('nvcc ', 'clang++ ')
+
     # Add default compute capability if not present
     if '--cuda-gpu-arch' not in ret:
       ret = ret.replace('clang++ ', 'clang++ --cuda-gpu-arch=sm_60 ')

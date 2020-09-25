@@ -1091,6 +1091,13 @@ double _FPC_CHECK_(long long x, int loc, const char *fileName)
   return (double)x;
 }
 
+__device__ static
+long double _FPC_CHECK_(long double x, int loc, const char *fileName)
+{
+  return x;
+}
+
+
 
 //__device__ static
 //double _FPC_CHECK_(size_t x, int loc, const char *fileName)
@@ -1190,6 +1197,12 @@ double _FPC_CHECK_(long long x, int loc, const char *fileName)
   return (double)x;
 }
 
+__host__ static
+long double _FPC_CHECK_(long double x, int loc, const char *fileName)
+{
+  return x;
+}
+
 //__host__ static
 //double _FPC_CHECK_(size_t x, int loc, const char *fileName)
 //{
@@ -1246,6 +1259,12 @@ __host__ __device__ static
 double _FPC_CHECK_(long long x, int loc, const char *fileName)
 {
   return (double)x;
+}
+
+__host__ __device__ static
+long double _FPC_CHECK_(long double x, int loc, const char *fileName)
+{
+  return x;
 }
 
 //__host__ __device__ static

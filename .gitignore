@@ -13,3 +13,4 @@ main
 .nfs*
 *.pytest_cache*
 .cache
+.fpchecker/

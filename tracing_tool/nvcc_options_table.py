@@ -192,7 +192,8 @@ LIST_OPTIONS = {
   '--Werror': ('-Werror', '', 0),
   '-Werror': ('-Werror', '', 0),
   '--options-file': ('', '', 0),
-  '-optf': ('', '', 0)
+  '-optf': ('', '', 0),
+  '-Xcudafe': ('', '', 0)
 }
 
 

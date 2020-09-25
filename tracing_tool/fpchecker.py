@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import json
 import pathlib
 import argparse
 import subprocess
@@ -7,6 +8,7 @@ import sys
 import os
 from nvcc_parser import ClangCommand
 from colors import prGreen,prCyan,prRed
+import strace_module
 
 FPCHECKER_PATH      ='/usr/global/tools/fpchecker/blueos_3_ppc64le_ib_p9/fpchecker-0.1.2-clang-9.0.0'
 
@@ -35,10 +37,38 @@ COMMANDS_DB = []
 
 CLANG_VERSION = True 
 
-LINKER = None
+#LINKER = None
+
+#OMIT_SOURCE_FILES = ['POLYBENCH_GEMVER-Cuda_copy.cpp']
+OMIT_SOURCE_FILES = []
+
+RESTART_COMMAND = 1
 
 # Defines a mapping of original names and new names for files
 FILE_NAMES_MAP = {'file1': 'file1_copy'}
+
+def modifyArchiveCommandIfNeeded(line):
+  found = False
+  tokens = line.split()
+  ar_idx = None
+  for t in tokens:
+    if t == 'ar' or t.endswith('/ar'):
+      ar_idx = tokens.index(t)
+      break
+  # We found the ar command
+  library_idx = None
+  if ar_idx != None:
+    for t in tokens:
+      if t.endswith('.a'):
+        library_idx = tokens.index(t)
+        break
+  # We found the ar command and library:
+  if ar_idx != None and library_idx != None:
+    found = True
+    for i in range(ar_idx+1, library_idx):
+     tokens[i] = tokens[i].replace('q', 'r')
+  line = ' '.join(tokens)
+  return (found, line)
 
 # Remove the object file option from the command line, i.e., -o file.o
 def removeObjectFile(line, fileName):
@@ -57,14 +87,20 @@ def removeObjectFile(line, fileName):
 
   return line
 
+# Is it a link comand?
 def isLinkCommand(line):
   if '-c ' not in line and '-o ' in line:
-    if LINKER != None:
-      if LINKER+' ' in line:
-        return True
-    else:
+    return True
+  return False 
+
+# Is it the command that links the final program?
+def isProgramLinkCommand(line):
+  if '-c ' not in line and '-o ' in line:
+    tokens = line.split()
+    idx = tokens.index('-o')
+    output = tokens[idx+1]
+    if not output.endswith('.o'):
       return True
-       
   return False 
 
 def changeNameOfExecutable(line):
@@ -104,7 +140,7 @@ def replaceFileNameAndCopy(line):
   if fileName != None:
     # Create a copy of the source file
     idx = line.index('clang++')
-    copyCommand = '  cp -f ' + fileName + ' ' + newFileName + '; '
+    copyCommand = '  cp -f ' + fileName + ' ' + newFileName + ' && '
     line = line[:idx] + copyCommand + line[idx:]
   return line, fileName
 
@@ -125,10 +161,20 @@ def isClang(line):
   return 'clang++ ' in line
 
 def convertCommand(line):
-  if isLinkCommand(line):
+  if isProgramLinkCommand(line):
     line = changeNameOfExecutable(line)
     if CLANG_VERSION:
       line = changeNameOfObjectFiles(line)
+    COMMANDS_DB.append([line, ''])
+    return
+
+  if isLinkCommand(line):
+    COMMANDS_DB.append([line, ''])
+    return
+
+  # Check if it's archive command
+  (found, line) = modifyArchiveCommandIfNeeded(line)
+  if found:
     COMMANDS_DB.append([line, ''])
     return
 
@@ -136,7 +182,7 @@ def convertCommand(line):
   if not isNVCC(line):
     COMMANDS_DB.append([line, ''])
     return
-  
+
   newLine = ClangCommand(line).to_str()
 
   # Add options after clang command
@@ -154,55 +200,26 @@ def convertCommand(line):
 
   COMMANDS_DB.append([newLine, origCommand])
 
-def saveCompilingCommands(line):
-  l = line.decode('utf-8')
-  cmd = ''
-  if 'write(' in l:
-      cmd = l.split(',')[1]
-      # Remove " from string
-      cmd = cmd[2:-3] + "\n"
-      sys.stdout.write(cmd)
-      sys.stdout.flush()
-      convertCommand(cmd)
+def replayCommands(fileName):
+  global RESTART_COMMAND, OMIT_SOURCE_FILES
 
-def traceProgram(command):
-  trace_command = ['strace', '-s', '2048'] + command
-  process = subprocess.Popen(trace_command, shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+  with open(fileName) as fd:
+    for line in fd:
+      convertCommand(line)
 
-  # Poll process for new output until finished
-  while True:
-    #nextline = process.stdout.readline()
-    nextline = process.stderr.readline()
+  for i in range(len(COMMANDS_DB))[RESTART_COMMAND-1:]:
+    cmd = COMMANDS_DB[i]
 
-    if process.poll() is not None:
-      break
+    # Omit some source files
+    sourceFileName = getCodeFileName(cmd[0])
+    if sourceFileName:
+      for f in OMIT_SOURCE_FILES:
+        if sourceFileName.endswith(f):
+          cmd[0] = 'echo "Skipping: ' + f + '"'
 
-    saveCompilingCommands(nextline)
-
-  (stdout_data, stderr_data) = process.communicate()
-  exitCode = process.returncode
-
-  if (exitCode == 0):
-    return (stdout_data, stderr_data)
-  else:
-    prCyan('Error exit code: '+str(exitCode))
-    print('Error in:', command)
-    exit(-1)
-    #raise ProcessException(command, exitCode, output)
-
-def replayCommands():
-  for cmd in COMMANDS_DB:
-    print(cmd[0])
-    prCyan('Instrumenting...')
+    prCyan('Instrumenting ' + str(i+1) + '/' + str(len(COMMANDS_DB)))
     try:
-      # If it is another make command, we call the wrapper on it
-      tokens = cmd[0].split()
-      if 'make' in tokens:
-        idx = tokens.index('make')
-        tokens[idx] = str(pathlib.Path(__file__).parent.absolute()) + '/' + os.path.split(__file__)[1] + ' make'
-        cmd[0] = ' '.join(tokens)
-        print(cmd[0])
-
+      print(cmd[0])
       cmdOutput = subprocess.check_output(cmd[0], stderr=subprocess.STDOUT, shell=True)
       print(cmdOutput.decode('utf-8'))
     except subprocess.CalledProcessError as e:
@@ -221,6 +238,38 @@ def replayCommands():
           print(e.output.decode('utf-8'))
           exit(-1)
 
+def execTraces(fileName):
+  prGreen('Executing commands from ' + fileName)
+  fd = open(fileName, 'r')
+  i = 1
+  total = len(fd)
+  for cmd in fd:
+    try:
+      print(str(1) + '/' + total + ': ' + cmd[:-1])
+      cmdOutput = subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True)
+      #print(cmdOutput.decode('utf-8'))
+    except subprocess.CalledProcessError as e:
+      prRed('Error:')
+      print(e.output.decode('utf-8')) 
+      exit(-1)
+  fd.close()
+
+def logConfigFile():
+  global RESTART_COMMAND, OMIT_SOURCE_FILES
+  confFile = './fpchecker_conf.json'
+  if os.path.exists(confFile):
+    print('Loading', confFile)
+    data = None
+    with open(confFile, 'r') as fd:
+      data = json.load(fd)
+    
+    if data != None:
+      for k in data.keys():
+        if k == '--skip_files':
+          OMIT_SOURCE_FILES = data[k]
+        if k == '--restart_command':
+          RESTART_COMMAND = data[k]
+
 if __name__ == '__main__':
   parser = argparse.ArgumentParser(description='FPChecker tool')
   parser.add_argument('build_command',  help='Build command (e.g., make).', nargs=argparse.REMAINDER)
@@ -228,10 +277,17 @@ if __name__ == '__main__':
   parser.add_argument('--no-warnings', action='store_true', help='Disable warnings of small or large numbers (overflows and underflows).')
   parser.add_argument('--no-abort', action='store_true', help='Print reports without aborting; allows to check for errors/warnings in the entire execution the program.')
   parser.add_argument('--no-checking', action='store_true', help='Do not perform any checking.')
-  parser.add_argument('--linker', help='Specify the linker.')
+  #parser.add_argument('--linker', help='Specify the linker.')
+  parser.add_argument('--record', action='store_true', help='Record build traces only')
+  parser.add_argument('--replay', action='store_true', help='Replay build traces (without instrumentation)')
+  parser.add_argument('--inst-replay', action='store_true', help='Instrument and replay build traces')
   args = parser.parse_args()
-#  print(args)
-#  exit()
+  #print(args)
+  #exit()
+
+  prGreen('FPChecker')
+
+  logConfigFile()
 
   if args.no_subnormal:
     NVCC_ADDED_FLAGS.append('-DFPC_DISABLE_SUBNORMAL')
@@ -245,20 +301,41 @@ if __name__ == '__main__':
   if args.no_checking:
     NVCC_ADDED_FLAGS.append('-DFPC_DISABLE_CHECKING')
 
-  if args.linker:
-    LINKER = args.linker
-
   if CLANG_VERSION:
     ADD_OPTIONS.append(LLVM_PASS_CLANG)
   else:
     ADD_OPTIONS.append(LLVM_PASS_LLVM)
 
-  #prog = sys.argv[1:]
   prog = args.build_command
-  prGreen('FPChecker')
-  prCyan('Tracing and saving compilation commands...')
-  (stdout_data, stderr_data) = traceProgram(prog)
-  prCyan('Attempting to re-compile with clang...')
-  replayCommands()
+  strace = strace_module.CommandsTracing(prog)
+
+
+  if not args.record and not args.inst_replay:
+    args.record = True
+    args.inst_replay = True
+
+  if args.record:
+    prCyan('Tracing and saving compilation commands...')
+    strace.startTracing()
+    strace.analyzeTraces()
+    strace.writeToFile()
+
+  if args.replay:
+    prCyan('Attempting to re-compile (without instrumentation)...')
+    fileName = strace.getTracesDir() + '/executable_traces.txt'
+    if os.path.exists(fileName):
+      execTraces(fileName)
+    else:
+      prRed('Error no traces file found')
+      exit(-1)
+
+  if args.inst_replay:
+    prCyan('Attempting to instrument and re-compile...')
+    fileName = strace.getTracesDir() + '/executable_traces.txt'
+    if os.path.exists(fileName):
+      replayCommands(fileName)
+    else:
+      prRed('Error no traces file found')
+      exit(-1)
 
 
