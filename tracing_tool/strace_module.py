@@ -151,7 +151,6 @@ class CommandsTracing:
         if topCmd != None:
           # Add CWD and command
           self.traced_commands.append((self.currentWorkingDir, line))
-          #print('found top', line)
           return
 
         # Check if child is created
@@ -290,7 +289,7 @@ class CommandsTracing:
       if line.startswith('execve('):
         line = line.split(', [')[1:]
         line = ' '.join(line).split(']')[0]
-        line = line.replace(',','')
+        line = line.replace(', ',' ')
         line = line.replace('"', '')
         line = line.replace('\\', '')
         if '/sh -c' in line:
@@ -344,7 +343,7 @@ class CommandsTracing:
 
 if __name__ == '__main__':
 
-  #l = 'execve("/bin/sh", ["/bin/sh", "-c", "cd /usr/workspace/wsa/laguna/fpchecker/clang_tool/wrapper/apps/kripke/Kripke/build/tpl/googletest/googletest && /usr/tcetmp/bin/xlc++ -+  -I/usr/workspace/wsa/laguna/fpchecker/clang_tool/wrapper/apps/kripke/Kripke/tpl/googletest/googletest/include -I/usr/workspace/wsa/laguna/fpchecker/clang_tool/wrapper/apps/kripke/Kripke/tpl/googletest/googletest  -std=c++1y      -O3 -ffast-math -qpic    -DGTEST_HAS_PTHREAD=1 -qeh  -std=c++11 -o CMakeFiles/gtest.dir/src/gtest-all.cc.o -c /usr/workspace/wsa/laguna/fpchecker/clang_tool/wrapper/apps/kripke/Kripke/tpl/googletest/googletest/src/gtest-all.cc"], 0x10097890 /* 129 vars */) = 0\n'
+  #l = 'execve("/usr/tce/packages/cuda/cuda-9.2.148/bin/nvcc", ["/usr/tce/packages/cuda/cuda-9.2.148/bin/nvcc", "-ccbin=clang++", "-restrict", "-gencode=arch=compute_70,code=sm_70", "-O3", "--expt-extended-lambda", "-Xcompiler=-fPIC", "-Wno-deprecated-gpu-targets", "-shared", "-dlink", "CMakeFiles/kripke.exe.dir/src/kripke.cpp.o", "-o", "CMakeFiles/kripke.exe.dir/cmake_device_link.o", "-L/usr/tce/packages/cuda/cuda-9.2.148/nvidia/targets/ppc64le-linux/lib/stubs", "-L/usr/tce/packages/cuda/cuda-9.2.148/nvidia/targets/ppc64le-linux/lib", "lib/libchai.a", "lib/libRAJA.a", "/usr/tce/packages/cuda/cuda-9.2.148/lib64/libcudart_static.a", "-lpthread", "-ldl", "lib/libkripke.a", "lib/libumpire.a", "-lcudadevrt", "-lcudart_static", "-lrt"], 0x7fffffffb8b8 /* 129 vars */) = 0\n'
   #strace = CommandsTracing(['make', '-j'])
   #ret = strace.isTopCommand(l)
   #print(l)
@@ -358,6 +357,6 @@ if __name__ == '__main__':
 
   cmd = sys.argv[1:]
   strace = CommandsTracing(cmd)
-  strace.startTracing()
-  #strace.analyzeTraces()
-  #strace.writeToFile()
+  #strace.startTracing()
+  strace.analyzeTraces()
+  strace.writeToFile()
