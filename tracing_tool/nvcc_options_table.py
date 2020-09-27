@@ -5,8 +5,8 @@
 BOOLEAN_OPTIONS = {
   '--verbose': '',
   '-v': '',
-  '--device-c': '-fcuda-rdc', 
-  '-dc': '-fcuda-rdc',
+  '--device-c': '-fcuda-rdc -c', 
+  '-dc': '-fcuda-rdc -c',
   '--cuda': '',
   '-cuda': '',
   '--cubin': '',

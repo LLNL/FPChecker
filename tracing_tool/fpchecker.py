@@ -17,16 +17,13 @@ FPCHECKER_PATH      ='/usr/global/tools/fpchecker/blueos_3_ppc64le_ib_p9/fpcheck
 LLVM_PASS_LLVM = '-Xclang -load -Xclang ' + FPCHECKER_PATH + '/lib64/libfpchecker.so -include ./Runtime.h ' #+ '-I' + FPCHECKER_PATH + '/src'
 
 # ------- Clang version ---------
-FPCHECKER_LIB       =FPCHECKER_PATH+'/lib64/libfpchecker_plugin.so'
-FPCHECKER_RUNTIME   =FPCHECKER_PATH+'/src/Runtime_plugin.h'
-#FPCHECKER_LIB       ='/usr/workspace/wsa/laguna/fpchecker/FPChecker/build/libfpchecker_plugin.so'
-#FPCHECKER_RUNTIME   ='/usr/workspace/wsa/laguna/fpchecker/FPChecker/src/Runtime_plugin.h'
+#FPCHECKER_LIB       =FPCHECKER_PATH+'/lib64/libfpchecker_plugin.so'
+#FPCHECKER_RUNTIME   =FPCHECKER_PATH+'/src/Runtime_plugin.h'
+FPCHECKER_LIB       ='/usr/workspace/wsa/laguna/fpchecker/FPChecker/build/libfpchecker_plugin.so'
+FPCHECKER_RUNTIME   ='/usr/workspace/wsa/laguna/fpchecker/FPChecker/src/Runtime_plugin.h'
 CLANG_PLUGIN        ='-Xclang -load -Xclang '+FPCHECKER_LIB+' -Xclang -plugin -Xclang instrumentation_plugin'
 LLVM_PASS_CLANG     =CLANG_PLUGIN+' -include '+FPCHECKER_RUNTIME+' -emit-llvm'
 
-#REPLACE_SINGLE_OPTIONS = {'--device-c':'-fcuda-rdc', '-dc':'-fcuda-rdc', '-arch':'--cuda-gpu-arch', '--gpu-architecture':'--cuda-gpu-arch', '-G':' '}
-#REPLACE_OPT_VALUES = {'-x':('cu', 'cuda')}
-#REMOVE_OPTS_WITH_VALUES = ['--compiler-bindir', '-ccbin', '--ptxas-options', '-Xptxas']
 ADD_OPTIONS = ['-Qunused-arguments', '-g']
 
 CUDA_EXTENSION = ['.cu', '.cuda'] + ['.C', '.cc', '.cpp', '.CPP', '.c++', '.cp', '.cxx']
@@ -46,6 +43,15 @@ RESTART_COMMAND = 1
 
 # Defines a mapping of original names and new names for files
 FILE_NAMES_MAP = {'file1': 'file1_copy'}
+
+def isRanlibCommand(line):
+  found = False
+  tokens = line.split()
+  for t in tokens:
+    if t == 'ranlib' or t.endswith('/ranlib'):
+      found = True
+      break
+  return found
 
 def modifyArchiveCommandIfNeeded(line):
   found = False
@@ -89,13 +95,17 @@ def removeObjectFile(line, fileName):
 
 # Is it a link comand?
 def isLinkCommand(line):
-  if '-c ' not in line and '-o ' in line:
+  if ('-c ' not in line and 
+    '--compile' not in line and
+    '-dc' not in line and
+    '--device-c'not in line and
+    '-o ' in line):
     return True
   return False 
 
 # Is it the command that links the final program?
 def isProgramLinkCommand(line):
-  if '-c ' not in line and '-o ' in line:
+  if isLinkCommand(line):
     tokens = line.split()
     idx = tokens.index('-o')
     output = tokens[idx+1]
@@ -175,6 +185,11 @@ def convertCommand(line):
   # Check if it's archive command
   (found, line) = modifyArchiveCommandIfNeeded(line)
   if found:
+    COMMANDS_DB.append([line, ''])
+    return
+
+  # Check if it's a randlib command
+  if isRanlibCommand(line):
     COMMANDS_DB.append([line, ''])
     return
 
@@ -309,12 +324,12 @@ if __name__ == '__main__':
   prog = args.build_command
   strace = strace_module.CommandsTracing(prog)
 
-
   if not args.record and not args.inst_replay:
     args.record = True
     args.inst_replay = True
 
   if args.record:
+    prGreen('Command: ' + ' '.join(prog))
     prCyan('Tracing and saving compilation commands...')
     strace.startTracing()
     strace.analyzeTraces()

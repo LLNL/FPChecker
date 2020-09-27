@@ -27,11 +27,33 @@ SUPPORTED_COMPILERS = set([
   'mpicxx',
   'mpicc',
   'clang',
-  'clang++'
+  'clang++',
+  'gfortran',
+  'xlf',
+  'xlf-gpu',
+  'xlf2003',
+  'xlf2003-gpu',
+  'xlf2003_r',
+  'xlf2003_r-gpu',
+  'xlf2008',
+  'xlf2008-gpu',
+  'xlf2008_r',
+  'xlf2008_r-gpu',
+  'xlf90',
+  'xlf90-gpu',
+  'xlf90_r',
+  'xlf90_r-gpu',
+  'xlf95',
+  'xlf95-gpu',
+  'xlf95_r',
+  'xlf95_r-gpu',
+  'xlf_r',
+  'xlf_r-gpu'
 ])
 
 SUPPORTED_TOOLS = set([
-  'ar'
+  'ar',
+  'ranlib'
 ])
 
 # Examples of top commands
@@ -204,7 +226,7 @@ class CommandsTracing:
  
   def isASupportedCompiler(self, line):
     for compiler in SUPPORTED_COMPILERS:
-      if line.endswith('/'+compiler):
+      if line.endswith('/'+compiler): #or line == compiler:
         return True
 
     for tool in SUPPORTED_TOOLS:
