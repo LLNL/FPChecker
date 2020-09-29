@@ -144,7 +144,7 @@ class CommandsTracing:
         if self.isMakeCommand(first_line):
           root_file = f
           break
-    print('Root file', root_file)
+    #print('Root file', root_file)
     if root_file == '':
       prRed('Error: root file not found')
       exit(-1)
@@ -359,9 +359,7 @@ class CommandsTracing:
     if (exitCode == 0):
       return (stdout_data, stderr_data)
     else:
-      prCyan('Error exit code: '+str(exitCode))
-      print('Error in:', trace_command)
-      exit(-1)
+      sys.exit('Error in input: ' + str(self.make_command))
 
 if __name__ == '__main__':
 
