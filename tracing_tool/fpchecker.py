@@ -58,8 +58,6 @@ OMIT_SOURCE_FILES = []
 # Command from which we restart re-compilation
 RESTART_COMMAND = 1
 
-# Defines a mapping of original names and new names for files
-FILE_NAMES_MAP = {'file1': 'file1_copy'}
 
 # Regex: archive command
 arPattern = re.compile(r'[/]?ar\s+(.+)\s+(.+\.a)\s+.+')
@@ -70,14 +68,18 @@ arPattern = re.compile(r'[/]?ar\s+(.+)\s+(.+\.a)\s+.+')
 
 class CompilationCommand:
   """ This class parses a compilation line and categorizes it. """
+  
+  # Defines a mapping of original names and new names for files
+  FILE_NAMES_MAP = {'file1': 'file1_copy'}
 
   def __init__(self, line):
-    self.line = line                  # un-parsed original command
+    #self.line = line                  # un-parsed original command
     self.nvcc_command = False         # nvcc command
     self.link_command = False         # links something, e.g., a library
     self.program_link_command = False # links the final program
     self.archive_command = False      # archive command for static libraries
     self.ranlib_command = False       # randlib command for static libraries 
+    self.output_program = ''          # output program from -o option
 
     tokens = line.split()
 
@@ -95,6 +97,7 @@ class CompilationCommand:
       output = tokens[idx+1]
       if not output.endswith('.o'):
         self.program_link_command = True
+        self.output_program = output
     
     for t in tokens:
       # nvcc command?
@@ -109,210 +112,132 @@ class CompilationCommand:
       if t == 'ranlib' or t.endswith('/ranlib'):
         self.ranlib_command = True
 
-  def convertArchiveCommand(self):
+  def convertArchiveCommand(self, line):
     """ Makes changes to the srchive command. """
     global arPattern
     if self.archive_command:
-      foundAr = arPattern.search(self.line)
+      foundAr = arPattern.search(line)
       if foundAr:
-        x = self.line.find(foundAr.group(1))
+        x = line.find(foundAr.group(1))
         y = x + len(foundAr.group(1))
-        sub = self.line[x:y].replace('q','r')
-        return self.line.replace(foundAr.group(1), sub)
+        sub = line[x:y].replace('q','r')
+        return line.replace(foundAr.group(1), sub)
     return None
+
+  def removeObjectFile(self, line, fileName):
+    """ Remove the object file option from the command line, i.e., -o file.o """
+    if '-o ' in line:
+      tokens = line.split()
+      idx = tokens.index('-o')
+      objectName = tokens[idx+1]
+      origName = os.path.splitext( os.path.split(objectName)[1] )[0]
+      self.FILE_NAMES_MAP[origName] = origName
+      del(tokens[idx])
+      del(tokens[idx])
+      line = ' '.join(tokens)
+    else:
+      name = os.path.splitext( os.path.split(fileName)[1] )[0]
+      self.FILE_NAMES_MAP[name] = name+'_copy'
+
+    return line
+
+  def changeNameOfExecutable(self, line):
+    tokens = line.split()
+    idx = tokens.index(self.output_program)
+    progName = tokens[idx]
+    tokens[idx] = progName + '_fpc'
+    line = ' '.join(tokens)
+    return line
+
+  def changeNameOfObjectFiles(self, line):
+    tokens = line.split()
+    for i in range(len(tokens)):
+      if tokens[i].endswith('.o'):
+        name = os.path.splitext( os.path.split(tokens[i])[1] )[0]
+        if name in self.FILE_NAMES_MAP:
+          newObjectName = self.FILE_NAMES_MAP[name]
+          newObjectName = os.path.join( os.path.split(tokens[i])[0], newObjectName+'.o')
+          line = line.replace(tokens[i], newObjectName, 1)
+    return line
+
+  def replaceFileName(self, line):
+    fileName = CompilationCommand.getCodeFileName(line)
+    newFileName = None
+    if fileName != None:
+      extension = fileName.split('.')[-1:][0]
+      nameOnly = os.path.splitext(fileName)[0]
+      newFileName = nameOnly+'_copy.'+extension
+      line = line.replace(fileName, newFileName, 1)
+    return (fileName, newFileName, line)
+
+  def replaceFileNameAndCopy(self, line):
+    """ Replace the original name of the source file.
+        Create a copy of the source file.
+    """
+    (fileName, newFileName, line) = self.replaceFileName(line)
+    if fileName != None:
+      # Create a copy of the source file
+      idx = line.index('clang++')
+      copyCommand = '  cp -f ' + fileName + ' ' + newFileName + ' && '
+      line = line[:idx] + copyCommand + line[idx:]
+    return line, fileName
+
+  @staticmethod
+  def getCodeFileName(line):
+    global CUDA_EXTENSION
+    """ Get the name of the file being compiled.   """
+    tokens = line.split()
+    fileName = None
+    for t in tokens:
+      for ext in CUDA_EXTENSION:
+        if t.endswith(ext):
+          fileName = t
+    return fileName
 
 # --------------------------------------------------------------------------- #
 # --- Functions ------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
-#def isRanlibCommand(line):
-#  """ Return true is the line contains the ranlib command. """
-#  for t in line.split():
-#    if t == 'ranlib' or t.endswith('/ranlib'):
-#      return True
-#  return False
-
-#def modifyArchiveCommandIfNeeded(line):
-#  found = False
-#  tokens = line.split()
-#  ar_idx = None
-#  for t in tokens:
-#    if t == 'ar' or t.endswith('/ar'):
-#      ar_idx = tokens.index(t)
-#      break
-#  # We found the ar command
-#  library_idx = None
-#  if ar_idx != None:
-#    for t in tokens:
-#      if t.endswith('.a'):
-#        library_idx = tokens.index(t)
-#        break
-#  # We found the ar command and library:
-#  if ar_idx != None and library_idx != None:
-#    found = True
-#    for i in range(ar_idx+1, library_idx):
-#     tokens[i] = tokens[i].replace('q', 'r')
-#  line = ' '.join(tokens)
-#  return (found, line)
-
-# Remove the object file option from the command line, i.e., -o file.o
-def removeObjectFile(line, fileName):
-  if '-o ' in line:
-    tokens = line.split()
-    idx = tokens.index('-o')
-    objectName = tokens[idx+1]
-    origName = os.path.splitext( os.path.split(objectName)[1] )[0]
-    FILE_NAMES_MAP[origName] = origName
-    del(tokens[idx])
-    del(tokens[idx])
-    line = ' '.join(tokens)
-  else:
-    name = os.path.splitext( os.path.split(fileName)[1] )[0]
-    FILE_NAMES_MAP[name] = name+'_copy'
-
-  return line
-
-# Is it a link comand?
-#def isLinkCommand(line):
-#  if ('-c ' not in line and 
-#    '--compile ' not in line and
-#    '-dc ' not in line and
-#    '--device-c ' not in line and
-#    '-o ' in line):
-#    return True
-#  return False 
-
-# Is it the command that links the final program?
-#def isProgramLinkCommand(line):
-#  if isLinkCommand(line):
-#    tokens = line.split()
-#    idx = tokens.index('-o')
-#    output = tokens[idx+1]
-#    if not output.endswith('.o'):
-#      return True
-#  return False 
-
-def changeNameOfExecutable(line):
-  tokens = line.split()
-  idx = tokens.index('-o') + 1
-  progName = tokens[idx]
-  tokens[idx] = progName + '_fpc'
-  line = ' '.join(tokens)
-  return line
-
-def changeNameOfObjectFiles(line):
-  #print(FILE_NAMES_MAP)
-  tokens = line.split()
-  for i in range(len(tokens)):
-    if tokens[i].endswith('.o'):
-      name = os.path.splitext( os.path.split(tokens[i])[1] )[0]
-      if name in FILE_NAMES_MAP:
-        newObjectName = FILE_NAMES_MAP[name]
-        newObjectName = os.path.join( os.path.split(tokens[i])[0], newObjectName+'.o')
-        line = line.replace(tokens[i], newObjectName, 1)
-  return line
-
-def replaceFileName(line):
-  fileName = getCodeFileName(line)
-  newFileName = None
-  if fileName != None:
-    extension = fileName.split('.')[-1:][0]
-    nameOnly = os.path.splitext(fileName)[0]
-    newFileName = nameOnly+'_copy.'+extension
-    line = line.replace(fileName, newFileName, 1)
-  return (fileName, newFileName, line)
-
-# Replace the original name of the source file
-# Create a copy of the source file
-def replaceFileNameAndCopy(line):
-  (fileName, newFileName, line) = replaceFileName(line)
-  if fileName != None:
-    # Create a copy of the source file
-    idx = line.index('clang++')
-    copyCommand = '  cp -f ' + fileName + ' ' + newFileName + ' && '
-    line = line[:idx] + copyCommand + line[idx:]
-  return line, fileName
-
-# Get the name of the file being compiled
-def getCodeFileName(line):
-  tokens = line.split()
-  fileName = None
-  for t in tokens:
-    for ext in CUDA_EXTENSION:
-      if t.endswith(ext):
-        fileName = t
-  return fileName
-
-def isNVCC(line):
-  return 'nvcc ' in line
-
-#def isClang(line):
-#  return 'clang++ ' in line
 
 def convertCommand(line):
   cmpCmd = CompilationCommand(line)
 
-#  if isProgramLinkCommand(line):
-#    line = changeNameOfExecutable(line)
-#    if CLANG_VERSION:
-#      line = changeNameOfObjectFiles(line)
-#    COMMANDS_DB.append([line, ''])
-#    return
-
   if cmpCmd.program_link_command:
-    line = changeNameOfExecutable(line)
-    line = changeNameOfObjectFiles(line)
+    line = cmpCmd.changeNameOfExecutable(line)
+    line = cmpCmd.changeNameOfObjectFiles(line)
     COMMANDS_DB.append([line, ''])
     return
-
-#  if isLinkCommand(line):
-#    COMMANDS_DB.append([line, ''])
-#    return
 
   if cmpCmd.link_command:
     COMMANDS_DB.append([line, ''])
     return
 
-  # Check if it's archive command
-#  (found, line) = modifyArchiveCommandIfNeeded(line)
-#  if found:
-#    COMMANDS_DB.append([line, ''])
-#    return
-
-  if cmpCmd.archive_command:
-    line = cmpCmd.convertArchiveCommand()
+  if cmpCmd.link_command:
     COMMANDS_DB.append([line, ''])
     return
 
-  # Check if it's a randlib command
-#  if isRanlibCommand(line):
-#    COMMANDS_DB.append([line, ''])
-#    return
+  if cmpCmd.archive_command:
+    line = cmpCmd.convertArchiveCommand(line)
+    COMMANDS_DB.append([line, ''])
+    return
 
   if cmpCmd.ranlib_command:
     COMMANDS_DB.append([line, ''])
     return
 
-  # Skip is not an nvcc compilation command
-#  if not isNVCC(line):
-#    COMMANDS_DB.append([line, ''])
-#    return
-
   if not cmpCmd.nvcc_command:
     COMMANDS_DB.append([line, ''])
     return
 
+  # At this point, we assume we have an nvcc command
   newLine = ClangCommand(line).to_str()
-
   # Add options after clang command
   newLine = newLine.replace('clang++ ', 'clang++ '+' '.join(ADD_OPTIONS)+' ', 1)
-
-  if CLANG_VERSION:
-    newLine, origFileName = replaceFileNameAndCopy(newLine)
-    newLine = removeObjectFile(newLine, origFileName)
+  newLine, origFileName = cmpCmd.replaceFileNameAndCopy(newLine)
+  newLine = cmpCmd.removeObjectFile(newLine, origFileName)
 
   # Add original command
-  origCommand = replaceFileName(line)[2]
+  origCommand = cmpCmd.replaceFileName(line)[2]
   newNVCCCommand = 'nvcc -include ' + FPCHECKER_RUNTIME + ' '
   newNVCCCommand = newNVCCCommand + ' '.join(NVCC_ADDED_FLAGS) + ' '
   origCommand = origCommand.replace('nvcc ', newNVCCCommand)
@@ -333,7 +258,7 @@ def replayCommands():
     cmd = COMMANDS_DB[i]
 
     # Omit some source files
-    sourceFileName = getCodeFileName(cmd[0])
+    sourceFileName = CompilationCommand.getCodeFileName(cmd[0])
     if sourceFileName:
       for f in OMIT_SOURCE_FILES:
         if sourceFileName.endswith(f):
@@ -345,20 +270,15 @@ def replayCommands():
       cmdOutput = subprocess.check_output(cmd[0], stderr=subprocess.STDOUT, shell=True)
       print(cmdOutput.decode('utf-8'))
     except subprocess.CalledProcessError as e:
-      prRed('Error:')
-      print(e.output.decode('utf-8'))
-      exit(-1)
+      sys.exit(e.output.decode('utf-8'))
 
-    if CLANG_VERSION:
-      if cmd[1] != '':
-        print(cmd[1])
-        try:
-          cmdOutput = subprocess.check_output(cmd[1], stderr=subprocess.STDOUT, shell=True)
-          print(cmdOutput.decode('utf-8'))
-        except subprocess.CalledProcessError as e:
-          prRed('Error:')
-          print(e.output.decode('utf-8'))
-          exit(-1)
+    if cmd[1] != '':
+      print(cmd[1].strip())
+      try:
+        cmdOutput = subprocess.check_output(cmd[1], stderr=subprocess.STDOUT, shell=True)
+        print(cmdOutput.decode('utf-8'))
+      except subprocess.CalledProcessError as e:
+        sys.exit(e.output.decode('utf-8'))
 
 def execTraces():
   checkTraceFileExists()
@@ -402,10 +322,6 @@ def checkTraceFileExists():
 def getTraceFileName():
   return strace.getTracesDir() + '/executable_traces.txt'
 
-# --------------------------------------------------------------------------- #
-# --- Main ------------------------------------------------------------------ #
-# --------------------------------------------------------------------------- #
-
 if __name__ == '__main__':
   parser = argparse.ArgumentParser(description='FPChecker tool')
   parser.add_argument('build_command',  help='Build command (e.g., make).', nargs=argparse.REMAINDER)
@@ -417,8 +333,6 @@ if __name__ == '__main__':
   parser.add_argument('--replay', action='store_true', help='Replay build traces (without instrumentation)')
   parser.add_argument('--inst-replay', action='store_true', help='Instrument and replay build traces')
   args = parser.parse_args()
-  #print(args)
-  #exit()
 
   prGreen('FPChecker')
 
