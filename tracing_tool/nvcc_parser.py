@@ -6,14 +6,20 @@ class ClangCommand:
 
   def __init__(self, line):
     # Split into multiple commands
-    #newCommand = []
     self.newCommand = []
     allCommands = re.split('\&\&|\;', line)
+
     for cmd in allCommands:
       if len(self.newCommand) > 0:
-        self.newCommand.append(';')
+        self.newCommand.append(' && ')
 
+      # Avoid empty commands
       if len(cmd) == 0:
+        continue
+
+      # Do not transform a link command (only compilation commands)
+      if self.isLinkCommand(cmd):
+        self.newCommand += [cmd]
         continue
 
       newCommand = []
@@ -29,7 +35,16 @@ class ClangCommand:
         if idx >= len(tokens):
           break
 
-      self.newCommand = self.newCommand + newCommand
+      self.newCommand += newCommand
+
+  def isLinkCommand(self, cmd):
+    if ('-c ' not in cmd  and 
+        '--compile ' not in cmd and
+        '-dc ' not in cmd and
+        '--device-c ' not in cmd and
+        '-o ' in cmd):
+      return True
+    return False
 
   def to_str(self):
     for elem in self.newCommand:

@@ -289,6 +289,31 @@ class CommandsTracing:
         return True
     return False
 
+  def formatCommandForExecution(self, cwd, line):
+    if line.startswith('execve('):
+      line = line.split(', [')[1:]
+      line = ' '.join(line).split(']')[0]
+      line = line.replace(', ',' ')
+      line = line.replace('"', '')
+      line = line.replace('\\', '')
+
+      # Split commands if needed
+      allCommands = re.split('\&\&|\;', line)
+      newCommand = []
+      for cmd in allCommands:
+        if '/sh -c' in cmd:
+          cmd = ' '.join(cmd.split()[2:]) # remove /bin/sh -c
+        if '-E ' in cmd: # Remove commands that only run the preprocessor with -E
+          continue
+        if not self.commandIvokesChangeDir(line):
+          cmd = 'cd ' + cwd + ' && ' + cmd
+         
+        newCommand.append(cmd) 
+
+      line = ' && '.join(newCommand)
+
+    return line
+
   def writeToFile(self):
     fileNameRaw = TRACES_DIR + '/raw_traces.txt'
     prGreen('Saving raw traces in '+fileNameRaw)
@@ -302,24 +327,19 @@ class CommandsTracing:
     fd = open(fileNameExec, 'w')
 
     for l in self.traced_commands:
-      line = l[1]
-      if l[0] != '':
-        cwd = l[0].split('"')[1]
+      #line = l[1]
+      cwd, line = l
+      #if l[0] != '':
+      #  cwd = l[0].split('"')[1]
+      #else:
+      #  cwd = '.'
+
+      if cwd != '':
+        cwd = cwd.split('"')[1]
       else:
         cwd = '.'
-
-      if line.startswith('execve('):
-        line = line.split(', [')[1:]
-        line = ' '.join(line).split(']')[0]
-        line = line.replace(', ',' ')
-        line = line.replace('"', '')
-        line = line.replace('\\', '')
-        if '/sh -c' in line:
-          line = ' '.join(line.split()[2:]) # remove /bin/sh -c
-        if '-E ' in line: # Remove commands that only run the preprocessor with -E
-          continue
-        if not self.commandIvokesChangeDir(line):
-          line = 'cd ' + cwd + ' && ' + line
+     
+      line = self.formatCommandForExecution(cwd, line)
 
       fd.write(line+'\n')
     fd.close()
