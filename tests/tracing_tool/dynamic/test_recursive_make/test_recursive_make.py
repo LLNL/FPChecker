@@ -2,8 +2,11 @@
 
 import subprocess
 import os
+import sys
+sys.path.append("..")
+from .. import conftest
 
-TRACING_TOLL_PATH='../../../../tracing_tool/fpchecker.py'
+TRACING_TOLL_PATH = conftest.FPCHECKER_PATH
 
 def setup_module(module):
     THIS_DIR = os.path.dirname(os.path.abspath(__file__))

@@ -1,0 +1,4 @@
+{
+  "--skip_files": ["unwanted1.cpp", "unwanted2.cu", "dot_product_copy.cu"],
+  "--restart_command": 1
+}
