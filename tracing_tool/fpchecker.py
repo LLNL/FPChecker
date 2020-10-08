@@ -16,15 +16,18 @@ import strace_module
 # --------------------------------------------------------------------------- #
 
 # Main installation path
-FPCHECKER_PATH      ='/usr/global/tools/fpchecker/blueos_3_ppc64le_ib_p9/fpchecker-0.1.3-clang-9.0.0'
+#FPCHECKER_PATH      ='/usr/global/tools/fpchecker/blueos_3_ppc64le_ib_p9/fpchecker-0.1.3-clang-9.0.0'
+FPCHECKER_PATH      = str(pathlib.Path(__file__).parent.absolute())
 
 # Clang version path
-#FPCHECKER_LIB       =FPCHECKER_PATH+'/lib64/libfpchecker_plugin.so'
-#FPCHECKER_RUNTIME   =FPCHECKER_PATH+'/src/Runtime_plugin.h'
-FPCHECKER_PARSER    ='/usr/workspace/wsa/laguna/fpchecker/FPChecker/tracing_tool/expressions_parser.py'
-FPCHECKER_RUNTIME_PARSER    ='/usr/workspace/wsa/laguna/fpchecker/FPChecker/src/Runtime_parser.h'
-FPCHECKER_LIB       ='/usr/workspace/wsa/laguna/fpchecker/FPChecker/build/libfpchecker_plugin.so'
-FPCHECKER_RUNTIME   ='/usr/workspace/wsa/laguna/fpchecker/FPChecker/src/Runtime_plugin.h'
+FPCHECKER_LIB       = FPCHECKER_PATH+'/../lib/libfpchecker_plugin.so'
+FPCHECKER_RUNTIME   = FPCHECKER_PATH+'/../src/Runtime_plugin.h'
+FPCHECKER_PARSER    = FPCHECKER_PATH+'/expressions_parser.py'
+#FPCHECKER_PARSER    ='/usr/workspace/wsa/laguna/fpchecker/FPChecker/tracing_tool/expressions_parser.py'
+#FPCHECKER_RUNTIME_PARSER    ='/usr/workspace/wsa/laguna/fpchecker/FPChecker/src/Runtime_parser.h'
+FPCHECKER_RUNTIME_PARSER  = FPCHECKER_PATH+'/../src/Runtime_parser.h'
+#FPCHECKER_LIB       ='/usr/workspace/wsa/laguna/fpchecker/FPChecker/build/libfpchecker_plugin.so'
+#FPCHECKER_RUNTIME   ='/usr/workspace/wsa/laguna/fpchecker/FPChecker/src/Runtime_plugin.h'
 CLANG_PLUGIN        ='-Xclang -load -Xclang '+FPCHECKER_LIB+' -Xclang -plugin -Xclang instrumentation_plugin'
 LLVM_PASS_CLANG     =CLANG_PLUGIN+' -include '+FPCHECKER_RUNTIME+' -emit-llvm'
 

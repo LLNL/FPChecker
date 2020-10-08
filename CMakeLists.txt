@@ -45,11 +45,38 @@ set_target_properties(fpchecker PROPERTIES
 target_include_directories(fpchecker PRIVATE src)
 
 install(TARGETS fpchecker fpchecker_plugin
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        LIBRARY DESTINATION "lib64"
+        PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_WRITE GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
 )
 
-install(FILES src/Runtime.h src/Runtime_plugin.h 
-        DESTINATION src
+# Install link for /lib
+install(CODE "execute_process( \
+        COMMAND ${CMAKE_COMMAND} -E create_symlink \
+        ${CMAKE_INSTALL_PREFIX}/lib64 ${CMAKE_INSTALL_PREFIX}/lib )"
+        COMMENT "Creating link: /lib --> /lib64"
+)
+
+install(FILES "src/Runtime.h" "src/Runtime_plugin.h" "src/Runtime_parser.h"
+        DESTINATION "src"
+        PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_WRITE GROUP_EXECUTE WORLD_READ
+)
+
+install(FILES
+        "tracing_tool/colors.py"
+        "tracing_tool/expressions_parser.py"
+        "tracing_tool/fpchecker.py"
+        "tracing_tool/nvcc_options_table.py"
+        "tracing_tool/nvcc_parser.py"
+        "tracing_tool/strace_module.py"
+        DESTINATION bin
+        PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_WRITE GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
+)
+
+# Install link for fpchecker tracing tool
+install(CODE "execute_process( \
+        COMMAND ${CMAKE_COMMAND} -E create_symlink \
+        ${CMAKE_INSTALL_PREFIX}/bin/fpchecker.py ${CMAKE_INSTALL_PREFIX}/bin/fpchecker )"
+        COMMENT "Creating link: fpchecker -> fpchecker.py"
 )
 
 # Tests
