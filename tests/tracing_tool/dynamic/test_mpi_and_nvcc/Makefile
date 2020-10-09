@@ -1,0 +1,13 @@
+#include ../../../Makefile.config
+
+#OP	= $(CLANG_PASS) -emit-llvm -O0 -x cuda --cuda-gpu-arch=sm_60 -g
+OP  = -O0 -x cu -arch=sm_70 -g
+MPICC=mpixlc
+
+all:
+	nvcc  $(OP) -c dot_product.cu
+	nvcc  $(OP) -c main.cu -ccbin=$(MPICC)
+	$(MPICC) -o main dot_product.o main.o -L$(CUDA_HOME)/lib64 -lcudart
+
+clean:
+	rm -rf *.o main __pycache__ *_copy.* main_fpc

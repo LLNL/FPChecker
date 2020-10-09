@@ -101,6 +101,9 @@ class CompilationCommand:
         '--compile ' not in line and
         '-dc ' not in line and
         '--device-c ' not in line and
+        '-cubin' not in line and
+        '-ptx' not in line and
+        '-fatbin' not in line and
         '-o ' in line):
       self.link_command = True
 

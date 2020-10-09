@@ -26,6 +26,11 @@ SUPPORTED_COMPILERS = set([
   'mpic++',
   'mpicxx',
   'mpicc',
+  'mpixlc',
+  'mpixlC',
+  'mpixlf',
+  'mpif77',
+  'mpif90',
   'clang',
   'clang++',
   'gfortran',
@@ -53,7 +58,8 @@ SUPPORTED_COMPILERS = set([
 
 SUPPORTED_TOOLS = set([
   'ar',
-  'ranlib'
+  'ranlib',
+  'bin2c'
 ])
 
 # Examples of top commands
@@ -105,7 +111,6 @@ class CommandsTracing:
     self.childTree = {}
     self.parentTree = {}
     self.tracedPIDs = set([])
-    self.currentWorkingDir = ''
 
   def getTracesDir(self):
     return TRACES_DIR
@@ -160,26 +165,56 @@ class CommandsTracing:
         newDir = line
     return newDir
 
-  def recursiveTreeTraversal(self, fileName):
+# Old implementation of recursive search
+# It has a bug on the cwd (it's kept for any recent process)
+# We want to unset the cwd once the process examination exits
+#
+#  def recursiveTreeTraversal(self, fileName):
+#    with open(fileName) as fd:
+#      for line in fd:
+#        # Save current dir
+#        cwd = self.isChangeDir(line)
+#        if cwd != None:
+#          print('Found chdir: ', cwd, 'file:', fileName)
+#          self.currentWorkingDir = cwd
+#
+#        # Check if it's a top command, and it if so
+#        topCmd = self.isTopCommand(line)
+#        if topCmd != None:
+#          # Add CWD and command
+#          print('Adding:')
+#          print('self.currentWorkingDir: ', self.currentWorkingDir)
+#          print('line:', line)
+#          self.traced_commands.append((self.currentWorkingDir, line))
+#          return
+#
+#        # Check if child is created
+#        childPID = self.isChildSpawn(line)
+#        if childPID != None:
+#          childFileName = TRACES_DIR + '/trace.' + childPID
+#          self.recursiveTreeTraversal(childFileName)
+
+  def recursiveTreeTraversal(self, fileName, chdirCmd):
+    lastSeenCHDIR = chdirCmd
     with open(fileName) as fd:
       for line in fd:
         # Save current dir
         cwd = self.isChangeDir(line)
         if cwd != None:
-          self.currentWorkingDir = cwd
+          lastSeenCHDIR = cwd
 
         # Check if it's a top command, and it if so
         topCmd = self.isTopCommand(line)
         if topCmd != None:
           # Add CWD and command
-          self.traced_commands.append((self.currentWorkingDir, line))
+          self.traced_commands.append((lastSeenCHDIR, line))
           return
 
         # Check if child is created
         childPID = self.isChildSpawn(line)
         if childPID != None:
           childFileName = TRACES_DIR + '/trace.' + childPID
-          self.recursiveTreeTraversal(childFileName)
+          self.recursiveTreeTraversal(childFileName, lastSeenCHDIR)
 
   def analyzeTraces(self):
     #prveTreeTraversal(root_file)
@@ -187,7 +222,7 @@ class CommandsTracing:
     root_file = self.getRootFile()
     print('root:', root_file)
     prGreen('Analyzing traces...')
-    self.recursiveTreeTraversal(root_file)
+    self.recursiveTreeTraversal(root_file, '')
 
   def getProcessID(self, line):
     p = self.pidPattern.match(line)

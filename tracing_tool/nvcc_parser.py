@@ -1,6 +1,7 @@
 import re
 import sys
 from nvcc_options_table import BOOLEAN_OPTIONS, SINGLE_VALUE_OPTIONS, SINGLE_VALUE_OPTIONS_TRANS, LIST_OPTIONS  
+from mpi_environment import MPIEnvironment 
 
 class ClangCommand:
 
@@ -26,6 +27,7 @@ class ClangCommand:
       tokens = cmd.split()
       idx = 0 # current index
 
+      # Main loop to convert all options in nvcc to clang
       while True:
         elem = tokens[idx]
         clangOpt = ClangOption.create(tokens[idx], tokens, idx)
@@ -37,11 +39,18 @@ class ClangCommand:
 
       self.newCommand += newCommand
 
+      # Add MPI include dirs
+      mpi = MPIEnvironment(cmd)
+      self.newCommand.append(mpi.getIncludeDirs())
+
   def isLinkCommand(self, cmd):
     if ('-c ' not in cmd  and 
         '--compile ' not in cmd and
         '-dc ' not in cmd and
         '--device-c ' not in cmd and
+        '-cubin' not in cmd and
+        '-ptx' not in cmd and
+        '-fatbin' not in cmd and
         '-o ' in cmd):
       return True
     return False
@@ -53,7 +62,6 @@ class ClangCommand:
         self.newCommand[idx] = 'clang++'
     
     ret = ' '.join(self.newCommand)
-    #ret = ret.replace('nvcc ', 'clang++ ')
 
     # Add default compute capability if not present
     if '--cuda-gpu-arch' not in ret:
@@ -124,18 +132,14 @@ class SingleValueOption(ClangOption):
     val = SINGLE_VALUE_OPTIONS[opt]
 
     if val[0] != 'CHECK': #---------------------------------
-      #self.newOption.append(val[0])
       converted_option.append(val[0])
 
       if val[1] == 'SAME':
         if '=' in self.option:
-          #self.newOption.append(self.option.split('=')[1])
           converted_option.append(self.option.split('=')[1])
         else:
-          #self.newOption.append(self.tokens[self.idx+1])
           converted_option.append(self.tokens[self.idx+1])
       else:
-        #self.newOption.append(val[1])
         converted_option.append(val[1])
     else: # CHECK value ------------------------------------
       whole_option = ''
@@ -145,7 +149,6 @@ class SingleValueOption(ClangOption):
       else:
         whole_option = self.option+' '+self.tokens[self.idx+1]
       newOpt = SINGLE_VALUE_OPTIONS_TRANS[whole_option]
-      #self.newOption.append(newOpt)
       converted_option.append(newOpt)
     
     if val[2] == 1:
