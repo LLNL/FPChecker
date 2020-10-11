@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.9)
+cmake_minimum_required(VERSION 3.11)
 
 set(CMAKE_CXX_COMPILER "clang++")
 set(CMAKE_C_COMPILER "clang")
@@ -44,6 +44,10 @@ set_target_properties(fpchecker PROPERTIES
 
 target_include_directories(fpchecker PRIVATE src)
 
+set(CMAKE_INSTALL_DEFAULT_DIRECTORY_PERMISSIONS
+    OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_WRITE GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
+)
+
 install(TARGETS fpchecker fpchecker_plugin
         LIBRARY DESTINATION "lib64"
         PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_WRITE GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
@@ -68,6 +72,7 @@ install(FILES
         "tracing_tool/nvcc_options_table.py"
         "tracing_tool/nvcc_parser.py"
         "tracing_tool/strace_module.py"
+        "tracing_tool/mpi_environment.py"
         DESTINATION bin
         PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_WRITE GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
 )
