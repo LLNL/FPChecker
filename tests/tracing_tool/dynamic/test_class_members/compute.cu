@@ -1,4 +1,3 @@
-
 #include "compute.h"
 #include <stdio.h>
 

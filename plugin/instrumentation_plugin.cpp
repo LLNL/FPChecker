@@ -226,6 +226,14 @@ public:
     }
   }
 
+  void removeUnwantedString(std::string &s) {
+    if (s.rfind("class ", 0) == 0) {
+      s.erase(0, 6);
+    } else if (s.rfind("this->class ", 0) == 0) {
+      s.erase(0, 12);
+    }
+  }
+
   /// Analyze BinaryOperator and instrument it.
   /// Return true if we can instrument; otherwise return false
   bool AnalyzetBinaryOperator(const BinaryOperator *E) {
@@ -253,7 +261,15 @@ public:
 #ifdef FPC_DEBUG
           printInstrumentedLocation(E);
 #endif
-          std::string txt("_FPC_CHECK_(" + getStmtString(rhs) +", "+lineNumber+", \""+getShortFileName()+"\"" + ")");
+          std::string prettyRHS;
+          if (auto *callExpr = dyn_cast<CallExpr>(rhs)) {
+            prettyRHS = getStmtString(callExpr);
+            removeUnwantedString(prettyRHS);
+          } else {
+            prettyRHS = getStmtString(rhs);
+          }
+          //std::string txt("_FPC_CHECK_(" + getStmtString(rhs) +", "+lineNumber+", \""+getShortFileName()+"\"" + ")");
+          std::string txt("_FPC_CHECK_(" + prettyRHS +", "+lineNumber+", \""+getShortFileName()+"\"" + ")");
           SourceRange range(rhs->getBeginLoc(), rhs->getEndLoc());
           rewriteCode(range, txt, E);
           ret = true;
