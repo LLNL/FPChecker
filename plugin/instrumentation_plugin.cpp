@@ -206,7 +206,8 @@ public:
     return CFT_Host;
   }
 
-  void rewriteCode(SourceRange &range, std::string &txt, const BinaryOperator *bo) {
+//  void rewriteCode(SourceRange &range, std::string &txt, const BinaryOperator *bo) {
+  void rewriteCode(SourceRange &range, std::string &leftTxt, std::string &rightTxt, const BinaryOperator *bo) {
     SourceLocation sl = bo->getEndLoc();
     FullSourceLoc fullLocation = Context->getFullLoc(sl);
     unsigned line = 0;
@@ -215,10 +216,18 @@ public:
     }
     std::string expr = getStmtString(bo);
     PairLocation loc(expr, line);
+    auto l = range.getBegin();
+    auto r = range.getEnd();
+    if (!Rewriter::isRewritable(l) || !Rewriter::isRewritable(r))
+      return; // don't do anything if not rewritable
 
     /// check if we have instrumented the location before
     if ( instrumentedCode.find(loc) == instrumentedCode.end()) {
-      rewriter->ReplaceText(range, txt);
+      //rewriter->ReplaceText(range, txt);
+      if (rewriter->InsertTextBefore(l, leftTxt))
+        llvm::outs() << "#FPCHECKER: left location not rewritable\n";
+      if (rewriter->InsertTextAfterToken(r, rightTxt))
+        llvm::outs() << "#FPCHECKER: right location not rewritable\n";
       instrumentedCode.insert(loc);
     } else {
       llvm::errs() << "FPChecker warning: instrumenting repeated location: " << expr << "\n";
@@ -226,13 +235,13 @@ public:
     }
   }
 
-  void removeUnwantedString(std::string &s) {
+  /*void removeUnwantedString(std::string &s) {
     if (s.rfind("class ", 0) == 0) {
       s.erase(0, 6);
     } else if (s.rfind("this->class ", 0) == 0) {
       s.erase(0, 12);
     }
-  }
+  }*/
 
   /// Analyze BinaryOperator and instrument it.
   /// Return true if we can instrument; otherwise return false
@@ -261,17 +270,20 @@ public:
 #ifdef FPC_DEBUG
           printInstrumentedLocation(E);
 #endif
-          std::string prettyRHS;
+          /*std::string prettyRHS;
           if (auto *callExpr = dyn_cast<CallExpr>(rhs)) {
             prettyRHS = getStmtString(callExpr);
             removeUnwantedString(prettyRHS);
           } else {
             prettyRHS = getStmtString(rhs);
-          }
+          }*/
           //std::string txt("_FPC_CHECK_(" + getStmtString(rhs) +", "+lineNumber+", \""+getShortFileName()+"\"" + ")");
-          std::string txt("_FPC_CHECK_(" + prettyRHS +", "+lineNumber+", \""+getShortFileName()+"\"" + ")");
+          //std::string txt("_FPC_CHECK_(" + prettyRHS +", "+lineNumber+", \""+getShortFileName()+"\"" + ")");
+          std::string leftTxt("_FPC_CHECK_(");
+          std::string rightTxt(", "+lineNumber+", \""+getShortFileName()+"\""+")");
           SourceRange range(rhs->getBeginLoc(), rhs->getEndLoc());
-          rewriteCode(range, txt, E);
+          rewriteCode(range, leftTxt, rightTxt, E);
+          //rewriteCode(range, txt, E);
           ret = true;
           //}
         } else if(E->getOpcode() == BO_Add || E->getOpcode() == BO_Sub ||
@@ -279,9 +291,12 @@ public:
 #ifdef FPC_DEBUG
           printInstrumentedLocation(E);
 #endif
-          std::string txt("_FPC_CHECK_(" + getStmtString(E) +", "+lineNumber+", \""+getShortFileName()+"\"" + ")");
+          //std::string txt("_FPC_CHECK_(" + getStmtString(E) +", "+lineNumber+", \""+getShortFileName()+"\"" + ")");
           SourceRange range(lhs->getBeginLoc(), rhs->getEndLoc());
-          rewriteCode(range, txt, E);
+          std::string leftTxt("_FPC_CHECK_(");
+          std::string rightTxt(", "+lineNumber+", \""+getShortFileName()+"\""+")");
+          rewriteCode(range, leftTxt, rightTxt, E);
+          //rewriteCode(range, txt, E);
           ret = true;
         }
       }

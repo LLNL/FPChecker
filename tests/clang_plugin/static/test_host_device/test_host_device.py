@@ -4,10 +4,19 @@ import subprocess
 import os
 
 source = "compute.cu"
-expression1 = "(x + 1.25) * 10."
+#  y += _FPC_CHECK_((x+1.25)*10.0, 8, "compute.cu");
+#  *x = _FPC_CHECK_(*x / 1.2, 15, "compute.cu");
+#  *x = _FPC_CHECK_((*x - 128.0) / (*x), 21, "compute.cu");
+#  *x = _FPC_CHECK_((64+*y) * (*x), 27, "compute.cu");
+expression1 = "(x+1.25)*10.0"
 expression2 = "*x / 1.2"
-expression3 = "(*x - 128.) / (*x)"
-expression4 = "(64 + *y) * (*x)"
+expression3 = "(*x - 128.0) / (*x)"
+expression4 = "(64+*y) * (*x)"
+
+#expression1 = "(x + 1.25) * 10."
+#expression2 = "*x / 1."
+#expression3 = "(*x - 128.) / (*x)"
+#expression4 = "(64 + *y) * (*x)"
 
 def setup_module(module):
     THIS_DIR = os.path.dirname(os.path.abspath(__file__))

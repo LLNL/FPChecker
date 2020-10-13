@@ -13,7 +13,7 @@ int main(int argc, char **argv)
   double *data = (double *)malloc(nbytes);
   for (int i=0; i < n; ++i)
   {
-    data[i] = _FPC_CHECK_((double)(i + 1), 16, "..ake_cuda/src/main_copy.cu");
+    data[i] = _FPC_CHECK_((double)(i+1), 16, "..ake_cuda/src/main_copy.cu");
   }
 
   cudaMemcpy((void *)d_a, (void *)data, nbytes, cudaMemcpyHostToDevice);

@@ -5,7 +5,7 @@ __device__ void mul(double a, double b, double *res)
 {
   *res = _FPC_CHECK_(a * b, 6, "dot_product_copy.cu");
   // NaN
-  *res = _FPC_CHECK_((*res) - (*res) / (*res) - (*res), 8, "dot_product_copy.cu"); 
+  *res = _FPC_CHECK_((*res)-(*res) / (*res)-(*res), 8, "dot_product_copy.cu"); 
 }
 
 __global__ void dot_prod(double *x, double *y, int size)

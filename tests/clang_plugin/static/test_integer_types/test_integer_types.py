@@ -4,8 +4,13 @@ import subprocess
 import os
 
 source = "compute.cu"
+#  y += _FPC_CHECK_((x + (int)128), 8, "compute.cu"); // should be instrumented
+#  return _FPC_CHECK_(y+r, 12, "compute.cu");
 expression1 = "(x + (int)128)"
-expression2 = "y + r"
+expression2 = "y+r"
+
+#expression1 = "(x + (int)128)"
+#expression2 = "y + r"
 
 def setup_module(module):
     THIS_DIR = os.path.dirname(os.path.abspath(__file__))

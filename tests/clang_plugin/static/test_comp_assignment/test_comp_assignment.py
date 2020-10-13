@@ -4,7 +4,9 @@ import subprocess
 import os
 
 source = "compute.cu"
-expression = "(x + 1.25) * 10."
+# y += _FPC_CHECK_((x+1.25)*10.0, 8, "compute.cu");
+#expression = "(x + 1.25) * 10."
+expression = "(x+1.25)*10.0"
 
 def setup_module(module):
     THIS_DIR = os.path.dirname(os.path.abspath(__file__))

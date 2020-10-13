@@ -10,4 +10,4 @@ all:
 	nvcc -o main_program dir1/dir2/dot_product.o main/main.o
 
 clean:
-	rm -rf dir1/dir2/*.o main/*.o main_program __pycache__ *_copy.* main_origram_fpc
+	rm -rf dir1/dir2/*.o main/*.o main_program __pycache__ *_copy.* main_program_fpc
