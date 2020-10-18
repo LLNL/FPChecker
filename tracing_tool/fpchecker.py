@@ -9,6 +9,7 @@ import sys
 import os
 from nvcc_parser import ClangCommand
 from colors import prGreen,prCyan,prRed
+from debug_traces import TraceBackCommand
 import strace_module
 
 # --------------------------------------------------------------------------- #
@@ -433,6 +434,7 @@ if __name__ == '__main__':
   parser.add_argument('--no-clang', action='store_true', help='Do not use clang to instrument CUDA code.')
   parser.add_argument('--no-rollback', action='store_true', help='Do not rollback to compiling with nvcc if clang failes to compile CUDA.')
   parser.add_argument('--replay-command', type=int, metavar='N', help='Replay a given command')
+  parser.add_argument('--debug-command', type=int, metavar='N', help='Print trace of specific command')
   args = parser.parse_args()
   #print(args)
   #exit()
@@ -458,6 +460,10 @@ if __name__ == '__main__':
 
   if args.no_checking:
     NVCC_ADDED_FLAGS.append('-DFPC_DISABLE_CHECKING')
+
+  if args.debug_command:
+    TraceBackCommand.printTrace(args.debug_command)
+    sys.exit(0)
 
   if CLANG_VERSION:
     ADD_OPTIONS.append(LLVM_PASS_CLANG)
