@@ -73,6 +73,7 @@ install(FILES
         "tracing_tool/nvcc_parser.py"
         "tracing_tool/strace_module.py"
         "tracing_tool/mpi_environment.py"
+        "tracing_tool/debug_traces"
         DESTINATION bin
         PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_WRITE GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
 )
