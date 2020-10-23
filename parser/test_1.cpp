@@ -1,3 +1,6 @@
 
-void compute(double x); 
+void compute(double x) {
 
+
+  double x;
+} 

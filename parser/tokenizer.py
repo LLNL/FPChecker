@@ -1,5 +1,8 @@
 
+import sys
+import os
 import re
+import tempfile
 
 # Lookahead tokens: 1
 CPP_SYMBOL_L1 = set([
@@ -161,78 +164,100 @@ CPP_KEYWORD = set([
   'final',
   'override',
   'transaction_safe',
-  'transaction_safe_dynamic'
+  'transaction_safe_dynamic',
+  '__attribute__'
 ])
 
 #--------------------------------------------------------------------#
-# Token classes
+# Token classes                                                      #
 #--------------------------------------------------------------------#
 
 identifierPattern = re.compile(r'[a-zA-Z_][a-zA-Z0-9_]*')
 numberPattern     = re.compile(r'[0-9.]')
 
 class Token:
-  def __init__(self, t: list):
+  def __init__(self, t: list, l: int):
     self.token = ''.join(t)
+    self.line = l
 
   def __str__(self):
     return self.token
 
+  def lineNumber(self):
+    return self.line
+
 class SymbolToken(Token):
-  def __init__(self, t: str):
+  def __init__(self, t: str, l: int):
     if (t not in CPP_SYMBOL_L1
       and t not in CPP_SYMBOL_L2
       and t not in CPP_SYMBOL_L3):
       raise SystemExit('Error: unknown symbol token')
-    super().__init__(t)
+    super().__init__(t, l)
 
 class KeywordToken(Token):
-  def __init__(self, t: str):
+  def __init__(self, t: str, l: int):
     if t not in CPP_KEYWORD:
       raise SystemExit('Error: unknown keyword token')
-    super().__init__(t)
+    super().__init__(t, l)
 
 class WhiteSpaceToken(Token):
-  def __init__(self, t: str):
+  def __init__(self, t: str, l: int):
     if (t[0]!=' ' and
       t[0]!='\t' and 
       t[0]!='\n' and
       t[0]!='\r'):
       raise SystemExit('Error: not a white space token')
-    super().__init__(t)
+    super().__init__(t, l)
 
 class IdentifierToken(Token):
-  def __init__(self, t: str):
+  def __init__(self, t: str, l: int):
     idMatch = identifierPattern.match(t)
     numMatch = numberPattern.match(t)
     if idMatch == None and numMatch == None:
       raise SystemExit('Error: not an identifier token')
-    super().__init__(t)
+    super().__init__(t, l)
 
 #--------------------------------------------------------------------#
-# Tokenizer
+# Tokenizer                                                          #
 #--------------------------------------------------------------------#
 
 class Tokenizer:
   def __init__(self, fileName: str):
-    self.fileName = fileName
+    self.fileName = os.path.abspath(fileName)
     self.buff_size = 1
     self.buff = []
+    self.current_line = 1
 
   def tokenize(self):
-    with open(self.fileName) as f:
+    ## Create temp file and remove pre-processor lines (start with #)
+    tmpFd, tmpFname = tempfile.mkstemp(suffix='.txt', text=True)
+    print('Temp file:', tmpFname)
+    with open(tmpFname, 'w') as f:
+      with open(self.fileName, 'r') as src:
+        for l in src:
+          if l.startswith('#'):
+            f.write('\n')
+          else:
+            f.write(l)
+
+    ## Iterate on new file
+    with open(tmpFname, 'r') as f:
       while True:
         c = f.read(self.buff_size)
         if not c:
+          print('final buff', self.buff)
           print("End of file")
           break
-        
+       
         self.buff.append(c)
         token = self.match(self.buff)
         if token:
-          print('token', type(token), ':', str(token))
+          yield token
         if token != None:
           continue
+
+    os.close(tmpFd)
+    os.remove(tmpFname)
 
   def match(self, buff: str):
     if len(buff)==0:
@@ -241,7 +266,10 @@ class Tokenizer:
     ### First let's try to match white spaces
     if Tokenizer.is_white_space(buff):
       self.consume(1)
-      return WhiteSpaceToken(buff[0])
+      # Update line number
+      if buff[0] == '\n':
+        self.current_line += 1
+      return WhiteSpaceToken(buff[0], self.current_line)
 
     if len(buff) < 3:
       return None
@@ -281,7 +309,7 @@ class Tokenizer:
       if delim:
         keyword = keyword[:-delim]
         self.consume(len(keyword))
-        return IdentifierToken(keyword)
+        return IdentifierToken(keyword, self.current_line)
     return None 
 
   def match_keyword(self, buff: str):
@@ -293,27 +321,27 @@ class Tokenizer:
         keyword = keyword[:-delim]
         if keyword in CPP_KEYWORD:
           self.consume(len(keyword))
-          return KeywordToken(keyword)
+          return KeywordToken(keyword, self.current_line)
     return None 
 
   def match_symbol_l3(self, buff: str):
     sym = ''.join(buff[:3])
     if sym in CPP_SYMBOL_L3:
       self.consume(3)
-      return SymbolToken(sym)
+      return SymbolToken(sym, self.current_line)
     return None
 
   def match_symbol_l2(self, buff: str):
     sym = ''.join(buff[:2])
     if sym in CPP_SYMBOL_L2:
       self.consume(2)
-      return SymbolToken(sym)
+      return SymbolToken(sym, self.current_line)
     return None
 
   def match_symbol_l1(self, buff: str):
     if buff[0] in CPP_SYMBOL_L1:
       self.consume(1)
-      return SymbolToken(buff[0])
+      return SymbolToken(buff[0], self.current_line)
     return None
 
   def consume(self, n: int):
@@ -348,11 +376,14 @@ class Tokenizer:
     return False
 
 #--------------------------------------------------------------------#
-# Main
+# Main                                                               #
 #--------------------------------------------------------------------#
 
 if __name__ == '__main__':
-  l = Tokenizer('./test_2.cpp')
-  l.tokenize()
-
+  fileName = sys.argv[1]
+  l = Tokenizer(fileName)
+  for token in l.tokenize():
+    print(type(token))
+    print(token.lineNumber())
+    sys.stdout.write(str(token))
 
