@@ -186,6 +186,9 @@ class Token:
   def lineNumber(self):
     return self.line
 
+  def areEqual(self, t):
+    return self.token == t.token
+
 class SymbolToken(Token):
   def __init__(self, t: str, l: int):
     if (t not in CPP_SYMBOL_L1
@@ -224,7 +227,6 @@ class IdentifierToken(Token):
 class Tokenizer:
   def __init__(self, fileName: str):
     self.fileName = os.path.abspath(fileName)
-    self.buff_size = 1
     self.buff = []
     self.current_line = 1
 
@@ -240,13 +242,21 @@ class Tokenizer:
           else:
             f.write(l)
 
-    ## Iterate on new file
+    ## Iterate on new file one character at a time
     with open(tmpFname, 'r') as f:
       while True:
-        c = f.read(self.buff_size)
+        c = f.read(1)
         if not c:
-          print('final buff', self.buff)
-          print("End of file")
+          ## Match the final 2 tokens
+          self.buff.append('\n')
+          self.buff.append('\n')
+          while True:
+            token = self.match(self.buff)
+            if not token or len(self.buff)==2: break
+            else: yield token
+
+          #print('final buff', self.buff)
+          print("\nEnd of file")
           break
        
         self.buff.append(c)
@@ -261,7 +271,7 @@ class Tokenizer:
 
   def match(self, buff: str):
     if len(buff)==0:
-      raise SystemExit('buffer len = 0')
+      raise SystemExit('Error: buffer len=0 in tokenizer')
 
     ### First let's try to match white spaces
     if Tokenizer.is_white_space(buff):
@@ -292,7 +302,6 @@ class Tokenizer:
     else:
       return None
 
-    #print('Tokenizer.endsWithDelimiter(buff)', Tokenizer.endsWithDelimiter(buff))
     ### If we couldn't match white spaces, symbols, or keywords,
     ### the token must be an identifier.
     ident = self.match_identifier(buff)
@@ -383,7 +392,7 @@ if __name__ == '__main__':
   fileName = sys.argv[1]
   l = Tokenizer(fileName)
   for token in l.tokenize():
-    print(type(token))
-    print(token.lineNumber())
+    sys.stdout.write('\n'+str(type(token))+':')
+    #print(token.lineNumber())
     sys.stdout.write(str(token))
 
