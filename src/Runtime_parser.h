@@ -77,25 +77,24 @@ __device__ static int _FPC_FP64_IS_FLUSH_TO_ZERO(double x, double y, double z, i
 
 
 /* ------ Generic templates for expressions parser mode ----------------- */
-//#pragma hd_warning_disable
-template<typename T>
-__host__ 
-T _FPC_CHECK_MACRO_(T t, int x, const char *str) {
-  return t;
-}
-
-//#pragma hd_warning_disable
 //template<typename T>
-//__host__
-//T _FPC_CHECK_HOST_(T t, int x, const char *str) {
+//__host__ 
+//T _FPC_CHECK_ANY_(T t, int x, const char *str) {
 //  return t;
 //}
 
-//#if defined(__CUDA_ARCH__)
-//#define _FPC_CHECK_MACRO_(f, x, str) 
-//#else
-//#define _FPC_CHECK_MACRO_(f, x, str) _FPC_CHECK_HOST_(f, x, str)
-//#endif
+template<typename T>
+__device__ 
+T _FPC_CHECK_D_(T t, int x, const char *str) {
+  return t;
+}
+
+template<typename T>
+__host__ __device__ 
+T _FPC_CHECK_HD_(T t, int x, const char *str) {
+  return t;
+}
+
 /* ----------------------------------------------------------------------- */
 
 /// Host function to print @ main()
