@@ -5,6 +5,7 @@ import sys
 from collections import defaultdict
 from tokenizer import Tokenizer
 from match import Match
+from match import FunctionType
 from deprocess import Deprocess
 
 ## Assumes we already pre-processed the file
@@ -18,6 +19,9 @@ class Instrument:
     self.allTokens = []
     self.linesOfAssigments = defaultdict(list)
     self.transformedLines = {}
+    self.PRE_DEVICE       = '_FPC_CHECK_D_'
+    self.PRE_HOST_DEVICE  = '_FPC_CHECK_HD_'
+    self.functionTypeMap = {} # key: token, value: function type
 
   def __del__(self):
     if self.deprocessedFile:
@@ -43,7 +47,8 @@ class Instrument:
   ## Finds ranges of lines that contain assigments
   def findAssigments(self):
     for l in self.deviceDclLines:
-      startLine, endLine, startIndex, endIndex = l # unpack lines and indexes
+      startLine, endLine, startIndex, endIndex, f_type = l # unpack lines and indexes
+      print('___Function Type:', f_type)
       m = Match()
       tokenIndexes = m.match_assigment(self.allTokens[startIndex:endIndex])
       for t in tokenIndexes:
@@ -54,8 +59,13 @@ class Instrument:
         self.linesOfAssigments[i_line].append((i_abs, 'b'))
         self.linesOfAssigments[j_line].append((j_abs, 'e'))
         print('Lines with assigments:', self.linesOfAssigments)
+        self.functionTypeMap[i_abs] = f_type
 
-  def transformLine(self, index, currentLine):
+  ## Adds preamble and end to the operation (i.e., instruments the line)
+  ## We add two things:
+  ##  (1) Line number (int)
+  ##  (2) Source file name (str)
+  def transformLine(self, index, currentLine: int):
     beg_tokens = set([])
     end_tokens = set([])
     for elem in self.linesOfAssigments[currentLine]:
@@ -67,9 +77,18 @@ class Instrument:
     newLine = ''
     for token in self.allTokens[index:]:
       if i in beg_tokens:
-        newLine += 'PRE('+str(self.allTokens[i])
+        # Add preamble
+        if self.functionTypeMap[i] == FunctionType.device: pre = self.PRE_DEVICE
+        elif self.functionTypeMap[i] == FunctionType.device_host: pre = self.PRE_HOST_DEVICE
+        elif self.functionTypeMap[i] == FunctionType.host_device: pre = self.PRE_HOST_DEVICE
+        newLine += pre + '('+str(self.allTokens[i])
       elif i in end_tokens:
-        newLine += ')END'+str(self.allTokens[i])
+        # Add line number
+        newLine += ', ' + str(currentLine)
+        # Add source file
+        newLine += ', "' + self.sourceFileName + '"'
+        # Add the end
+        newLine += ')'+str(self.allTokens[i])
       else:
         newLine += str(self.allTokens[i])
       if str(token)=='\n':
@@ -94,19 +113,23 @@ class Instrument:
       if currentLine in self.linesOfAssigments.keys():
         tokensConsumed, newLine = self.transformLine(index, currentLine)
         index += tokensConsumed-1
-        print('==>', newLine)
+        print('[New Line]: ==>', newLine)
         self.transformedLines[currentLine] = newLine
 
   def instrument(self):
+    fileName, ext = os.path.splitext(self.sourceFileName)
     with open(self.sourceFileName, 'r') as fd:
-      l = 0
-      for line in fd:
-        l += 1
-        if l in self.transformedLines.keys():
-          newLine = self.transformedLines[l]
-          print(newLine[:-1])
-        else:
-          print(line[:-1])
+      with open(fileName+'_inst'+ext, 'w') as outFile:
+        l = 0
+        for line in fd:
+          l += 1
+          if l in self.transformedLines.keys():
+            newLine = self.transformedLines[l]
+            print(newLine[:-1])
+            outFile.write(newLine[:-1]+'\n')
+          else:
+            print(line[:-1])
+            outFile.write(line[:-1]+'\n')
 
 if __name__ == '__main__':
   preFileName = sys.argv[1]
@@ -119,7 +142,5 @@ if __name__ == '__main__':
   inst.findAssigments()
   inst.produceInstrumentedLines()
   inst.instrument()
-  #inst.getContentOfAssigmentLines()
   #print(inst.assigmentIndexes)
-  #inst.printInstrumentedCode()
 
