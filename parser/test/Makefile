@@ -17,9 +17,9 @@ all:
 	#python3 ../instrument.py main.cu.ii main.cu
 	#nvcc $(INCLUDE) -arch=sm_70 -O0 -c dot_product_inst.cu 
 	#nvcc $(INCLUDE) -arch=sm_70 -O0 -c main_inst.cu 
-	$(NVCC) --std=c++11 -arch=sm_70 -O0 -c dot_product.cu 
-	$(NVCC) --std=c++11 -arch=sm_70 -O0 -c main.cu 
-	$(NVCC) -o main main.o dot_product.o
+	$(NVCC) --std=c++11 -arch=sm_70 -O0 -c dot_product.cu -o dot_product.cu.o
+	$(NVCC) --std=c++11 -arch=sm_70 -O0 -c main.cu  -o main.cu.o
+	$(NVCC) -o main main.cu.o dot_product.cu.o
 
 clean:
 	rm -rf *.cu *.o main __pycache__ *_inst.* *.inst *.ii

@@ -118,7 +118,7 @@ class Command:
     
     new_cmd = ['nvcc', '-E'] + newParams
     try:
-      prGreen(new_cmd) 
+      prGreen(' '.join(new_cmd)) 
       cmdOutput = subprocess.run(' '.join(new_cmd), shell=True, check=True)
     except subprocess.CalledProcessError as e:
       prRed(e)
@@ -165,6 +165,10 @@ class Command:
 
 if __name__ == '__main__':
   cmd = Command(sys.argv)
+
+  if 'FPC_INSTRUMENT' not in os.environ:
+    cmd.executeOriginalCommand()
+    exit()
 
   # Link command
   if cmd.isLinkCommand():

@@ -217,7 +217,7 @@ class IdentifierToken(Token):
     idMatch = identifierPattern.match(t)
     numMatch = numberPattern.match(t)
     if idMatch == None and numMatch == None:
-      raise SystemExit('Error: not an identifier token')
+      raise SystemExit('Error: not an identifier token: ' + t)
     super().__init__(t, l)
 
 #--------------------------------------------------------------------#
@@ -255,7 +255,6 @@ class Tokenizer:
             if not token or len(self.buff)==2: break
             else: yield token
 
-          #print('final buff', self.buff)
           print("\nEnd of file")
           break
        
