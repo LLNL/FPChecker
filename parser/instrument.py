@@ -22,6 +22,7 @@ class Instrument:
     self.PRE_DEVICE       = '_FPC_CHECK_D_'
     self.PRE_HOST_DEVICE  = '_FPC_CHECK_HD_'
     self.functionTypeMap = {} # key: token, value: function type
+    self.instrumentedFileName = None
 
   def __del__(self):
     if self.deprocessedFile:
@@ -118,8 +119,9 @@ class Instrument:
 
   def instrument(self):
     fileName, ext = os.path.splitext(self.sourceFileName)
+    self.instrumentedFileName = fileName+'_inst'+ext
     with open(self.sourceFileName, 'r') as fd:
-      with open(fileName+'_inst'+ext, 'w') as outFile:
+      with open(self.instrumentedFileName, 'w') as outFile:
         l = 0
         for line in fd:
           l += 1
@@ -130,6 +132,9 @@ class Instrument:
           else:
             print(line[:-1])
             outFile.write(line[:-1]+'\n')
+
+  def getInstrumentedFileName(self):
+    return self.instrumentedFileName
 
 if __name__ == '__main__':
   preFileName = sys.argv[1]

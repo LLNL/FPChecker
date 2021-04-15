@@ -13,6 +13,7 @@
 #include <math.h>
 #include <stdint.h>
 #include <limits.h>
+#include <type_traits>
 
 /// *** Warning ***
 /// Changing this file: Runtime.h
@@ -86,7 +87,11 @@ __device__ static int _FPC_FP64_IS_FLUSH_TO_ZERO(double x, double y, double z, i
 template<typename T>
 __device__ 
 T _FPC_CHECK_D_(T t, int x, const char *str) {
-  return t;
+  if (std::is_floating_point<T>::value) {
+    return _FPC_CHECK_(t, x, str);
+  } else {
+    return t;
+  }
 }
 
 template<typename T>
