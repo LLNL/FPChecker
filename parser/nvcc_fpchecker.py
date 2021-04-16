@@ -7,6 +7,7 @@ import sys
 from colors import prGreen, prCyan, prRed
 from instrument import Instrument
 from exceptions import CommandException, CompileException
+from logging import logMessage
 
 # --------------------------------------------------------------------------- #
 # --- Installation Paths ---------------------------------------------------- #
@@ -85,7 +86,9 @@ class Command:
           fileName = t
 
     if not fileName:
-      raise CommandException('Could not find source file in nvcc command')
+      message = 'Could not find source file in nvcc command'
+      logMessage(message)
+      raise CommandException(message)
   
     return fileName
 
@@ -123,7 +126,10 @@ class Command:
       cmdOutput = subprocess.run(' '.join(new_cmd), shell=True, check=True)
     except Exception as e:
       prRed(e)
-      raise RuntimeError('Could not execute pre-processor') from e
+      logMessage(str(e))
+      message = 'Could not execute pre-processor'
+      logMessage(message)
+      raise RuntimeError(message) from e
 
     return True
 
@@ -162,7 +168,10 @@ class Command:
       cmdOutput = subprocess.run(' '.join(new_cmd), shell=True, check=True)
     except Exception as e:
       prRed(e)
-      raise CompileException('Could not compile instrumented file') from e
+      logMessage(str(e))
+      message = 'Could not compile instrumented file'
+      logMessage(message)
+      raise CompileException(message) from e
 
 if __name__ == '__main__':
   cmd = Command(sys.argv)
@@ -173,7 +182,6 @@ if __name__ == '__main__':
 
   # Link command
   if cmd.isLinkCommand():
-    #prGreen('Linking...')
     cmd.executeOriginalCommand()
   else:
     # Compilation command
@@ -181,8 +189,10 @@ if __name__ == '__main__':
       cmd.executePreprocessor()
       cmd.instrumentSource()
       cmd.compileInstrumentedFile()
+      logMessage('Instrumented: ' + cmd.instrumentedFile)
     except Exception as e:
       # Fall back to original command
+      logMessage(str(e))
       prRed(e)
       cmd.executeOriginalCommand()
 

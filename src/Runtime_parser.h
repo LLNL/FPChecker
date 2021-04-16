@@ -14,7 +14,7 @@
 #include <stdint.h>
 #include <limits.h>
 #include <type_traits>
-
+#include <limits>
 
 /* --------------- Definitions --------------------------------------------- */
 __device__
@@ -26,71 +26,71 @@ static double _FPC_CHECK_(double x, int loc, const char *fileName);
 __device__ static 
 short _FPC_CHECK_(short x, int loc, const char *fileName) {return x;}
 
-__device__ static 
-short int _FPC_CHECK_(short int x, int loc, const char *fileName) {return x;}
+//__device__ static 
+//short int _FPC_CHECK_(short int x, int loc, const char *fileName) {return x;}
+
+//__device__ static 
+//signed short _FPC_CHECK_(signed short x, int loc, const char *fileName) {return x;}
+
+//__device__ static 
+//signed short int _FPC_CHECK_(signed short int x, int loc, const char *fileName) {return x;}
 
 __device__ static 
-signed short _FPC_CHECK_(signed short x, int loc, const char *fileName) {return x;}
+unsigned short _FPC_CHECK_(unsigned short x, int loc, const char *fileName) {return x;}
 
-__device__ static 
-signed short int _FPC_CHECK_(signed short int x, int loc, const char *fileName) {return x;}
-
-__device__ static 
-unsigned short _FPC_CHECK_(unsigned short x, int loc, const char *fileName) {return x;}
-
-__device__ static 
-unsigned short int _FPC_CHECK_(unsigned short int x, int loc, const char *fileName) {return x;}
+//__device__ static 
+//unsigned short int _FPC_CHECK_(unsigned short int x, int loc, const char *fileName) {return x;}
 
 __device__ static 
 int _FPC_CHECK_(int x, int loc, const char *fileName) {return x;}
 
-__device__ static 
-signed _FPC_CHECK_(signed x, int loc, const char *fileName) {return x;}
+//__device__ static 
+//signed _FPC_CHECK_(signed x, int loc, const char *fileName) {return x;}
 
-__device__ static 
-signed int _FPC_CHECK_(signed int x, int loc, const char *fileName) {return x;}
+//__device__ static 
+//signed int _FPC_CHECK_(signed int x, int loc, const char *fileName) {return x;}
 
 __device__ static 
 unsigned _FPC_CHECK_(unsigned x, int loc, const char *fileName) {return x;}
 
-__device__ static 
-unsigned int _FPC_CHECK_(unsigned int x, int loc, const char *fileName) {return x;}
+//__device__ static 
+//unsigned int _FPC_CHECK_(unsigned int x, int loc, const char *fileName) {return x;}
 
 __device__ static 
 long _FPC_CHECK_(long x, int loc, const char *fileName) {return x;}
 
-__device__ static 
-long int _FPC_CHECK_(long int x, int loc, const char *fileName) {return x;}
+//__device__ static 
+//long int _FPC_CHECK_(long int x, int loc, const char *fileName) {return x;}
+
+//__device__ static 
+//signed long _FPC_CHECK_(signed long x, int loc, const char *fileName) {return x;}
+
+//__device__ static 
+//signed long int _FPC_CHECK_(signed long int x, int loc, const char *fileName) {return x;}
 
 __device__ static 
-signed long _FPC_CHECK_(signed long x, int loc, const char *fileName) {return x;}
+unsigned long _FPC_CHECK_(unsigned long x, int loc, const char *fileName) {return x;}
+
+//__device__ static 
+//unsigned long int _FPC_CHECK_(unsigned long int x, int loc, const char *fileName) {return x;}
 
 __device__ static 
-signed long int _FPC_CHECK_(signed long int x, int loc, const char *fileName) {return x;}
+long long _FPC_CHECK_(long long x, int loc, const char *fileName) {return x;}
+
+//__device__ static 
+//long long int _FPC_CHECK_(long long int x, int loc, const char *fileName) {return x;}
+
+//__device__ static 
+//signed long long _FPC_CHECK_(signed long long x, int loc, const char *fileName) {return x;}
+
+//__device__ static 
+//signed long long int _FPC_CHECK_(signed long long int x, int loc, const char *fileName) {return x;}
 
 __device__ static 
-unsigned long _FPC_CHECK_(unsigned long x, int loc, const char *fileName) {return x;}
+unsigned long long _FPC_CHECK_(unsigned long long x, int loc, const char *fileName) {return x;}
 
-__device__ static 
-unsigned long int _FPC_CHECK_(unsigned long int x, int loc, const char *fileName) {return x;}
-
-__device__ static 
-long long _FPC_CHECK_(long long x, int loc, const char *fileName) {return x;}
-
-__device__ static 
-long long int _FPC_CHECK_(long long int x, int loc, const char *fileName) {return x;}
-
-__device__ static 
-signed long long _FPC_CHECK_(signed long long x, int loc, const char *fileName) {return x;}
-
-__device__ static 
-signed long long int _FPC_CHECK_(signed long long int x, int loc, const char *fileName) {return x;}
-
-__device__ static 
-unsigned long long _FPC_CHECK_(unsigned long long x, int loc, const char *fileName) {return x;}
-
-__device__ static 
-unsigned long long int _FPC_CHECK_(unsigned long long int x, int loc, const char *fileName) {return x;}
+//__device__ static 
+//unsigned long long int _FPC_CHECK_(unsigned long long int x, int loc, const char *fileName) {return x;}
 
 /* ------ Generic templates for any types----------------------------------- */
 
@@ -104,14 +104,15 @@ T _FPC_CHECK_D_(T t, int x, const char *str) {
   }
 }
 
+__host__ __device__ 
+double _FPC_CHECK_HD_(double x, int l, const char *str) {
+  return _FPC_CHECK_(x, l, str);
+}
+
 template<typename T>
 __host__ __device__ 
 T _FPC_CHECK_HD_(T t, int x, const char *str) {
-  if (std::is_floating_point<T>::value) {
-    return _FPC_CHECK_(t, x, str);
-  } else {
-    return t;
-  }
+  return t;
 }
 
 /* ----------------------------------------------------------------------- */
