@@ -23,7 +23,6 @@ CPP_SYMBOL_L1 = set([
   '-',
   '*',
   '/',
-  "'",
   '?',
   '=',
   '>',
@@ -227,6 +226,12 @@ class StringToken(Token):
       raise SystemExit('Error: not a string token')
     super().__init__(t, l)
 
+class CharToken(Token):
+  def __init__(self, t: str, l: int):
+    if t[0] != "'" and t[-1:][0] != "'":
+      raise SystemExit('Error: not a char token')
+    super().__init__(t, l)
+
 #--------------------------------------------------------------------#
 # Tokenizer                                                          #
 #--------------------------------------------------------------------#
@@ -299,10 +304,13 @@ class Tokenizer:
     if l1: return l1
    
     ## If we can't match white spaces and/or symbols
-    ## we match strings
+    ## we match strings and chars
     if buff[0] == '"':
       string = self.match_string(buff)
       return string 
+    if buff[0] == "'":
+      char = self.match_char(buff)
+      return char
  
     ### If at this point we can't match white spaces or symbols,
     ### we try to match keywords.
@@ -338,6 +346,13 @@ class Tokenizer:
     if buff[0] == '"' and buff[-1:][0] == '"':
       self.consume(len(buff))
       return StringToken(buff, self.current_line)
+    return None
+
+  ## Returns either a srtring token or None
+  def match_char(self, buff: str):
+    if buff[0] == "'" and buff[-1:][0] == "'":
+      self.consume(len(buff))
+      return CharToken(buff, self.current_line)
     return None
 
   def match_keyword(self, buff: str):

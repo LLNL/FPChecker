@@ -47,17 +47,6 @@ long long _FPC_CHECK_(long long x, int loc, const char *fileName) {return x;}
 __host__ __device__ static 
 unsigned long long _FPC_CHECK_(unsigned long long x, int loc, const char *fileName) {return x;}
 
-/* ------ Generic templates for any types----------------------------------- */
-
-/*template<typename T>
-__device__ 
-T _FPC_CHECK_D_(T t, int x, const char *str) {
-  if (std::is_floating_point<T>::value) {
-    return _FPC_CHECK_(t, x, str);
-  } else {
-    return t;
-  }
-}*/
 
 ////////// HOST DEVICE CHECKS ///////////////////////////
 __host__ __device__ static
@@ -77,7 +66,6 @@ T _FPC_CHECK_HD_(T t, int x, const char *str) {
 }
 
 ////////// DEVICE CHECKS ///////////////////////////
-
 __host__ __device__ static
 double _FPC_CHECK_D_(double x, int l, const char *str) {
   return _FPC_CHECK_(x, l, str);
