@@ -3,6 +3,7 @@ import sys
 import os
 import re
 import tempfile
+from exceptions import MatchException
 
 # Lookahead tokens: 1
 CPP_SYMBOL_L1 = set([
@@ -22,7 +23,7 @@ CPP_SYMBOL_L1 = set([
   '-',
   '*',
   '/',
-  '"',
+  "'",
   '?',
   '=',
   '>',
@@ -178,7 +179,7 @@ numberPattern     = re.compile(r'[0-9.]')
 class Token:
   def __init__(self, t: list, l: int):
     self.token = ''.join(t)
-    self.line = l
+    self.line = l # line number
 
   def __str__(self):
     return self.token
@@ -218,6 +219,12 @@ class IdentifierToken(Token):
     numMatch = numberPattern.match(t)
     if idMatch == None and numMatch == None:
       raise SystemExit('Error: not an identifier token: ' + t)
+    super().__init__(t, l)
+
+class StringToken(Token):
+  def __init__(self, t: str, l: int):
+    if t[0] != '"' and t[-1:][0] != '"':
+      raise SystemExit('Error: not a string token')
     super().__init__(t, l)
 
 #--------------------------------------------------------------------#
@@ -270,7 +277,7 @@ class Tokenizer:
 
   def match(self, buff: str):
     if len(buff)==0:
-      raise SystemExit('Error: buffer len=0 in tokenizer')
+      raise MatchException('Buffer len=0 in tokenizer - this file is empty')
 
     ### First let's try to match white spaces
     if Tokenizer.is_white_space(buff):
@@ -290,7 +297,13 @@ class Tokenizer:
     if l2: return l2
     l1 = self.match_symbol_l1(buff)
     if l1: return l1
-    
+   
+    ## If we can't match white spaces and/or symbols
+    ## we match strings
+    if buff[0] == '"':
+      string = self.match_string(buff)
+      return string 
+ 
     ### If at this point we can't match white spaces or symbols,
     ### we try to match keywords.
     ### We look for the pattern ...[white_space] or ...[symbol]
@@ -319,6 +332,13 @@ class Tokenizer:
         self.consume(len(keyword))
         return IdentifierToken(keyword, self.current_line)
     return None 
+
+  ## Returns either a srtring token or None
+  def match_string(self, buff: str):
+    if buff[0] == '"' and buff[-1:][0] == '"':
+      self.consume(len(buff))
+      return StringToken(buff, self.current_line)
+    return None
 
   def match_keyword(self, buff: str):
     keyword = ''

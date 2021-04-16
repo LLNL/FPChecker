@@ -88,6 +88,7 @@ template<typename T>
 __device__ 
 T _FPC_CHECK_D_(T t, int x, const char *str) {
   if (std::is_floating_point<T>::value) {
+    printf("In _FPC_CHECK_D_\n");
     return _FPC_CHECK_(t, x, str);
   } else {
     return t;
@@ -97,6 +98,7 @@ T _FPC_CHECK_D_(T t, int x, const char *str) {
 template<typename T>
 __host__ __device__ 
 T _FPC_CHECK_HD_(T t, int x, const char *str) {
+  printf("--->In _FPC_CHECK_HD_ \n");
   return t;
 }
 

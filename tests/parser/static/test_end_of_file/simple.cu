@@ -56,5 +56,3 @@ void calc2(double *x, int s) {
     x[i] = x[i] + 3.1;
   }
 }
-
-static double var;

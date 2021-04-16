@@ -6,6 +6,7 @@ import subprocess
 import sys
 from colors import prGreen, prCyan, prRed
 from instrument import Instrument
+from exceptions import CommandException, CompileException
 
 # --------------------------------------------------------------------------- #
 # --- Installation Paths ---------------------------------------------------- #
@@ -84,7 +85,7 @@ class Command:
           fileName = t
 
     if not fileName:
-      raise RuntimeError('FPCHECKER: Could not find source file') from None
+      raise CommandException('Could not find source file in nvcc command')
   
     return fileName
 
@@ -120,13 +121,13 @@ class Command:
     try:
       prGreen(' '.join(new_cmd)) 
       cmdOutput = subprocess.run(' '.join(new_cmd), shell=True, check=True)
-    except subprocess.CalledProcessError as e:
+    except Exception as e:
       prRed(e)
-      raise RuntimeError('FPCHECKER: Could not execute pre-processor') from e
+      raise RuntimeError('Could not execute pre-processor') from e
 
     return True
 
-  def instrumentSouce(self):
+  def instrumentSource(self):
     preFileName = self.preprocessedFile
     sourceFileName = self.getCodeFileNameIfExists()
     inst = Instrument(preFileName, sourceFileName)
@@ -161,7 +162,7 @@ class Command:
       cmdOutput = subprocess.run(' '.join(new_cmd), shell=True, check=True)
     except Exception as e:
       prRed(e)
-      raise RuntimeError('FPCHECKER: Could not compile instrumented file') from e
+      raise CompileException('Could not compile instrumented file') from e
 
 if __name__ == '__main__':
   cmd = Command(sys.argv)
@@ -178,7 +179,7 @@ if __name__ == '__main__':
     # Compilation command
     try:
       cmd.executePreprocessor()
-      cmd.instrumentSouce()
+      cmd.instrumentSource()
       cmd.compileInstrumentedFile()
     except Exception as e:
       # Fall back to original command

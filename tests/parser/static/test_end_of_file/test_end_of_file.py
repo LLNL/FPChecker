@@ -15,7 +15,5 @@ def test_1():
     sys.stdout.write(str(token))
   print('Len:', count)
 
-  assert count == 20
-
 if __name__ == '__main__':
   test_1()
