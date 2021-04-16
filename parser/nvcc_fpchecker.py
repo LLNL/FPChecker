@@ -6,8 +6,8 @@ import subprocess
 import sys
 from colors import prGreen, prCyan, prRed
 from instrument import Instrument
-from exceptions import CommandException, CompileException
-from logging import logMessage
+from exceptions import CommandException, CompileException, EmptyFileException
+from logging import logMessage, verbose
 
 # --------------------------------------------------------------------------- #
 # --- Installation Paths ---------------------------------------------------- #
@@ -41,12 +41,10 @@ class Command:
   def executeOriginalCommand(self):
     try:
       cmd = ['nvcc'] + self.parameters
-      print('Executing original command:', cmd)
-      #cmdOutput = subprocess.call(cmd, stderr=subprocess.STDOUT, shell=True)
+      if verbose(): print('Executing original command:', cmd)
       subprocess.run(' '.join(cmd), shell=True, check=True)
     except subprocess.CalledProcessError as e:
       prRed(e)
-      #sys.exit('FPCHECKER: nvcc error: ' + ' '.join(cmd))
 
   def getOriginalCommand(self):
     return ' '.join(['nvcc'] + self.parameters[1:])
@@ -122,13 +120,14 @@ class Command:
     
     new_cmd = ['nvcc', '-E'] + newParams
     try:
-      prGreen(' '.join(new_cmd)) 
+      if verbose(): prGreen(' '.join(new_cmd)) 
       cmdOutput = subprocess.run(' '.join(new_cmd), shell=True, check=True)
     except Exception as e:
-      prRed(e)
-      logMessage(str(e))
-      message = 'Could not execute pre-processor'
-      logMessage(message)
+      if verbose():
+        prRed(e)
+        logMessage(str(e))
+        message = 'Could not execute pre-processor'
+        logMessage(message)
       raise RuntimeError(message) from e
 
     return True
@@ -139,7 +138,7 @@ class Command:
     inst = Instrument(preFileName, sourceFileName)
     inst.deprocess()
     inst.findDeviceDeclarations()
-    print(inst.deviceDclLines)
+    if verbose(): print(inst.deviceDclLines)
     inst.findAssigments()
     inst.produceInstrumentedLines()
     inst.instrument()
@@ -164,13 +163,14 @@ class Command:
 
     # Compile
     try:
-      prGreen('Compiling: ' + ' '.join(new_cmd))
+      if verbose(): prGreen('Compiling: ' + ' '.join(new_cmd))
       cmdOutput = subprocess.run(' '.join(new_cmd), shell=True, check=True)
     except Exception as e:
-      prRed(e)
-      logMessage(str(e))
-      message = 'Could not compile instrumented file'
-      logMessage(message)
+      if verbose():
+        prRed(e)
+        logMessage(str(e))
+        message = 'Could not compile instrumented file'
+        logMessage(message)
       raise CompileException(message) from e
 
 if __name__ == '__main__':
@@ -190,9 +190,17 @@ if __name__ == '__main__':
       cmd.instrumentSource()
       cmd.compileInstrumentedFile()
       logMessage('Instrumented: ' + cmd.instrumentedFile)
+    except EmptyFileException as e:
+      if verbose():
+        logMessage(str(e))
+        prRed(e)
+        logMessage('Failed: ' + ' '.join(sys.argv))
+      cmd.executeOriginalCommand()
     except Exception as e:
       # Fall back to original command
-      logMessage(str(e))
-      prRed(e)
+      if verbose():
+        logMessage(str(e))
+        prRed(e)
+      logMessage('Failed: ' + ' '.join(sys.argv))
       cmd.executeOriginalCommand()
 

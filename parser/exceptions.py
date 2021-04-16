@@ -11,3 +11,6 @@ class CommandException(FPCheckerException):
 
 class CompileException(FPCheckerException):
   pass
+
+class EmptyFileException(FPCheckerException):
+  pass

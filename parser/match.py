@@ -2,6 +2,7 @@
 import sys
 import enum
 from tokenizer import Tokenizer, Token, SymbolToken, KeywordToken, WhiteSpaceToken, IdentifierToken
+from logging import verbose, logMessage
 
 #--------------------------------------------------------------------#
 # Types                                                              #
@@ -29,7 +30,6 @@ class Match:
     x, y = blockRange
     last_x, last_y = self.code_range_cache[-1:][0]
     if x >= last_x and y <= last_y:
-      print('\t x,y', x, y, 'last x,y:', last_x, last_y)
       return True
     else:
       # Block has not been seen
@@ -248,9 +248,9 @@ class Match:
                 endLine = buff[i+m1+m2+m3+m4+m5].lineNumber()
                 startIndex = i
                 endIndex = i+m1+m2+m3+m4+m5
-                print('***** F Type:', func_type)
                 if not self._matched_block( (startLine, endLine) ):
-                  print('Not seen block:', (startLine, endLine), '\ncache:', self.code_range_cache)
+                  if verbose():
+                    print('Not seen block:', (startLine, endLine), '\ncache:', self.code_range_cache)
                   linesThatMatched.append((startLine, endLine, startIndex, endIndex, func_type))
 
     return linesThatMatched
@@ -279,15 +279,15 @@ class Match:
       m1 = self._match_anything_until_except(tokensRange[i:], ';', unallowedChars)
       if m1:
         left = self._nextNonEmpty(tokensRange[i+1:])
-        print('PRE:', tokensRange[i+1+left])
-        print('POST:', tokensRange[i+m1-1])
+        if verbose(): print('PRE:', tokensRange[i+1+left])
+        if verbose(): print('POST:', tokensRange[i+m1-1])
         tokenIndexes.append((i+1+left, i+m1-1))
     return tokenIndexes
 
   # Print friendly a bugger of tokens
   def printTokens(self, buff):
     for i in range(len(buff)):
-      print('['+str(i)+']:', str(buff[i]))
+      if verbose(): print('['+str(i)+']:', str(buff[i]))
     
 #--------------------------------------------------------------------#
 # Main                                                               #

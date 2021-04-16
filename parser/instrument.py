@@ -7,6 +7,7 @@ from tokenizer import Tokenizer
 from match import Match
 from match import FunctionType
 from deprocess import Deprocess
+from logging import verbose, logMessage
 
 ## Assumes we already pre-processed the file
 class Instrument:
@@ -30,10 +31,10 @@ class Instrument:
 
   def deprocess(self):
     tmpFd, tmpFname = tempfile.mkstemp(suffix='.txt', text=True)
-    print('Temp file:', tmpFname)
+    if verbose(): print('Temp file:', tmpFname)
     self.deprocessedFile = tmpFname
     dp = Deprocess(self.preFileName, tmpFname)
-    print('Running de-processor...')
+    if verbose(): print('Running de-processor...')
     dp.run()
     #os.close(tmpFd)
     #os.remove(tmpFname)
@@ -49,7 +50,6 @@ class Instrument:
   def findAssigments(self):
     for l in self.deviceDclLines:
       startLine, endLine, startIndex, endIndex, f_type = l # unpack lines and indexes
-      print('___Function Type:', f_type)
       m = Match()
       tokenIndexes = m.match_assigment(self.allTokens[startIndex:endIndex])
       for t in tokenIndexes:
@@ -59,7 +59,7 @@ class Instrument:
         j_line = self.allTokens[j_abs].lineNumber()
         self.linesOfAssigments[i_line].append((i_abs, 'b'))
         self.linesOfAssigments[j_line].append((j_abs, 'e'))
-        print('Lines with assigments:', self.linesOfAssigments)
+        if verbose(): print('Lines with assigments:', self.linesOfAssigments)
         self.functionTypeMap[i_abs] = f_type
 
   ## Adds preamble and end to the operation (i.e., instruments the line)
@@ -114,7 +114,7 @@ class Instrument:
       if currentLine in self.linesOfAssigments.keys():
         tokensConsumed, newLine = self.transformLine(index, currentLine)
         index += tokensConsumed-1
-        print('[New Line]: ==>', newLine)
+        if verbose(): print('[New Line]: ==>', newLine)
         self.transformedLines[currentLine] = newLine
 
   def instrument(self):
@@ -127,10 +127,10 @@ class Instrument:
           l += 1
           if l in self.transformedLines.keys():
             newLine = self.transformedLines[l]
-            print(newLine[:-1])
+            if verbose(): print(newLine[:-1])
             outFile.write(newLine[:-1]+'\n')
           else:
-            print(line[:-1])
+            if verbose(): print(line[:-1])
             outFile.write(line[:-1]+'\n')
 
   def getInstrumentedFileName(self):
@@ -140,12 +140,10 @@ if __name__ == '__main__':
   preFileName = sys.argv[1]
   sourceFileName = sys.argv[2]
   inst = Instrument(preFileName, sourceFileName)
-  #inst.loadProcessedFile()
   inst.deprocess()
   inst.findDeviceDeclarations()
   print(inst.deviceDclLines)
   inst.findAssigments()
   inst.produceInstrumentedLines()
   inst.instrument()
-  #print(inst.assigmentIndexes)
 

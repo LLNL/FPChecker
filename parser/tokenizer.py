@@ -3,7 +3,8 @@ import sys
 import os
 import re
 import tempfile
-from exceptions import MatchException
+from exceptions import MatchException, EmptyFileException
+from logging import verbose, logMessage
 
 # Lookahead tokens: 1
 CPP_SYMBOL_L1 = set([
@@ -245,7 +246,7 @@ class Tokenizer:
   def tokenize(self):
     ## Create temp file and remove pre-processor lines (start with #)
     tmpFd, tmpFname = tempfile.mkstemp(suffix='.txt', text=True)
-    print('Temp file:', tmpFname)
+    if verbose(): print('Temp file:', tmpFname)
     with open(tmpFname, 'w') as f:
       with open(self.fileName, 'r') as src:
         for l in src:
@@ -267,7 +268,7 @@ class Tokenizer:
             if not token or len(self.buff)==2: break
             else: yield token
 
-          print("\nEnd of file")
+          if verbose(): print("\nEnd of file")
           break
        
         self.buff.append(c)
@@ -282,7 +283,7 @@ class Tokenizer:
 
   def match(self, buff: str):
     if len(buff)==0:
-      raise MatchException('Buffer len=0 in tokenizer - this file is empty')
+      raise EmptyFileException('Buffer len=0 in tokenizer - this file is empty')
 
     ### First let's try to match white spaces
     if Tokenizer.is_white_space(buff):
@@ -334,7 +335,6 @@ class Tokenizer:
     for c in buff:
       keyword += c
       delim = Tokenizer.endsWithDelimiter(keyword)
-      #print('delim', delim, 'keyword', keyword)
       if delim:
         keyword = keyword[:-delim]
         self.consume(len(keyword))
@@ -427,6 +427,5 @@ if __name__ == '__main__':
   l = Tokenizer(fileName)
   for token in l.tokenize():
     sys.stdout.write('\n'+str(type(token))+':')
-    #print(token.lineNumber())
     sys.stdout.write(str(token))
 
