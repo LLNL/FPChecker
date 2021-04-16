@@ -15,6 +15,14 @@
 #include <limits.h>
 #include <type_traits>
 
+
+/* --------------- Definitions --------------------------------------------- */
+__device__
+static float _FPC_CHECK_(float x, int loc, const char *fileName);
+
+__device__
+static double _FPC_CHECK_(double x, int loc, const char *fileName);
+
 /* ------ Generic templates for any types----------------------------------- */
 
 template<typename T>
@@ -30,7 +38,9 @@ T _FPC_CHECK_D_(T t, int x, const char *str) {
 template<typename T>
 __host__ __device__ 
 T _FPC_CHECK_HD_(T t, int x, const char *str) {
-  if (std::is_floating_point<T>::value) {
+  if (std::is_integral<T>::value) {
+    return t;
+  } else if (std::is_floating_point<T>::value) {
     return _FPC_CHECK_(t, x, str);
   } else {
     return t;
