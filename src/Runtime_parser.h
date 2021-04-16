@@ -26,71 +26,26 @@ static double _FPC_CHECK_(double x, int loc, const char *fileName);
 __device__ static 
 short _FPC_CHECK_(short x, int loc, const char *fileName) {return x;}
 
-//__device__ static 
-//short int _FPC_CHECK_(short int x, int loc, const char *fileName) {return x;}
-
-//__device__ static 
-//signed short _FPC_CHECK_(signed short x, int loc, const char *fileName) {return x;}
-
-//__device__ static 
-//signed short int _FPC_CHECK_(signed short int x, int loc, const char *fileName) {return x;}
-
 __device__ static 
 unsigned short _FPC_CHECK_(unsigned short x, int loc, const char *fileName) {return x;}
-
-//__device__ static 
-//unsigned short int _FPC_CHECK_(unsigned short int x, int loc, const char *fileName) {return x;}
 
 __device__ static 
 int _FPC_CHECK_(int x, int loc, const char *fileName) {return x;}
 
-//__device__ static 
-//signed _FPC_CHECK_(signed x, int loc, const char *fileName) {return x;}
-
-//__device__ static 
-//signed int _FPC_CHECK_(signed int x, int loc, const char *fileName) {return x;}
-
 __device__ static 
 unsigned _FPC_CHECK_(unsigned x, int loc, const char *fileName) {return x;}
-
-//__device__ static 
-//unsigned int _FPC_CHECK_(unsigned int x, int loc, const char *fileName) {return x;}
 
 __device__ static 
 long _FPC_CHECK_(long x, int loc, const char *fileName) {return x;}
 
-//__device__ static 
-//long int _FPC_CHECK_(long int x, int loc, const char *fileName) {return x;}
-
-//__device__ static 
-//signed long _FPC_CHECK_(signed long x, int loc, const char *fileName) {return x;}
-
-//__device__ static 
-//signed long int _FPC_CHECK_(signed long int x, int loc, const char *fileName) {return x;}
-
 __device__ static 
 unsigned long _FPC_CHECK_(unsigned long x, int loc, const char *fileName) {return x;}
-
-//__device__ static 
-//unsigned long int _FPC_CHECK_(unsigned long int x, int loc, const char *fileName) {return x;}
 
 __device__ static 
 long long _FPC_CHECK_(long long x, int loc, const char *fileName) {return x;}
 
-//__device__ static 
-//long long int _FPC_CHECK_(long long int x, int loc, const char *fileName) {return x;}
-
-//__device__ static 
-//signed long long _FPC_CHECK_(signed long long x, int loc, const char *fileName) {return x;}
-
-//__device__ static 
-//signed long long int _FPC_CHECK_(signed long long int x, int loc, const char *fileName) {return x;}
-
 __device__ static 
 unsigned long long _FPC_CHECK_(unsigned long long x, int loc, const char *fileName) {return x;}
-
-//__device__ static 
-//unsigned long long int _FPC_CHECK_(unsigned long long int x, int loc, const char *fileName) {return x;}
 
 /* ------ Generic templates for any types----------------------------------- */
 
@@ -149,7 +104,7 @@ __device__ static int _FPC_LOCK_STATE_ = 0;
 ///  Line      : 23
 /// +----------------------------------------------------------+
 
-__device__
+__host__ __device__
 static int _FPC_LEN_(const char *s)
 {
 	int maxLen = 1024; // to check correctness and avid infinite loop
@@ -159,7 +114,7 @@ static int _FPC_LEN_(const char *s)
 	return i;
 }
 
-__device__
+__host__ __device__
 static void _FPC_CPY_(char *d, const char *s)
 {
 	int len = _FPC_LEN_(s);
@@ -169,7 +124,7 @@ static void _FPC_CPY_(char *d, const char *s)
 	d[i] = '\0';
 }
 
-__device__
+__host__ __device__
 static void _FPC_CAT_(char *d, const char *s)
 {
 	int lenS = _FPC_LEN_(s);
@@ -180,7 +135,7 @@ static void _FPC_CAT_(char *d, const char *s)
 	d[i+lenD] = '\0';
 }
 
-__device__
+__host__ __device__
 static void _FPC_PRINT_REPORT_LINE_(const char border)
 {
 	printf("%c",border);
@@ -189,7 +144,7 @@ static void _FPC_PRINT_REPORT_LINE_(const char border)
 	printf("%c\n",border);
 }
 
-__device__
+__host__ __device__
 static void _FPC_PRINT_REPORT_HEADER_(int type)
 {
 	//_FPC_PRINT_REPORT_LINE_('.');
@@ -217,7 +172,7 @@ static void _FPC_PRINT_REPORT_HEADER_(int type)
 	printf("%s\n",line);
 }
 
-__device__
+__host__ __device__
 static void _FPC_PRINT_REPORT_ROW_(const char *val, int space, int last, char lastChar)
 {
 	char msg[255];
@@ -235,7 +190,7 @@ static void _FPC_PRINT_REPORT_ROW_(const char *val, int space, int last, char la
 		printf("\n");
 }
 
-__device__
+__host__ __device__
 static void _FPC_PRINT_REPORT_ROW_(int val, int space, int last)
 {
 	int numChars = floor(log10 ((double)abs (val))) + 1;
@@ -254,7 +209,7 @@ static void _FPC_PRINT_REPORT_ROW_(int val, int space, int last)
 		printf("\n");
 }
 
-__device__
+__host__ __device__
 static void _FPC_PRINT_REPORT_ROW_(float val, int space, int last)
 {
 	int numChars = 18;
@@ -274,7 +229,7 @@ static void _FPC_PRINT_REPORT_ROW_(float val, int space, int last)
 		printf("\n");
 }
 
-__device__
+__host__ __device__
 static void _FPC_PRINT_REPORT_ROW_(double val, int space, int last)
 {
 	int numChars = 18;
@@ -300,7 +255,7 @@ static void _FPC_PRINT_REPORT_ROW_(double val, int space, int last)
 /// op: 0:ADD, 1:SUB, 2:MUL, 3:DIV
 
 /** Calculates the ID of GPU thread */
-__device__
+__host__ __device__
 static int _FPC_GET_GLOBAL_IDX_3D_3D()
 {
 	int blockId = blockIdx.x + blockIdx.y * gridDim.x
@@ -315,7 +270,7 @@ static int _FPC_GET_GLOBAL_IDX_3D_3D()
 
 /// Returns non-zero value if operation returned zero,
 /// but none of arguments of the operation were zero
-__device__
+__host__ __device__
 static int _FPC_FP32_IS_FLUSH_TO_ZERO(float x, float y, float z, int op)
 {
 	int ret = 0;
@@ -332,7 +287,7 @@ static int _FPC_FP32_IS_FLUSH_TO_ZERO(float x, float y, float z, int op)
 }
 
 //// Returns non-zero value if FP argument is a sub-normal
-__device__
+__host__ __device__
 static int _FPC_FP32_IS_SUBNORMAL(float x)
 {
 	int ret = 0;
@@ -348,7 +303,7 @@ static int _FPC_FP32_IS_SUBNORMAL(float x)
   return ret;
 }
 
-__device__
+__host__ __device__
 static int _FPC_FP32_IS_ALMOST_OVERFLOW(float x)
 {
 	int ret = 0;
@@ -365,7 +320,7 @@ static int _FPC_FP32_IS_ALMOST_OVERFLOW(float x)
   return ret;
 }
 
-__device__
+__host__ __device__
 static int _FPC_FP32_IS_ALMOST_SUBNORMAL(float x)
 {
 	int ret = 0;
@@ -386,7 +341,7 @@ static int _FPC_FP32_IS_ALMOST_SUBNORMAL(float x)
 
 /// Returns non-zero value if operation returned zero,
 /// but none of arguments of the operation were zero
-__device__
+__host__ __device__
 static int _FPC_FP64_IS_FLUSH_TO_ZERO(double x, double y, double z, int op)
 {
 	int ret = 0;
@@ -404,7 +359,7 @@ static int _FPC_FP64_IS_FLUSH_TO_ZERO(double x, double y, double z, int op)
 
 /// Returns non-zero value if FP argument is a sub-normal.
 /// Check that the exponent bits are zero.
-__device__
+__host__ __device__
 static int _FPC_FP64_IS_SUBNORMAL(double x)
 {
   int ret = 0;
@@ -420,7 +375,7 @@ static int _FPC_FP64_IS_SUBNORMAL(double x)
   return ret;
 }
 
-__device__
+__host__ __device__
 static int _FPC_FP64_IS_ALMOST_OVERFLOW(double x)
 {
 	int ret = 0;
@@ -437,7 +392,7 @@ static int _FPC_FP64_IS_ALMOST_OVERFLOW(double x)
   return ret;
 }
 
-__device__
+__host__ __device__
 static int _FPC_FP64_IS_ALMOST_SUBNORMAL(double x)
 {
 	int ret = 0;
@@ -460,7 +415,7 @@ static int _FPC_FP64_IS_ALMOST_SUBNORMAL(double x)
 /// errorType: 0:NaN, 1:INF, 2:Underflow
 /// op: 0:ADD, 1:SUB, 2:MUL, 3:DIV
 
-__device__
+__host__ __device__
 __attribute__((noinline)) static void _FPC_PLUGIN_INTERRUPT_(int errorType, int op, int loc, float fp32_val, double fp64_val, const char* fileName)
 {
 	//printf("-- _FPC_PLUGIN_INTERRUPT_\n");
@@ -511,7 +466,7 @@ __attribute__((noinline)) static void _FPC_PLUGIN_INTERRUPT_(int errorType, int 
 	}
 }
 
-__device__
+__host__ __device__
 __attribute__((noinline)) static void _FPC_PLUGIN_WARNING_(int errorType, int op, int loc, float fp32_val, double fp64_val, const char* fileName)
 {
 	//printf("-- _FPC_PLUGIN_WAR_\n");
@@ -562,12 +517,12 @@ __attribute__((noinline)) static void _FPC_PLUGIN_WARNING_(int errorType, int op
 	}
 }
 
-__device__ static int _FPC_HAS_PRINTED_ = 0;
+__host__ __device__ static int _FPC_HAS_PRINTED_ = 0;
 
 
 // NOTE: we rely on CUDA function overloading for FP32 and FP64 versions
 // FP64 version
-__device__ static
+__host__ __device__ static
 double _FPC_CHECK_(double x, int loc, const char *fileName)
 {
 #ifdef FPC_DISABLE_CHECKING
@@ -642,7 +597,7 @@ double _FPC_CHECK_(double x, int loc, const char *fileName)
 }
 
 // FP32 version
-__device__ static
+__host__ __device__ static
 float _FPC_CHECK_(float x, int loc, const char *fileName)
 {
 #ifdef FPC_DISABLE_CHECKING
