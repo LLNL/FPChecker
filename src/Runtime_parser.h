@@ -17,39 +17,39 @@
 #include <limits>
 
 /* --------------- Definitions --------------------------------------------- */
-__device__
+__host__ __device__
 static float _FPC_CHECK_(float x, int loc, const char *fileName);
 
-__device__
+__host__ __device__
 static double _FPC_CHECK_(double x, int loc, const char *fileName);
 
-__device__ static 
+__host__ __device__ static 
 short _FPC_CHECK_(short x, int loc, const char *fileName) {return x;}
 
-__device__ static 
+__host__ __device__ static 
 unsigned short _FPC_CHECK_(unsigned short x, int loc, const char *fileName) {return x;}
 
-__device__ static 
+__host__ __device__ static 
 int _FPC_CHECK_(int x, int loc, const char *fileName) {return x;}
 
-__device__ static 
+__host__ __device__ static 
 unsigned _FPC_CHECK_(unsigned x, int loc, const char *fileName) {return x;}
 
-__device__ static 
+__host__ __device__ static 
 long _FPC_CHECK_(long x, int loc, const char *fileName) {return x;}
 
-__device__ static 
+__host__ __device__ static 
 unsigned long _FPC_CHECK_(unsigned long x, int loc, const char *fileName) {return x;}
 
-__device__ static 
+__host__ __device__ static 
 long long _FPC_CHECK_(long long x, int loc, const char *fileName) {return x;}
 
-__device__ static 
+__host__ __device__ static 
 unsigned long long _FPC_CHECK_(unsigned long long x, int loc, const char *fileName) {return x;}
 
 /* ------ Generic templates for any types----------------------------------- */
 
-template<typename T>
+/*template<typename T>
 __device__ 
 T _FPC_CHECK_D_(T t, int x, const char *str) {
   if (std::is_floating_point<T>::value) {
@@ -57,16 +57,40 @@ T _FPC_CHECK_D_(T t, int x, const char *str) {
   } else {
     return t;
   }
+}*/
+
+////////// HOST DEVICE CHECKS ///////////////////////////
+__host__ __device__ static
+double _FPC_CHECK_HD_(double x, int l, const char *str) {
+  return _FPC_CHECK_(x, l, str);
 }
 
-__host__ __device__ 
-double _FPC_CHECK_HD_(double x, int l, const char *str) {
+__host__ __device__ static
+float _FPC_CHECK_HD_(float x, int l, const char *str) {
   return _FPC_CHECK_(x, l, str);
 }
 
 template<typename T>
 __host__ __device__ 
 T _FPC_CHECK_HD_(T t, int x, const char *str) {
+  return t;
+}
+
+////////// DEVICE CHECKS ///////////////////////////
+
+__host__ __device__ static
+double _FPC_CHECK_D_(double x, int l, const char *str) {
+  return _FPC_CHECK_(x, l, str);
+}
+
+__host__ __device__ static
+float _FPC_CHECK_D_(float x, int l, const char *str) {
+  return _FPC_CHECK_(x, l, str);
+}
+
+template<typename T>
+__host__ __device__ 
+T _FPC_CHECK_D_(T t, int x, const char *str) {
   return t;
 }
 
@@ -258,12 +282,16 @@ static void _FPC_PRINT_REPORT_ROW_(double val, int space, int last)
 __host__ __device__
 static int _FPC_GET_GLOBAL_IDX_3D_3D()
 {
+#if defined(__CUDA_ARCH__)
 	int blockId = blockIdx.x + blockIdx.y * gridDim.x
 		+ gridDim.x * gridDim.y * blockIdx.z;
 	int threadId = blockId * (blockDim.x * blockDim.y * blockDim.z)
  		+ (threadIdx.z * (blockDim.x * blockDim.y))
  		+ (threadIdx.y * blockDim.x) + threadIdx.x;
 	return threadId;
+#else
+  return 0;
+#endif
 }
 
 /* ------------------------ FP32 Helper Functions --------------------------- */
@@ -418,6 +446,7 @@ static int _FPC_FP64_IS_ALMOST_SUBNORMAL(double x)
 __host__ __device__
 __attribute__((noinline)) static void _FPC_PLUGIN_INTERRUPT_(int errorType, int op, int loc, float fp32_val, double fp64_val, const char* fileName)
 {
+#if defined(__CUDA_ARCH__)
 	//printf("-- _FPC_PLUGIN_INTERRUPT_\n");
 	volatile bool blocked = true;
 	while(blocked) {
@@ -464,11 +493,13 @@ __attribute__((noinline)) static void _FPC_PLUGIN_INTERRUPT_(int errorType, int 
 				asm("trap;");
 		}
 	}
+#endif
 }
 
 __host__ __device__
 __attribute__((noinline)) static void _FPC_PLUGIN_WARNING_(int errorType, int op, int loc, float fp32_val, double fp64_val, const char* fileName)
 {
+#if defined(__CUDA_ARCH__)
 	//printf("-- _FPC_PLUGIN_WAR_\n");
 	volatile bool blocked = true;
   	while(blocked) {
@@ -515,9 +546,10 @@ __attribute__((noinline)) static void _FPC_PLUGIN_WARNING_(int errorType, int op
 				asm("trap;");
 		}
 	}
+#endif
 }
 
-__host__ __device__ static int _FPC_HAS_PRINTED_ = 0;
+__device__ static int _FPC_HAS_PRINTED_ = 0;
 
 
 // NOTE: we rely on CUDA function overloading for FP32 and FP64 versions
@@ -525,6 +557,7 @@ __host__ __device__ static int _FPC_HAS_PRINTED_ = 0;
 __host__ __device__ static
 double _FPC_CHECK_(double x, int loc, const char *fileName)
 {
+#if defined(__CUDA_ARCH__)
 #ifdef FPC_DISABLE_CHECKING
   return x;
 #else
@@ -594,12 +627,16 @@ double _FPC_CHECK_(double x, int loc, const char *fileName)
 
 	return x;
 #endif // FPC_DISABLE_CHECKING
+#else
+  return x; // host code
+#endif // end of #if defined(__CUDA_ARCH__)
 }
 
 // FP32 version
 __host__ __device__ static
 float _FPC_CHECK_(float x, int loc, const char *fileName)
 {
+#if defined(__CUDA_ARCH__)
 #ifdef FPC_DISABLE_CHECKING
   return x;
 #else
@@ -670,10 +707,10 @@ float _FPC_CHECK_(float x, int loc, const char *fileName)
 
 	return x;
 #endif // FPC_DISABLE_CHECKING
+#else
+  return x; // host code
+#endif // end of #if defined(__CUDA_ARCH__)
 }
-
-/* -------------- Integer functions ----------------------------------------- */
-
 
 
 
