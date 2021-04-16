@@ -15,80 +15,12 @@
 #include <limits.h>
 #include <type_traits>
 
-/// *** Warning ***
-/// Changing this file: Runtime.h
-/// When a global __device__ function is added in the this file, some actions
-/// must be taken:
-/// (1) We may need to find this function when initializing Instrumentation pass.
-/// (2) Linkage of the function must be set to LinkOnceODRLinkage or static.
-/// (3) MAke sure we add this function to the list of unwanted functions, i.e.,
-///     functions we do not instrument in the pass.
-
-#ifdef __CUDA_ARCH__
-/// Symbol used to determine whether we are compiling device code or not
-//__device__ void _FPC_DEVICE_CODE_FUNC_(){};
-#endif
-
-/* --- non-static ----------------------------------------------------------- */
-#ifdef __NVCC__
-__device__ static void _FPC_PRINT_ERRORS_();
-__device__ static void _FPC_FP32_CHECK_ADD_(float x, float y, float z, int loc);
-__device__ static void _FPC_FP32_CHECK_SUB_(float x, float y, float z, int loc);
-__device__ static void _FPC_FP32_CHECK_MUL_(float x, float y, float z, int loc);
-__device__ static void _FPC_FP32_CHECK_DIV_(float x, float y, float z, int loc);
-__device__ static void _FPC_FP64_CHECK_ADD_(double x, double y, double z, int loc);
-__device__ static void _FPC_FP64_CHECK_SUB_(double x, double y, double z, int loc);
-__device__ static void _FPC_FP64_CHECK_MUL_(double x, double y, double z, int loc);
-__device__ static void _FPC_FP64_CHECK_DIV_(double x, double y, double z, int loc);
-#else
-__device__ void _FPC_PRINT_ERRORS_();
-__device__ void _FPC_FP32_CHECK_ADD_(float x, float y, float z, int loc);
-__device__ void _FPC_FP32_CHECK_SUB_(float x, float y, float z, int loc);
-__device__ void _FPC_FP32_CHECK_MUL_(float x, float y, float z, int loc);
-__device__ void _FPC_FP32_CHECK_DIV_(float x, float y, float z, int loc);
-__device__ void _FPC_FP64_CHECK_ADD_(double x, double y, double z, int loc);
-__device__ void _FPC_FP64_CHECK_SUB_(double x, double y, double z, int loc);
-__device__ void _FPC_FP64_CHECK_MUL_(double x, double y, double z, int loc);
-__device__ void _FPC_FP64_CHECK_DIV_(double x, double y, double z, int loc);
-#endif
-
-/* --- static --------------------------------------------------------------- */
-__device__ __attribute__((noinline)) static void _FPC_INTERRUPT_(int errorType, int op, int loc, float fp32_val, double fp64_val);
-__device__ __attribute__((noinline)) static void _FPC_WARNING_(int errorType, int op, int loc, float fp32_val, double fp64_val);
-__device__ __host__ static int _FPC_LEN_(const char *s);
-__device__ __host__ static void _FPC_CPY_(char *d, const char *s);
-__device__ __host__ static void _FPC_CAT_(char *d, const char *s);
-__device__ __host__ static void _FPC_PRINT_REPORT_LINE_(const char border);
-__device__ __host__ static void _FPC_PRINT_REPORT_HEADER_(int type);
-__device__ __host__ static void _FPC_PRINT_REPORT_ROW_(const char *val, int space, int last, char lastChar);
-__device__ __host__ static void _FPC_PRINT_REPORT_ROW_(int val, int space, int last);
-__device__ __host__ static void _FPC_PRINT_REPORT_ROW_(float val, int space, int last);
-__device__ __host__ static void _FPC_PRINT_REPORT_ROW_(double val, int space, int last);
-__device__ static void _FPC_FP32_CHECK_OPERATION_(float x, float y, float z, int loc, int op);
-__device__ static int _FPC_FP32_IS_SUBNORMAL(float x);
-__device__ static int _FPC_FP32_IS_ALMOST_OVERFLOW(float x);
-__device__ static int _FPC_FP32_IS_ALMOST_SUBNORMAL(float x);
-__device__ static void _FPC_FP64_CHECK_OPERATION_(double x, double y, double z, int loc, int op);
-__device__ __host__ static int _FPC_FP64_IS_SUBNORMAL(double x);
-__device__ static int _FPC_FP64_IS_ALMOST_OVERFLOW(double x);
-__device__ static int _FPC_FP64_IS_ALMOST_SUBNORMAL(double x);
-__device__ static int _FPC_GET_GLOBAL_IDX_3D_3D();
-__device__ static int _FPC_FP32_IS_FLUSH_TO_ZERO(float x, float y, float z, int op);
-__device__ static int _FPC_FP64_IS_FLUSH_TO_ZERO(double x, double y, double z, int op);
-
-
-/* ------ Generic templates for expressions parser mode ----------------- */
-//template<typename T>
-//__host__ 
-//T _FPC_CHECK_ANY_(T t, int x, const char *str) {
-//  return t;
-//}
+/* ------ Generic templates for any types----------------------------------- */
 
 template<typename T>
 __device__ 
 T _FPC_CHECK_D_(T t, int x, const char *str) {
   if (std::is_floating_point<T>::value) {
-    printf("In _FPC_CHECK_D_\n");
     return _FPC_CHECK_(t, x, str);
   } else {
     return t;
@@ -98,14 +30,14 @@ T _FPC_CHECK_D_(T t, int x, const char *str) {
 template<typename T>
 __host__ __device__ 
 T _FPC_CHECK_HD_(T t, int x, const char *str) {
-  printf("--->In _FPC_CHECK_HD_ \n");
-  return t;
+  if (std::is_floating_point<T>::value) {
+    return _FPC_CHECK_(t, x, str);
+  } else {
+    return t;
+  }
 }
 
 /* ----------------------------------------------------------------------- */
-
-/// Host function to print @ main()
-static void _FPC_PRINT_AT_MAIN_();
 
 #define REPORT_LINE_SIZE 80
 #define REPORT_COL1_SIZE 15
@@ -123,19 +55,11 @@ __attribute__((used)) __device__ static int ERRORS_DONT_ABORT = 1;
 
 /* ----------------------------- Global Data ------------------------------- */
 
-/// We store the file name and directory in this variable
-//char *_FPC_LOCATIONS_TABLE_[100];// = {"NONE1"};
-__device__ static char *_FPC_FILE_NAME_[1];
 
 /// Lock to print from one thread only
 //__device__ static int lock_state = 0;
 __device__ static int _FPC_LOCK_STATE_ = 0;
 
-/// Variables to store errors/warnings found in errors-dont-abort mode
-/// The size of vectors is irrelevant since they will be instrumented
-//__device__ static long long int errors_array_size = 10;
-__device__ static long long int _FPC_ERRORS_ARRAY_SIZE_ = 10;
-__device__ static long long int _FPC_ARR_NOT_USED_[10]; // not used at runtime
 
 /* ------------------------ Generic Functions ------------------------------ */
 
@@ -147,7 +71,7 @@ __device__ static long long int _FPC_ARR_NOT_USED_[10]; // not used at runtime
 ///  Line      : 23
 /// +----------------------------------------------------------+
 
-__device__ __host__
+__device__
 static int _FPC_LEN_(const char *s)
 {
 	int maxLen = 1024; // to check correctness and avid infinite loop
@@ -157,7 +81,7 @@ static int _FPC_LEN_(const char *s)
 	return i;
 }
 
-__device__ __host__
+__device__
 static void _FPC_CPY_(char *d, const char *s)
 {
 	int len = _FPC_LEN_(s);
@@ -167,7 +91,7 @@ static void _FPC_CPY_(char *d, const char *s)
 	d[i] = '\0';
 }
 
-__device__ __host__
+__device__
 static void _FPC_CAT_(char *d, const char *s)
 {
 	int lenS = _FPC_LEN_(s);
@@ -178,7 +102,7 @@ static void _FPC_CAT_(char *d, const char *s)
 	d[i+lenD] = '\0';
 }
 
-__device__ __host__
+__device__
 static void _FPC_PRINT_REPORT_LINE_(const char border)
 {
 	printf("%c",border);
@@ -187,7 +111,7 @@ static void _FPC_PRINT_REPORT_LINE_(const char border)
 	printf("%c\n",border);
 }
 
-__device__ __host__
+__device__
 static void _FPC_PRINT_REPORT_HEADER_(int type)
 {
 	//_FPC_PRINT_REPORT_LINE_('.');
@@ -215,7 +139,7 @@ static void _FPC_PRINT_REPORT_HEADER_(int type)
 	printf("%s\n",line);
 }
 
-__device__ __host__
+__device__
 static void _FPC_PRINT_REPORT_ROW_(const char *val, int space, int last, char lastChar)
 {
 	char msg[255];
@@ -233,7 +157,7 @@ static void _FPC_PRINT_REPORT_ROW_(const char *val, int space, int last, char la
 		printf("\n");
 }
 
-__device__ __host__
+__device__
 static void _FPC_PRINT_REPORT_ROW_(int val, int space, int last)
 {
 	int numChars = floor(log10 ((double)abs (val))) + 1;
@@ -252,7 +176,7 @@ static void _FPC_PRINT_REPORT_ROW_(int val, int space, int last)
 		printf("\n");
 }
 
-__device__ __host__
+__device__
 static void _FPC_PRINT_REPORT_ROW_(float val, int space, int last)
 {
 	int numChars = 18;
@@ -272,7 +196,7 @@ static void _FPC_PRINT_REPORT_ROW_(float val, int space, int last)
 		printf("\n");
 }
 
-__device__ __host__
+__device__
 static void _FPC_PRINT_REPORT_ROW_(double val, int space, int last)
 {
 	int numChars = 18;
@@ -292,155 +216,12 @@ static void _FPC_PRINT_REPORT_ROW_(double val, int space, int last)
 		printf("\n");
 }
 
+/* ----- END of Report Functons --------------- */
+
 /// errorType: 0:NaN, 1:INF, 2:Underflow
 /// op: 0:ADD, 1:SUB, 2:MUL, 3:DIV
-__device__
-__attribute__((noinline))  static void _FPC_INTERRUPT_(int errorType, int op, int loc, float fp32_val, double fp64_val)
-{
-#ifdef FPC_ERRORS_DONT_ABORT
-	volatile bool blocked = false;
-#else
-	bool blocked = true;
-#endif
-	while(blocked) {
-			if(0 == atomicCAS(&_FPC_LOCK_STATE_, 0, 1)) {
 
-				char e[64]; e[0] = '\0';
-				char o[64]; o[0] = '\0';
-
-				if 			(errorType == 0) _FPC_CPY_(e, "NaN");
-				else if	(errorType == 1) _FPC_CPY_(e, "INF");
-				else if	(errorType == 2) _FPC_CPY_(e, "Underflow");
-				else _FPC_CPY_(e, "NONE");
-
-				if 			(op == 0) _FPC_CPY_(o, "ADD");
-				else if	(op == 1) _FPC_CPY_(o, "SUB");
-				else if	(op == 2) _FPC_CPY_(o, "MUL");
-				else if	(op == 3) _FPC_CPY_(o, "DIV");
-				else _FPC_CPY_(o, "NONE");
-
-				_FPC_PRINT_REPORT_HEADER_(0);
-				_FPC_PRINT_REPORT_ROW_("Error", REPORT_COL1_SIZE, 0, ':');
-				_FPC_PRINT_REPORT_ROW_(e, REPORT_COL2_SIZE, 1, ' ');
-				_FPC_PRINT_REPORT_ROW_("Operation", REPORT_COL1_SIZE, 0, ':');
-				if (errorType == 2)
-				{
-					_FPC_PRINT_REPORT_ROW_(o, 4, 0, ' ');
-					if (fp32_val != 0)
-						_FPC_PRINT_REPORT_ROW_(fp32_val, REPORT_COL2_SIZE, 1);
-					else
-						_FPC_PRINT_REPORT_ROW_(fp64_val, REPORT_COL2_SIZE, 1);
-				}
-				else
-				{
-					_FPC_PRINT_REPORT_ROW_(o, REPORT_COL2_SIZE, 1, ' ');
-				}
-				_FPC_PRINT_REPORT_ROW_("File", REPORT_COL1_SIZE, 0, ':');
-				_FPC_PRINT_REPORT_ROW_(_FPC_FILE_NAME_[0], REPORT_COL2_SIZE, 1, ' ');
-				_FPC_PRINT_REPORT_ROW_("Line", REPORT_COL1_SIZE, 0, ':');
-				//_FPC_PRINT_REPORT_ROW_(l, REPORT_COL2_SIZE, 1);
-				_FPC_PRINT_REPORT_ROW_(loc, REPORT_COL2_SIZE, 1);
-				_FPC_PRINT_REPORT_LINE_('+');
-
-				asm("trap;");
-		}
-	}
-}
-
-__device__
-static void _FPC_WARNING_(int errorType, int op, int loc, float fp32_val, double fp64_val)
-{
-#ifdef FPC_ERRORS_DONT_ABORT
-	volatile bool blocked = false;
-#else
-	bool blocked = true;
-#endif
-  	while(blocked) {
-			if(0 == atomicCAS(&_FPC_LOCK_STATE_, 0, 1)) {
-
-				char e[64]; e[0] = '\0';
-				char o[64]; o[0] = '\0';
-
-				if 			(errorType == 0) _FPC_CPY_(e, "NaN");
-				else if	(errorType == 1) _FPC_CPY_(e, "INF");
-				else if	(errorType == 2) _FPC_CPY_(e, "Underflow");
-				else _FPC_CPY_(e, "NONE");
-
-				if 			(op == 0) _FPC_CPY_(o, "ADD");
-				else if	(op == 1) _FPC_CPY_(o, "SUB");
-				else if	(op == 2) _FPC_CPY_(o, "MUL");
-				else if	(op == 3) _FPC_CPY_(o, "DIV");
-				else _FPC_CPY_(o, "NONE");
-
-				_FPC_PRINT_REPORT_HEADER_(1);
-				_FPC_PRINT_REPORT_ROW_("Error", REPORT_COL1_SIZE, 0, ':');
-				_FPC_PRINT_REPORT_ROW_(e, REPORT_COL2_SIZE, 1, ' ');
-				_FPC_PRINT_REPORT_ROW_("Operation", REPORT_COL1_SIZE, 0, ':');
-				if (errorType == 1 || errorType == 2)
-				{
-					_FPC_PRINT_REPORT_ROW_(o, 4, 0, ' ');
-					if (fp32_val != 0)
-						_FPC_PRINT_REPORT_ROW_(fp32_val, REPORT_COL2_SIZE, 1);
-					else
-						_FPC_PRINT_REPORT_ROW_(fp64_val, REPORT_COL2_SIZE, 1);
-				}
-				else
-				{
-					_FPC_PRINT_REPORT_ROW_(o, REPORT_COL2_SIZE, 1, ' ');
-				}
-				_FPC_PRINT_REPORT_ROW_("File", REPORT_COL1_SIZE, 0, ':');
-				_FPC_PRINT_REPORT_ROW_(_FPC_FILE_NAME_[0], REPORT_COL2_SIZE, 1, ' ');
-				_FPC_PRINT_REPORT_ROW_("Line", REPORT_COL1_SIZE, 0, ':');
-				//_FPC_PRINT_REPORT_ROW_(l, REPORT_COL2_SIZE, 1);
-				_FPC_PRINT_REPORT_ROW_(loc, REPORT_COL2_SIZE, 1);
-				_FPC_PRINT_REPORT_LINE_('+');
-
-				asm("trap;");
-		}
-	}
-}
-
-void _FPC_PRINT_AT_MAIN_()
-{
-	printf("\n");
-	printf("========================================\n");
-	printf(" FPChecker (v0.1.0, %s)\n", __DATE__);
-	printf("========================================\n");
-	printf("\n");
-}
-
-/* -------------------------------------- */
-/*         Warning: DO NOT MODIFY!        */
-/*      Functions will be instrumented    */
-/* -------------------------------------- */
-#ifndef __NVCC__
-__device__
-__attribute__((noinline))  long long int _FPC_READ_GLOBAL_ERRORS_ARRAY_(long long int i)
-{
-	asm ("");
-	return _FPC_ARR_NOT_USED_[i];
-}
-__device__
-__attribute__((noinline)) void _FPC_WRITE_GLOBAL_ERRORS_ARRAY_(long long int i, long long int val)
-{
-	asm ("");
-	_FPC_ARR_NOT_USED_[i] = val;
-}
-__device__
-__attribute__((noinline))  long long int _FPC_READ_FP64_GLOBAL_ARRAY_(long long int i)
-{
-	asm ("");
-	return _FPC_ARR_NOT_USED_[i]; 
-}
-__device__
-__attribute__((noinline))  void _FPC_WRITE_FP64_GLOBAL_ARRAY_(long long int i, long long int val)
-{
-	asm ("");
-	_FPC_ARR_NOT_USED_[i] = val;
-}
-#endif
-/* -------------------------------------- */
-
+/** Calculates the ID of GPU thread */
 __device__
 static int _FPC_GET_GLOBAL_IDX_3D_3D()
 {
@@ -452,94 +233,7 @@ static int _FPC_GET_GLOBAL_IDX_3D_3D()
 	return threadId;
 }
 
-#ifndef __NVCC__
-__device__
-void _FPC_PRINT_ERRORS_()
-{
-	int id = _FPC_GET_GLOBAL_IDX_3D_3D();
-	if (id == 0)
-	{
-		for (long long int i=0; i < _FPC_ERRORS_ARRAY_SIZE_; ++i)
-		//for (long long int i=0; i < errors_array_size; ++i)
-		{
-			/* --- Print error reports ---- */
-			long long int errors = _FPC_READ_GLOBAL_ERRORS_ARRAY_(i);
-			//if (errors > 0)
-			if (errors < 0 && errors > -4)
-			{
-				if (errors == -3) // NaN
-					printf("\n#FPCHECKER: NAN Error ");
-				else if (errors == -2) // INF
-					printf("\n#FPCHECKER: INF Error ");
-				else if (errors == -1) // Underflow
-					printf("\n#FPCHECKER: Underflow Error ");
-				else
-					printf("\n#FPCHECKER: UNKNOWN Error ");
-
-				printf("at %s:%lld (code:#%lld, tid:%d)\n", _FPC_FILE_NAME_[0], i, errors, id);
-				_FPC_WRITE_GLOBAL_ERRORS_ARRAY_(i, LLONG_MIN);
-			}
-			//else if (errors < 0)
-			else if (errors == LLONG_MIN)
-			{
-				// This is so we do not report them multiple times
-				_FPC_WRITE_GLOBAL_ERRORS_ARRAY_(i, LLONG_MIN);
-			}
-
-			/* --- Print warning reports ---- */
-			unsigned long long int warnings = (unsigned long long int)_FPC_READ_FP64_GLOBAL_ARRAY_(i);
-			double val;
-			memcpy((void *) &val, (void *) &warnings, sizeof(val));
-			if (warnings != 0 && !isnan(val) )
-			{
-		  		printf("\n#FPCHECKER: Warning at %s:%lld (#%e, tid:%d)\n", _FPC_FILE_NAME_[0], i, val, id);
-		  		double newVal = NAN;
-		  		memcpy((void *) &warnings, (void *) &newVal, sizeof(warnings));
-		  		_FPC_WRITE_FP64_GLOBAL_ARRAY_(i, warnings);
-			}
-			else if (isnan(val))
-			{
-	  			memcpy((void *) &warnings, (void *) &val, sizeof(warnings));
-	  			_FPC_WRITE_FP64_GLOBAL_ARRAY_(i, warnings);
-			}
-		}
-	}
-}
-#endif
-
-/* ------------------------ FP32 Functions --------------------------------- */
-
-__device__
-static void _FPC_FP32_CHECK_OPERATION_(float x, float y, float z, int loc, int op)
-{
-	if (isinf(x))
-	{
-		_FPC_INTERRUPT_(1, op, loc, x, 0);
-	}
-	else if (isnan(x))
-	{
-		_FPC_INTERRUPT_(0, op, loc, x, 0);
-	}
-	else /// subnormals check
-	{
-		if (_FPC_FP32_IS_SUBNORMAL(x))
-		{
-			_FPC_INTERRUPT_(2, op, loc, x, 0);
-		}
-		else if (_FPC_FP32_IS_FLUSH_TO_ZERO(x, y, z, op))
-		{
-			_FPC_INTERRUPT_(2, op, loc, x, 0);
-		}
-		else if (_FPC_FP32_IS_ALMOST_SUBNORMAL(x))
-		{
-			_FPC_WARNING_(2, op, loc, x, 0);
-		}
-		else if (_FPC_FP32_IS_ALMOST_OVERFLOW(x))
-		{
-			_FPC_WARNING_(1, op, loc, x, 0);
-		}
-	}
-}
+/* ------------------------ FP32 Helper Functions --------------------------- */
 
 /// Returns non-zero value if operation returned zero,
 /// but none of arguments of the operation were zero
@@ -609,63 +303,8 @@ static int _FPC_FP32_IS_ALMOST_SUBNORMAL(float x)
   }
   return ret;
 }
-__device__
-void _FPC_FP32_CHECK_ADD_(float x, float y, float z, int loc)
-{
-	_FPC_FP32_CHECK_OPERATION_(x, y, z, loc, 0);
-}
 
-__device__
-void _FPC_FP32_CHECK_SUB_(float x, float y, float z, int loc)
-{
-	_FPC_FP32_CHECK_OPERATION_(x, y, z, loc, 1);
-}
-
-__device__
-void _FPC_FP32_CHECK_MUL_(float x, float y, float z, int loc)
-{
-	_FPC_FP32_CHECK_OPERATION_(x, y, z, loc, 2);
-}
-
-__device__
-void _FPC_FP32_CHECK_DIV_(float x, float y, float z, int loc)
-{
-	_FPC_FP32_CHECK_OPERATION_(x, y, z, loc, 3);
-}
-
-/* ------------------------ FP64 Functions --------------------------------- */
-
-__device__
-static void _FPC_FP64_CHECK_OPERATION_(double x, double y, double z, int loc, int op)
-{
-	if (isinf(x))
-	{
-		_FPC_INTERRUPT_(1, op, loc, 0, x);
-	}
-	else if (isnan(x))
-	{
-		_FPC_INTERRUPT_(0, op, loc, 0, x);
-	}
-	else /// subnormals check
-	{
-		if (_FPC_FP64_IS_SUBNORMAL(x))
-		{
-			_FPC_INTERRUPT_(2, op, loc, 0, x);
-		}
-		else if (_FPC_FP64_IS_FLUSH_TO_ZERO(x, y, z, op))
-		{
-			_FPC_INTERRUPT_(2, op, loc, x, 0);
-		}
-		else if (_FPC_FP64_IS_ALMOST_SUBNORMAL(x))
-		{
-			_FPC_WARNING_(2, op, loc, 0, x);
-		}
-		else if (_FPC_FP64_IS_ALMOST_OVERFLOW(x))
-		{
-			_FPC_WARNING_(1, op, loc, 0, x);
-		}
-	}
-}
+/* ------------------------ FP64 Helper Functions --------------------------- */
 
 /// Returns non-zero value if operation returned zero,
 /// but none of arguments of the operation were zero
@@ -687,7 +326,7 @@ static int _FPC_FP64_IS_FLUSH_TO_ZERO(double x, double y, double z, int op)
 
 /// Returns non-zero value if FP argument is a sub-normal.
 /// Check that the exponent bits are zero.
-__device__ __host__
+__device__
 static int _FPC_FP64_IS_SUBNORMAL(double x)
 {
   int ret = 0;
@@ -737,38 +376,12 @@ static int _FPC_FP64_IS_ALMOST_SUBNORMAL(double x)
   return ret;
 }
 
-__device__
-void _FPC_FP64_CHECK_ADD_(double x, double y, double z, int loc)
-{
-	_FPC_FP64_CHECK_OPERATION_(x, y, z, loc, 0);
-}
-
-__device__
-void _FPC_FP64_CHECK_SUB_(double x, double y, double z, int loc)
-{
-	_FPC_FP64_CHECK_OPERATION_(x, y, z, loc, 1);
-}
-
-__device__
-void _FPC_FP64_CHECK_MUL_(double x, double y, double z, int loc)
-{
-	_FPC_FP64_CHECK_OPERATION_(x, y, z, loc, 2);
-}
-
-__device__
-void _FPC_FP64_CHECK_DIV_(double x, double y, double z, int loc)
-{
-	_FPC_FP64_CHECK_OPERATION_(x, y, z, loc, 3);
-}
 
 /* --------------------- Clang Plug-in Functions ---------------------- */
 
 /// errorType: 0:NaN, 1:INF, 2:Underflow
 /// op: 0:ADD, 1:SUB, 2:MUL, 3:DIV
 
-#ifdef __NVCC__
-
-#ifdef __CUDA_ARCH__
 __device__
 __attribute__((noinline)) static void _FPC_PLUGIN_INTERRUPT_(int errorType, int op, int loc, float fp32_val, double fp64_val, const char* fileName)
 {
@@ -819,62 +432,6 @@ __attribute__((noinline)) static void _FPC_PLUGIN_INTERRUPT_(int errorType, int 
 		}
 	}
 }
-#else // no __CUDA_ARCH__ (host)
-
-__host__
-__attribute__((noinline)) static void _FPC_PLUGIN_INTERRUPT_(int errorType, int op, int loc, float fp32_val, double fp64_val, const char* fileName)
-{
-  char e[64]; e[0] = '\0';
-  char o[64]; o[0] = '\0';
-
-  if      (errorType == 0) _FPC_CPY_(e, "NaN");
-  else if (errorType == 1) _FPC_CPY_(e, "INF");
-  else if (errorType == 2) _FPC_CPY_(e, "Underflow");
-  else _FPC_CPY_(e, "NONE");
-
-  if      (op == 0) _FPC_CPY_(o, "ADD");
-  else if (op == 1) _FPC_CPY_(o, "SUB");
-  else if (op == 2) _FPC_CPY_(o, "MUL");
-  else if (op == 3) _FPC_CPY_(o, "DIV");
-  else _FPC_CPY_(o, "NONE");
-
-  _FPC_PRINT_REPORT_HEADER_(0);
-  _FPC_PRINT_REPORT_ROW_("Error", REPORT_COL1_SIZE, 0, ':');
-  _FPC_PRINT_REPORT_ROW_(e, REPORT_COL2_SIZE, 1, ' ');
-  _FPC_PRINT_REPORT_ROW_("Operation", REPORT_COL1_SIZE, 0, ':');
-  if (errorType == 2)
-  {
-    _FPC_PRINT_REPORT_ROW_(o, 4, 0, ' ');
-    if (fp32_val != 0)
-      _FPC_PRINT_REPORT_ROW_(fp32_val, REPORT_COL2_SIZE, 1);
-    else
-      _FPC_PRINT_REPORT_ROW_(fp64_val, REPORT_COL2_SIZE, 1);
-  }
-  else
-  {
-    _FPC_PRINT_REPORT_ROW_(o, REPORT_COL2_SIZE, 1, ' ');
-  }
-  _FPC_PRINT_REPORT_ROW_("File", REPORT_COL1_SIZE, 0, ':');
-  _FPC_PRINT_REPORT_ROW_(fileName, REPORT_COL2_SIZE, 1, ' ');
-  _FPC_PRINT_REPORT_ROW_("Line", REPORT_COL1_SIZE, 0, ':');
-  //_FPC_PRINT_REPORT_ROW_(l, REPORT_COL2_SIZE, 1);
-  _FPC_PRINT_REPORT_ROW_(loc, REPORT_COL2_SIZE, 1);
-  _FPC_PRINT_REPORT_LINE_('+');
-
-  exit(0);
-  //asm("trap;");
-}
-
-#endif
-
-#else // LLVM part
-
-__host__ __device__
-__attribute__((noinline)) static void _FPC_PLUGIN_INTERRUPT_(int errorType, int op, int loc, float fp32_val, double fp64_val, const char* fileName)
-{
-}
-
-#endif
 
 __device__
 __attribute__((noinline)) static void _FPC_PLUGIN_WARNING_(int errorType, int op, int loc, float fp32_val, double fp64_val, const char* fileName)
@@ -929,9 +486,7 @@ __attribute__((noinline)) static void _FPC_PLUGIN_WARNING_(int errorType, int op
 
 __device__ static int _FPC_HAS_PRINTED_ = 0;
 
-#ifdef __NVCC__
 
-#ifdef __CUDA_ARCH__
 // NOTE: we rely on CUDA function overloading for FP32 and FP64 versions
 // FP64 version
 __device__ static
@@ -1083,226 +638,6 @@ float _FPC_CHECK_(float x, int loc, const char *fileName)
 	return x;
 #endif // FPC_DISABLE_CHECKING
 }
-
-__device__ static
-double _FPC_CHECK_(int x, int loc, const char *fileName)
-{
-  return (double)x;
-}
-
-__device__ static
-double _FPC_CHECK_(unsigned int x, int loc, const char *fileName)
-{
-  return (double)x;
-}
-
-__device__ static
-double _FPC_CHECK_(const unsigned long long x, int loc, const char *fileName)
-{
-  return (double)x;
-}
-
-__device__ static
-double _FPC_CHECK_(long x, int loc, const char *fileName)
-{
-  return (double)x;
-}
-
-__device__ static
-double _FPC_CHECK_(unsigned long x, int loc, const char *fileName)
-{
-  return (double)x;
-}
-
-__device__ static
-double _FPC_CHECK_(long long x, int loc, const char *fileName)
-{
-  return (double)x;
-}
-
-__device__ static
-long double _FPC_CHECK_(long double x, int loc, const char *fileName)
-{
-  return x;
-}
-
-
-
-//__device__ static
-//double _FPC_CHECK_(size_t x, int loc, const char *fileName)
-//{
-//  return (double)x;
-//}
-
-#else // not __CUDA_ARCH__ (host)
-
-__host__ static
-double _FPC_CHECK_(double x, int loc, const char *fileName)
-{
-#ifdef FPC_DISABLE_CHECKING
-  return x;
-#else
-
-  int op = -1;
-  if (isinf(x))
-  {
-    _FPC_PLUGIN_INTERRUPT_(1, op, loc, 0, x, fileName);
-  }
-  else if (isnan(x))
-  {
-    _FPC_PLUGIN_INTERRUPT_(0, op, loc, 0, x, fileName);
-  }
-  else /// subnormals check
-  {
-    if (_FPC_FP64_IS_SUBNORMAL(x))
-    {
-      _FPC_PLUGIN_INTERRUPT_(2, op, loc, 0, x, fileName);
-    }
-  }
-  return x;
-#endif // FPC_DISABLE_CHECKING
-}
-
-__host__ static
-float _FPC_CHECK_(float x, int loc, const char *fileName)
-{
-#ifdef FPC_DISABLE_CHECKING
-  return x;
-#else
-
-  int op = -1;
-  if (isinf(x))
-  {
-    _FPC_PLUGIN_INTERRUPT_(1, op, loc, x, 0, fileName);
-  }
-  else if (isnan(x))
-  {
-    _FPC_PLUGIN_INTERRUPT_(0, op, loc, x, 0, fileName);
-  }
-  else /// subnormals check
-  {
-    if (_FPC_FP64_IS_SUBNORMAL(x))
-    {
-      _FPC_PLUGIN_INTERRUPT_(2, op, loc, x, 0, fileName);
-    }
-  }
-  return x;
-#endif // FPC_DISABLE_CHECKING
-}
-
-__host__ static
-double _FPC_CHECK_(int x, int loc, const char *fileName)
-{
-  return (double)x;
-}
-
-__host__ static
-double _FPC_CHECK_(unsigned int x, int loc, const char *fileName)
-{
-  return (double)x;
-}
-
-__host__ static
-double _FPC_CHECK_(const unsigned long long x, int loc, const char *fileName)
-{
-  return (double)x;
-}
-
-__host__ static
-double _FPC_CHECK_(long x, int loc, const char *fileName)
-{
-  return (double)x;
-}
-
-__host__ static
-double _FPC_CHECK_(unsigned long x, int loc, const char *fileName)
-{
-  return (double)x;
-}
-
-__host__ static
-double _FPC_CHECK_(long long x, int loc, const char *fileName)
-{
-  return (double)x;
-}
-
-__host__ static
-long double _FPC_CHECK_(long double x, int loc, const char *fileName)
-{
-  return x;
-}
-
-//__host__ static
-//double _FPC_CHECK_(size_t x, int loc, const char *fileName)
-//{
-//  return (double)x;
-//}
-
-#endif // __CUDA_ARCH__
-
-#else // not __NVCC__
-
-__host__ __device__ static
-double _FPC_CHECK_(double x, int loc, const char *fileName)
-{
-  return x;
-}
-
-__host__ __device__ static
-float _FPC_CHECK_(float x, int loc, const char *fileName)
-{
-  return x;
-}
-
-__host__ __device__ static
-double _FPC_CHECK_(int x, int loc, const char *fileName)
-{
-  return (double)x;
-}
-
-__host__ __device__ static
-double _FPC_CHECK_(unsigned int x, int loc, const char *fileName)
-{
-  return (double)x;
-}
-
-__host__ __device__ static
-double _FPC_CHECK_(const unsigned long long x, int loc, const char *fileName)
-{
-  return (double)x;
-}
-
-__host__ __device__ static
-double _FPC_CHECK_(long x, int loc, const char *fileName)
-{
-  return (double)x;
-}
-
-__host__ __device__ static
-double _FPC_CHECK_(unsigned long x, int loc, const char *fileName)
-{
-  return (double)x;
-}
-
-__host__ __device__ static
-double _FPC_CHECK_(long long x, int loc, const char *fileName)
-{
-  return (double)x;
-}
-
-__host__ __device__ static
-long double _FPC_CHECK_(long double x, int loc, const char *fileName)
-{
-  return x;
-}
-
-//__host__ __device__ static
-//double _FPC_CHECK_(size_t x, int loc, const char *fileName)
-//{
-//  return (double)x;
-//}
-
-#endif //__NVCC__
 
 
 #endif /* SRC_RUNTIME_H_ */
