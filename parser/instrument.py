@@ -7,7 +7,7 @@ from tokenizer import Tokenizer
 from match import Match
 from match import FunctionType
 from deprocess import Deprocess
-from logging import verbose, logMessage
+from fpc_logging import verbose, logMessage
 
 ## Assumes we already pre-processed the file
 class Instrument:

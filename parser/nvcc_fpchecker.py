@@ -7,7 +7,7 @@ import sys
 from colors import prGreen, prCyan, prRed
 from instrument import Instrument
 from exceptions import CommandException, CompileException, EmptyFileException
-from logging import logMessage, verbose
+from fpc_logging import logMessage, verbose
 
 # --------------------------------------------------------------------------- #
 # --- Installation Paths ---------------------------------------------------- #
@@ -190,17 +190,17 @@ if __name__ == '__main__':
       cmd.instrumentSource()
       cmd.compileInstrumentedFile()
       logMessage('Instrumented: ' + cmd.instrumentedFile)
-    except EmptyFileException as e:
+    except Exception as e: # Fall back to original command
       if verbose():
         logMessage(str(e))
-        prRed(e)
+        prRed(e)     
+      if not isinstance(e, EmptyFileException):
         logMessage('Failed: ' + ' '.join(sys.argv))
+      else:
+          if verbose():
+            logMessage('Failed: ' + ' '.join(sys.argv))
       cmd.executeOriginalCommand()
-    except Exception as e:
-      # Fall back to original command
-      if verbose():
-        logMessage(str(e))
-        prRed(e)
-      logMessage('Failed: ' + ' '.join(sys.argv))
-      cmd.executeOriginalCommand()
+
+
+
 

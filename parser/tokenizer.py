@@ -4,7 +4,7 @@ import os
 import re
 import tempfile
 from exceptions import MatchException, EmptyFileException
-from logging import verbose, logMessage
+from fpc_logging import verbose, logMessage
 
 # Lookahead tokens: 1
 CPP_SYMBOL_L1 = set([

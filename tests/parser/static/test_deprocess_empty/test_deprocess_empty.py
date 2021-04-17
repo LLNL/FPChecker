@@ -1,13 +1,15 @@
-
+import pathlib
 import sys
 
 sys.path.insert(1, '/usr/workspace/wsa/laguna/fpchecker/FPChecker/parser')
 from deprocess import Deprocess
 from instrument import Instrument
-from exceptions import MatchException
+from exceptions import EmptyFileException
 
-SOURCE = "MemUtils_HIP.cpp"
-PRE_PROCESSED = "MemUtils_HIP.cpp.o.ii"
+FILE_PATH = str(pathlib.Path(__file__).parent.absolute())
+
+SOURCE = FILE_PATH + "/MemUtils_HIP.cpp"
+PRE_PROCESSED = FILE_PATH + "/MemUtils_HIP.cpp.o.ii"
 
 def test_1():
   # This should produce an exception since the
@@ -19,7 +21,7 @@ def test_1():
     inst = Instrument(preFileName, sourceFileName)
     inst.deprocess()
     inst.findDeviceDeclarations()
-  except MatchException:
+  except EmptyFileException:
     got_exception = True
 
   assert got_exception

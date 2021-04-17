@@ -2,7 +2,7 @@
 import sys
 import enum
 from tokenizer import Tokenizer, Token, SymbolToken, KeywordToken, WhiteSpaceToken, IdentifierToken
-from logging import verbose, logMessage
+from fpc_logging import verbose, logMessage
 
 #--------------------------------------------------------------------#
 # Types                                                              #

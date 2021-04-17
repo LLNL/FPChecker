@@ -1,3 +1,6 @@
+#!/usr/bin/env python3
+
+import sys
 import os
 
 def getLogFiles() -> list:
@@ -26,11 +29,15 @@ def report(fileList: list):
         elif line.startswith('Failed:'):
           failed += 1
 
-  print('*** FPChcecker Report ***')
+  print('===== FPChcecker Report =====')
   print('Instrumented files:', inst)
   print('Failed:', failed)
 
 if __name__ == '__main__':
   fileList = getLogFiles()
-  #removeFiles(fileList)
-  report(fileList)
+
+  if len(sys.argv) > 1:
+    if sys.argv[1] == '-r':
+      removeFiles(fileList)
+  else:
+    report(fileList)

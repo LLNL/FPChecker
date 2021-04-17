@@ -1,11 +1,11 @@
-
+import pathlib
 import sys
 import subprocess
 
 sys.path.insert(1, '/usr/workspace/wsa/laguna/fpchecker/FPChecker/parser')
 from tokenizer import Tokenizer
 
-FILENAME = "simple.cu"
+FILENAME = str(pathlib.Path(__file__).parent.absolute()) + "/simple.cu"
 
 def test_1():
 
