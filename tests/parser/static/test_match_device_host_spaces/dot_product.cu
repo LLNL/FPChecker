@@ -24,23 +24,12 @@ __global__ void dot_prod(double *x, double *y, int size)
   }
 }
 
-__host__ __device__
+/*__host__ __device__
 void calc(double *x, int s) {
   for (int i=0; i < s; ++i) {
     x[i] = x[i] + 3.1;
   }
-}
-
-__host__ 
-
-
-  __device__
-
-void calc2(double *x, int s) {
-  for (int i=0; i < s; ++i) {
-    x[i] = x[i] + 3.1;
-  }
-}
+}*/
 
     __device__     __host__     void   comp(double *x, int s) {
   for (int i=0; i < s; ++i) {
@@ -57,4 +46,4 @@ void calc2(double *x, int s) {
   }
 }
 
-static double var1;
+

@@ -91,69 +91,27 @@ class Match:
   def _match_host_device_decl(self, buff):
     h = self._match_host_decl(buff)
     if h:
-      n = 10 # number of whispaces
+      n = 20 # number of whispaces
       for i in range(n):
         if not self._match_white_space(buff[h+i]):
           break
       d = self._match_device_decl(buff[h+i:])
       if d:
-        return h+i+1+d
+        return h+i+d
     return False
 
   ## Matches __attribute__((device)) __attribute__((host)) 
   def _match_device_host_decl(self, buff):
     d = self._match_device_decl(buff)
     if d:
-      n = 10 # number of whispaces
+      n = 20 # number of whispaces
       for i in range(n):
         if not self._match_white_space(buff[d+i]):
           break
       h = self._match_host_decl(buff[d+i:])
       if h:
-        return d+i+1+h
+        return d+i+h
     return False
-
-  ## Matches __attribute__((host)) __attribute__((device)) 
-#  def _match_host_device_decl(self, buff):
-#    if len(buff) < 12:
-#      return False
-#    if (self._match_keyword(buff[0], '__attribute__') and
-#        self._match_symbol(buff[1], '(') and
-#        self._match_symbol(buff[2], '(') and
-#        self._match_identifier(buff[3], 'host') and
-#        self._match_symbol(buff[4], ')') and
-#        self._match_symbol(buff[5], ')') and
-#        self._match_white_space(buff[6]) and
-#        self._match_keyword(buff[7], '__attribute__') and
-#        self._match_symbol(buff[8], '(') and
-#        self._match_symbol(buff[9], '(') and
-#        self._match_identifier(buff[10], 'device') and
-#        self._match_symbol(buff[11], ')') and
-#        self._match_symbol(buff[12], ')')
-#         ):
-#      return 12
-#    return False
-
-  ## Matches __attribute__((device)) __attribute__((host)) 
-#  def _match_device_host_decl(self, buff):
-#    if len(buff) < 12:
-#      return False
-#    if (self._match_keyword(buff[0], '__attribute__') and
-#        self._match_symbol(buff[1], '(') and
-#        self._match_symbol(buff[2], '(') and
-#        self._match_identifier(buff[3], 'device') and
-#        self._match_symbol(buff[4], ')') and
-#        self._match_symbol(buff[5], ')') and
-#        self._match_white_space(buff[6]) and
-#        self._match_keyword(buff[7], '__attribute__') and
-#        self._match_symbol(buff[8], '(') and
-#        self._match_symbol(buff[9], '(') and
-#        self._match_identifier(buff[10], 'host') and
-#        self._match_symbol(buff[11], ')') and
-#        self._match_symbol(buff[12], ')')
-#         ):
-#      return 12
-#    return False
 
   def _match_anything_until(self, buff, untilStr):
     for i in range(len(buff)):
@@ -232,9 +190,21 @@ class Match:
       d, d_h, h_d, func_type = self._match_any_device_annotation(buff[i:])
       if d or d_h or h_d:
         # Get the number of tokens fromn the annotation that matched
-        if isinstance(d, int): m1 = d
-        elif isinstance(d_h, int): m1 = d_h
-        elif isinstance(h_d, int): m1 = h_d
+#        if isinstance(d, int):
+#          m1 = d
+#          print('--> got d')
+#        elif isinstance(d_h, int): 
+#          print('--> got d_h')
+#          m1 = d_h
+#        elif isinstance(h_d, int):
+#          m1 = h_d
+#          print('--> got h_d')
+#        else: return [] # we couldn't match any device function
+        if d: m1 = d
+        elif d_h: m1 = d_h
+        elif h_d: m1 = h_d
+        else: return [] # we couldn't match any device function
+        #print('m1', m1, 'func_type', func_type)
 
         m2 = self._match_anything_until(buff[i+m1:], '(')
         if m2:
@@ -244,10 +214,10 @@ class Match:
             if m4:
               m5 = self._match_anything_until_balanced_bracket(buff[i+m1+m2+m3+m4:])
               if m5:
-                startLine = buff[i].lineNumber()
-                endLine = buff[i+m1+m2+m3+m4+m5].lineNumber()
                 startIndex = i
-                endIndex = i+m1+m2+m3+m4+m5
+                endIndex = i+m1+m2+m3+m4+m5 - 1 # Important to subtract 1 (because indexes start with zero)
+                startLine = buff[i].lineNumber()
+                endLine = buff[endIndex].lineNumber()
                 if not self._matched_block( (startLine, endLine) ):
                   if verbose():
                     print('Not seen block:', (startLine, endLine), '\ncache:', self.code_range_cache)
@@ -289,6 +259,15 @@ class Match:
     for i in range(len(buff)):
       if verbose(): print('['+str(i)+']:', str(buff[i]))
     
+#--------------------------------------------------------------------#
+# Helper                                                             #
+#--------------------------------------------------------------------#
+
+def printTokenBuffer(buff):
+  print('*** Buffer ***')
+  for i in range(len(buff)):
+    print(i, ':', buff[i].__class__.__name__, buff[i])
+
 #--------------------------------------------------------------------#
 # Main                                                               #
 #--------------------------------------------------------------------#

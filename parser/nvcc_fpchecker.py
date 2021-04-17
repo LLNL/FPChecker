@@ -123,10 +123,10 @@ class Command:
       if verbose(): prGreen(' '.join(new_cmd)) 
       cmdOutput = subprocess.run(' '.join(new_cmd), shell=True, check=True)
     except Exception as e:
+      message = 'Could not execute pre-processor'
       if verbose():
         prRed(e)
         logMessage(str(e))
-        message = 'Could not execute pre-processor'
         logMessage(message)
       raise RuntimeError(message) from e
 

@@ -1,0 +1,12 @@
+Instrumented: dot_product_inst.cu
+Instrumented: main_inst.cu
+Instrumented: dot_product_inst.cu
+Instrumented: main_inst.cu
+Instrumented: dot_product_inst.cu
+Instrumented: main_inst.cu
+list index out of range
+Failed: /usr/workspace/wsa/laguna/fpchecker/FPChecker/parser/nvcc_fpchecker.py --std=c++11 -arch=sm_70 -O0 -c dot_product.cu -o dot_product.cu.o
+Instrumented: main_inst.cu
+Could not find source file in nvcc command
+Could not find source file in nvcc command
+Could not find source file in nvcc command
