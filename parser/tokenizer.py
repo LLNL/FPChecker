@@ -246,7 +246,7 @@ class Tokenizer:
   def tokenize(self):
     ## Create temp file and remove pre-processor lines (start with #)
     tmpFd, tmpFname = tempfile.mkstemp(suffix='.txt', text=True)
-    if verbose(): print('Temp file:', tmpFname)
+    if verbose(): print('Temp file (tokenizer):', tmpFname)
     with open(tmpFname, 'w') as f:
       with open(self.fileName, 'r') as src:
         for l in src:
@@ -279,7 +279,8 @@ class Tokenizer:
           continue
 
     os.close(tmpFd)
-    os.remove(tmpFname)
+    if 'FPC_LEAVE_TEMP_FILES' not in os.environ:
+      os.remove(tmpFname)
 
   def match(self, buff: str):
     if len(buff)==0:

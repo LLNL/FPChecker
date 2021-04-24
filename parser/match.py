@@ -131,12 +131,36 @@ class Match:
         return i+1
     return False
 
+  ## Match anything until we see a particular token, e.g., ';'
+  ## If see an unwanted char, it doesn't match and return False
   def _match_anything_until_except(self, buff, untilStr, exceptChars):
     for i in range(len(buff)):
       if str(buff[i]) in exceptChars:
         return False
       if str(buff[i])==untilStr:
         return i+1
+    return False
+
+  ## Match anything until we see a particular token, e.g., ';',
+  ## or until we see an inbalanaced parethesis ')'.
+  ## If we see an assigment operator (=) we return False
+  def _match_anything_until_or_imbalanced_parenthesis(self, buff, untilStr):
+    open_parenthesis = 0
+    equal_sign = 0
+    for i in range(len(buff)):
+      if str(buff[i])=='(':
+        open_parenthesis += 1
+      elif str(buff[i])==')':
+        open_parenthesis -= 1
+        if open_parenthesis == -1: # found imbalanced parenthesis
+          return i+1
+      elif str(buff[i])=='=':
+        equal_sign += 1
+        if equal_sign > 1:
+          return False
+      elif str(buff[i])==untilStr:
+        if open_parenthesis == 0:
+          return i+1
     return False
 
   ## Get next non-white-space token
@@ -190,16 +214,6 @@ class Match:
       d, d_h, h_d, func_type = self._match_any_device_annotation(buff[i:])
       if d or d_h or h_d:
         # Get the number of tokens fromn the annotation that matched
-#        if isinstance(d, int):
-#          m1 = d
-#          print('--> got d')
-#        elif isinstance(d_h, int): 
-#          print('--> got d_h')
-#          m1 = d_h
-#        elif isinstance(h_d, int):
-#          m1 = h_d
-#          print('--> got h_d')
-#        else: return [] # we couldn't match any device function
         if d: m1 = d
         elif d_h: m1 = d_h
         elif h_d: m1 = h_d
@@ -225,6 +239,22 @@ class Match:
 
     return linesThatMatched
 
+  def _find_indexes_with_assignmets(self, tokensRange):
+    startIndexes = [] # indexes with assigment operator
+    for i in range(len(tokensRange)):
+      if (self._match_symbol(tokensRange[i], '+=') or
+          self._match_symbol(tokensRange[i], '-=') or
+          self._match_symbol(tokensRange[i], '*=') or
+          self._match_symbol(tokensRange[i], '/=')
+        ):
+        startIndexes.append(i)
+      elif (self._match_symbol(tokensRange[i], '=')):
+        if not (self._match_symbol(tokensRange[i-1], '<') or
+                self._match_symbol(tokensRange[i-1], '>') or
+                self._match_symbol(tokensRange[i-1], '=')):
+          startIndexes.append(i)
+    return startIndexes
+
   ## Matches an assigment in a given range of lines:
   ## ... = x + y ...;
   ##
@@ -232,27 +262,19 @@ class Match:
   ## of the begin anf end of the assigment RHS (right hand side)
   ## for each assigment in the range.
   def match_assigment(self, tokensRange):
-    startIndexes = [] # indexes with assigment operator
-    for i in range(len(tokensRange)):
-      if (self._match_symbol(tokensRange[i], '=') or
-          self._match_symbol(tokensRange[i], '+=') or
-          self._match_symbol(tokensRange[i], '-=') or
-          self._match_symbol(tokensRange[i], '*=') or
-          self._match_symbol(tokensRange[i], '/=')
-        ):
-        startIndexes.append(i)
-
-    tokenIndexes = []
-    unallowedChars = set(['{', '}'])
+    startIndexes = self._find_indexes_with_assignmets(tokensRange)
+    ret = []
+    #unallowedChars = set(['{', '}'])
     for i in startIndexes:
       ## Match until ; except if we see a body {}
-      m1 = self._match_anything_until_except(tokensRange[i:], ';', unallowedChars)
+      #m1 = self._match_anything_until_except(tokensRange[i:], ';', unallowedChars)
+      m1 = self._match_anything_until_or_imbalanced_parenthesis(tokensRange[i:], ';')
       if m1:
         left = self._nextNonEmpty(tokensRange[i+1:])
         if verbose(): print('PRE:', tokensRange[i+1+left])
         if verbose(): print('POST:', tokensRange[i+m1-1])
-        tokenIndexes.append((i+1+left, i+m1-1))
-    return tokenIndexes
+        ret.append((i+1+left, i+m1-1))
+    return ret
 
   # Print friendly a bugger of tokens
   def printTokens(self, buff):

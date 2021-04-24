@@ -31,13 +31,14 @@ class Instrument:
 
   def deprocess(self):
     tmpFd, tmpFname = tempfile.mkstemp(suffix='.txt', text=True)
-    if verbose(): print('Temp file:', tmpFname)
+    if verbose(): print('Temp file (deprocessing):', tmpFname)
     self.deprocessedFile = tmpFname
     dp = Deprocess(self.preFileName, tmpFname)
     if verbose(): print('Running de-processor...')
     dp.run()
     #os.close(tmpFd)
-    #os.remove(tmpFname)
+    #if 'FPC_LEAVE_TEMP_FILES' not in os.environ:
+    #  os.remove(tmpFname)
 
   def findDeviceDeclarations(self):
     t = Tokenizer(self.deprocessedFile)

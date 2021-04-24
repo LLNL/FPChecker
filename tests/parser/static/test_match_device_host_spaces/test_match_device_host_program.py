@@ -8,6 +8,10 @@ from nvcc_fpchecker import Command
 
 PATH = str(pathlib.Path(__file__).parent.absolute())
 
+def teardown_module(module):
+  cmd = ["rm -f *.o *.ii"]
+  cmdOutput = subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True)
+
 def test_1():
   passed = True
   try:
