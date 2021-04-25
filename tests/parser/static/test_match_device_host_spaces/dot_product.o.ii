@@ -1,4 +1,4 @@
-# 1 "comp.cu"
+# 1 "/usr/WS1/laguna/fpchecker/FPChecker/tests/parser/static/test_match_device_host_spaces/dot_product.cu"
 # 1 "<built-in>"
 # 1 "<command-line>"
 # 1 "/usr/include/stdc-predef.h" 1 3 4
@@ -423,6 +423,18 @@ typedef __attribute__((device_builtin)) struct dim3 dim3;
 typedef long int ptrdiff_t;
 # 212 "/usr/tce/packages/gcc/gcc-4.9.3/gnu/lib64/gcc/powerpc64le-unknown-linux-gnu/4.9.3/include/stddef.h" 3 4
 typedef long unsigned int size_t;
+# 422 "/usr/tce/packages/gcc/gcc-4.9.3/gnu/lib64/gcc/powerpc64le-unknown-linux-gnu/4.9.3/include/stddef.h" 3 4
+typedef struct {
+  long long __max_align_ll __attribute__((__aligned__(__alignof__(long long))));
+  long double __max_align_ld __attribute__((__aligned__(__alignof__(long double))));
+} max_align_t;
+
+
+
+
+
+
+  typedef decltype(nullptr) nullptr_t;
 # 74 "/usr/tce/packages/cuda/cuda-9.2.148/nvidia/bin/../targets/ppc64le-linux/include/driver_types.h" 2
 # 171 "/usr/tce/packages/cuda/cuda-9.2.148/nvidia/bin/../targets/ppc64le-linux/include/driver_types.h"
 enum __attribute__((device_builtin)) cudaError
@@ -3822,7 +3834,7 @@ namespace std
   typedef long int ptrdiff_t;
 
 
-
+  typedef decltype(nullptr) nullptr_t;
 
 }
 # 350 "/usr/tce/packages/gcc/gcc-4.9.3/gnu/include/c++/4.9.3/powerpc64le-unknown-linux-gnu/bits/c++config.h" 3
@@ -3860,12 +3872,12 @@ namespace std
   class exception
   {
   public:
-    exception() throw() { }
-    virtual ~exception() throw();
+    exception() noexcept { }
+    virtual ~exception() noexcept;
 
 
 
-    virtual const char* what() const throw();
+    virtual const char* what() const noexcept;
   };
 
 
@@ -3873,14 +3885,14 @@ namespace std
   class bad_exception : public exception
   {
   public:
-    bad_exception() throw() { }
+    bad_exception() noexcept { }
 
 
 
-    virtual ~bad_exception() throw();
+    virtual ~bad_exception() noexcept;
 
 
-    virtual const char* what() const throw();
+    virtual const char* what() const noexcept;
   };
 
 
@@ -3890,16 +3902,30 @@ namespace std
   typedef void (*unexpected_handler) ();
 
 
-  terminate_handler set_terminate(terminate_handler) throw();
-# 102 "/usr/tce/packages/gcc/gcc-4.9.3/gnu/include/c++/4.9.3/exception" 3
-  void terminate() throw() __attribute__ ((__noreturn__));
+  terminate_handler set_terminate(terminate_handler) noexcept;
 
 
-  unexpected_handler set_unexpected(unexpected_handler) throw();
-# 114 "/usr/tce/packages/gcc/gcc-4.9.3/gnu/include/c++/4.9.3/exception" 3
+
+  terminate_handler get_terminate() noexcept;
+
+
+
+
+  void terminate() noexcept __attribute__ ((__noreturn__));
+
+
+  unexpected_handler set_unexpected(unexpected_handler) noexcept;
+
+
+
+  unexpected_handler get_unexpected() noexcept;
+
+
+
+
   void unexpected() __attribute__ ((__noreturn__));
 # 127 "/usr/tce/packages/gcc/gcc-4.9.3/gnu/include/c++/4.9.3/exception" 3
-  bool uncaught_exception() throw() __attribute__ ((__pure__));
+  bool uncaught_exception() noexcept __attribute__ ((__pure__));
 
 
 }
@@ -3916,6 +3942,287 @@ namespace __gnu_cxx
 }
 
 #pragma GCC visibility pop
+
+
+# 1 "/usr/tce/packages/gcc/gcc-4.9.3/gnu/include/c++/4.9.3/bits/exception_ptr.h" 1 3
+# 34 "/usr/tce/packages/gcc/gcc-4.9.3/gnu/include/c++/4.9.3/bits/exception_ptr.h" 3
+#pragma GCC visibility push(default)
+
+
+# 1 "/usr/tce/packages/gcc/gcc-4.9.3/gnu/include/c++/4.9.3/bits/exception_defines.h" 1 3
+# 38 "/usr/tce/packages/gcc/gcc-4.9.3/gnu/include/c++/4.9.3/bits/exception_ptr.h" 2 3
+
+
+
+
+
+extern "C++" {
+
+namespace std
+{
+  class type_info;
+
+
+
+
+
+  namespace __exception_ptr
+  {
+    class exception_ptr;
+  }
+
+  using __exception_ptr::exception_ptr;
+
+
+
+
+
+  exception_ptr current_exception() noexcept;
+
+
+  void rethrow_exception(exception_ptr) __attribute__ ((__noreturn__));
+
+  namespace __exception_ptr
+  {
+
+
+
+
+    class exception_ptr
+    {
+      void* _M_exception_object;
+
+      explicit exception_ptr(void* __e) noexcept;
+
+      void _M_addref() noexcept;
+      void _M_release() noexcept;
+
+      void *_M_get() const noexcept __attribute__ ((__pure__));
+
+      friend exception_ptr std::current_exception() noexcept;
+      friend void std::rethrow_exception(exception_ptr);
+
+    public:
+      exception_ptr() noexcept;
+
+      exception_ptr(const exception_ptr&) noexcept;
+
+
+      exception_ptr(nullptr_t) noexcept
+      : _M_exception_object(0)
+      { }
+
+      exception_ptr(exception_ptr&& __o) noexcept
+      : _M_exception_object(__o._M_exception_object)
+      { __o._M_exception_object = 0; }
+# 111 "/usr/tce/packages/gcc/gcc-4.9.3/gnu/include/c++/4.9.3/bits/exception_ptr.h" 3
+      exception_ptr&
+      operator=(const exception_ptr&) noexcept;
+
+
+      exception_ptr&
+      operator=(exception_ptr&& __o) noexcept
+      {
+        exception_ptr(static_cast<exception_ptr&&>(__o)).swap(*this);
+        return *this;
+      }
+
+
+      ~exception_ptr() noexcept;
+
+      void
+      swap(exception_ptr&) noexcept;
+# 138 "/usr/tce/packages/gcc/gcc-4.9.3/gnu/include/c++/4.9.3/bits/exception_ptr.h" 3
+      explicit operator bool() const
+      { return _M_exception_object; }
+
+
+      friend bool
+      operator==(const exception_ptr&, const exception_ptr&)
+ noexcept __attribute__ ((__pure__));
+
+      const class std::type_info*
+      __cxa_exception_type() const noexcept
+ __attribute__ ((__pure__));
+    };
+
+    bool
+    operator==(const exception_ptr&, const exception_ptr&)
+      noexcept __attribute__ ((__pure__));
+
+    bool
+    operator!=(const exception_ptr&, const exception_ptr&)
+      noexcept __attribute__ ((__pure__));
+
+    inline void
+    swap(exception_ptr& __lhs, exception_ptr& __rhs)
+    { __lhs.swap(__rhs); }
+
+  }
+
+
+
+  template<typename _Ex>
+    exception_ptr
+    make_exception_ptr(_Ex __ex) noexcept
+    {
+      try
+ {
+
+   throw __ex;
+
+ }
+      catch(...)
+ {
+   return current_exception();
+ }
+    }
+
+
+
+
+
+  template<typename _Ex>
+    exception_ptr
+    copy_exception(_Ex __ex) noexcept __attribute__ ((__deprecated__));
+
+  template<typename _Ex>
+    exception_ptr
+    copy_exception(_Ex __ex) noexcept
+    { return std::make_exception_ptr<_Ex>(__ex); }
+
+
+}
+
+}
+
+#pragma GCC visibility pop
+# 163 "/usr/tce/packages/gcc/gcc-4.9.3/gnu/include/c++/4.9.3/exception" 2 3
+# 1 "/usr/tce/packages/gcc/gcc-4.9.3/gnu/include/c++/4.9.3/bits/nested_exception.h" 1 3
+# 33 "/usr/tce/packages/gcc/gcc-4.9.3/gnu/include/c++/4.9.3/bits/nested_exception.h" 3
+#pragma GCC visibility push(default)
+# 45 "/usr/tce/packages/gcc/gcc-4.9.3/gnu/include/c++/4.9.3/bits/nested_exception.h" 3
+extern "C++" {
+
+namespace std
+{
+
+
+
+
+
+
+  class nested_exception
+  {
+    exception_ptr _M_ptr;
+
+  public:
+    nested_exception() noexcept : _M_ptr(current_exception()) { }
+
+    nested_exception(const nested_exception&) = default;
+
+    nested_exception& operator=(const nested_exception&) = default;
+
+    virtual ~nested_exception() noexcept;
+
+    void
+    rethrow_nested() const __attribute__ ((__noreturn__))
+    { rethrow_exception(_M_ptr); }
+
+    exception_ptr
+    nested_ptr() const
+    { return _M_ptr; }
+  };
+
+  template<typename _Except>
+    struct _Nested_exception : public _Except, public nested_exception
+    {
+      explicit _Nested_exception(_Except&& __ex)
+      : _Except(static_cast<_Except&&>(__ex))
+      { }
+    };
+
+  template<typename _Ex>
+    struct __get_nested_helper
+    {
+      static const nested_exception*
+      _S_get(const _Ex& __ex)
+      { return dynamic_cast<const nested_exception*>(&__ex); }
+    };
+
+  template<typename _Ex>
+    struct __get_nested_helper<_Ex*>
+    {
+      static const nested_exception*
+      _S_get(const _Ex* __ex)
+      { return dynamic_cast<const nested_exception*>(__ex); }
+    };
+
+  template<typename _Ex>
+    inline const nested_exception*
+    __get_nested_exception(const _Ex& __ex)
+    { return __get_nested_helper<_Ex>::_S_get(__ex); }
+
+  template<typename _Ex>
+    void
+    __throw_with_nested(_Ex&&, const nested_exception* = 0)
+    __attribute__ ((__noreturn__));
+
+  template<typename _Ex>
+    void
+    __throw_with_nested(_Ex&&, ...) __attribute__ ((__noreturn__));
+
+
+
+
+  template<typename _Ex>
+    inline void
+    __throw_with_nested(_Ex&& __ex, const nested_exception*)
+    { throw __ex; }
+
+  template<typename _Ex>
+    inline void
+    __throw_with_nested(_Ex&& __ex, ...)
+    { throw _Nested_exception<_Ex>(static_cast<_Ex&&>(__ex)); }
+
+  template<typename _Ex>
+    void
+    throw_with_nested(_Ex __ex) __attribute__ ((__noreturn__));
+
+
+
+  template<typename _Ex>
+    inline void
+    throw_with_nested(_Ex __ex)
+    {
+      if (__get_nested_exception(__ex))
+        throw __ex;
+      __throw_with_nested(static_cast<_Ex&&>(__ex), &__ex);
+    }
+
+
+  template<typename _Ex>
+    inline void
+    rethrow_if_nested(const _Ex& __ex)
+    {
+      if (const nested_exception* __nested = __get_nested_exception(__ex))
+        __nested->rethrow_nested();
+    }
+
+
+  inline void
+  rethrow_if_nested(const nested_exception& __ex)
+  { __ex.rethrow_nested(); }
+
+
+}
+
+}
+
+
+
+#pragma GCC visibility pop
+# 164 "/usr/tce/packages/gcc/gcc-4.9.3/gnu/include/c++/4.9.3/exception" 2 3
 # 41 "/usr/tce/packages/gcc/gcc-4.9.3/gnu/include/c++/4.9.3/new" 2 3
 
 #pragma GCC visibility push(default)
@@ -3942,21 +4249,21 @@ namespace std
 
     virtual const char* what() const throw();
   };
-# 85 "/usr/tce/packages/gcc/gcc-4.9.3/gnu/include/c++/4.9.3/new" 3
-  class bad_array_length : public bad_alloc
+
+
+  class bad_array_new_length : public bad_alloc
   {
   public:
-    bad_array_length() throw() { };
+    bad_array_new_length() throw() { };
 
 
 
-    virtual ~bad_array_length() throw();
+    virtual ~bad_array_new_length() throw();
 
 
     virtual const char* what() const throw();
   };
-
-
+# 99 "/usr/tce/packages/gcc/gcc-4.9.3/gnu/include/c++/4.9.3/new" 3
   struct nothrow_t { };
 
   extern const nothrow_t nothrow;
@@ -3971,36 +4278,36 @@ namespace std
 
 
 
-
+  new_handler get_new_handler() noexcept;
 
 }
 # 128 "/usr/tce/packages/gcc/gcc-4.9.3/gnu/include/c++/4.9.3/new" 3
-void* operator new(std::size_t) throw(std::bad_alloc)
+void* operator new(std::size_t)
   __attribute__((__externally_visible__));
-void* operator new[](std::size_t) throw(std::bad_alloc)
+void* operator new[](std::size_t)
   __attribute__((__externally_visible__));
-void operator delete(void*) throw()
+void operator delete(void*) noexcept
   __attribute__((__externally_visible__));
-void operator delete[](void*) throw()
+void operator delete[](void*) noexcept
   __attribute__((__externally_visible__));
-void* operator new(std::size_t, const std::nothrow_t&) throw()
+void* operator new(std::size_t, const std::nothrow_t&) noexcept
   __attribute__((__externally_visible__));
-void* operator new[](std::size_t, const std::nothrow_t&) throw()
+void* operator new[](std::size_t, const std::nothrow_t&) noexcept
   __attribute__((__externally_visible__));
-void operator delete(void*, const std::nothrow_t&) throw()
+void operator delete(void*, const std::nothrow_t&) noexcept
   __attribute__((__externally_visible__));
-void operator delete[](void*, const std::nothrow_t&) throw()
+void operator delete[](void*, const std::nothrow_t&) noexcept
   __attribute__((__externally_visible__));
 
 
-inline void* operator new(std::size_t, void* __p) throw()
+inline void* operator new(std::size_t, void* __p) noexcept
 { return __p; }
-inline void* operator new[](std::size_t, void* __p) throw()
+inline void* operator new[](std::size_t, void* __p) noexcept
 { return __p; }
 
 
-inline void operator delete (void*, void*) throw() { }
-inline void operator delete[](void*, void*) throw() { }
+inline void operator delete (void*, void*) noexcept { }
+inline void operator delete[](void*, void*) noexcept { }
 
 }
 
@@ -6040,8 +6347,8 @@ extern __attribute__((host)) __attribute__((device)) __attribute__((cudart_built
 
 }
 # 230 "/usr/tce/packages/cuda/cuda-9.2.148/nvidia/bin/../targets/ppc64le-linux/include/crt/common_functions.h"
-extern __attribute__((host)) __attribute__((device)) __attribute__((cudart_builtin)) void* operator new(std:: size_t) throw(std:: bad_alloc);
-extern __attribute__((host)) __attribute__((device)) __attribute__((cudart_builtin)) void* operator new[](std:: size_t) throw(std:: bad_alloc);
+extern __attribute__((host)) __attribute__((device)) __attribute__((cudart_builtin)) void* operator new(std:: size_t) ;
+extern __attribute__((host)) __attribute__((device)) __attribute__((cudart_builtin)) void* operator new[](std:: size_t) ;
 extern __attribute__((host)) __attribute__((device)) __attribute__((cudart_builtin)) void operator delete(void*) throw();
 extern __attribute__((host)) __attribute__((device)) __attribute__((cudart_builtin)) void operator delete[](void*) throw();
 # 257 "/usr/tce/packages/cuda/cuda-9.2.148/nvidia/bin/../targets/ppc64le-linux/include/crt/common_functions.h"
@@ -7597,7 +7904,24 @@ namespace std __attribute__ ((__visibility__ ("default")))
       enum { __value = 1 };
       typedef __true_type __type;
     };
-# 198 "/usr/tce/packages/gcc/gcc-4.9.3/gnu/include/c++/4.9.3/bits/cpp_type_traits.h" 3
+
+
+
+  template<>
+    struct __is_integer<char16_t>
+    {
+      enum { __value = 1 };
+      typedef __true_type __type;
+    };
+
+  template<>
+    struct __is_integer<char32_t>
+    {
+      enum { __value = 1 };
+      typedef __true_type __type;
+    };
+
+
   template<>
     struct __is_integer<short>
     {
@@ -7800,7 +8124,19 @@ namespace std __attribute__ ((__visibility__ ("default")))
       enum { __value = 0 };
       typedef __false_type __type;
     };
-# 413 "/usr/tce/packages/gcc/gcc-4.9.3/gnu/include/c++/4.9.3/bits/cpp_type_traits.h" 3
+
+
+  template<typename _Iterator>
+    class move_iterator;
+
+  template<typename _Iterator>
+    struct __is_move_iterator< move_iterator<_Iterator> >
+    {
+      enum { __value = 1 };
+      typedef __true_type __type;
+    };
+
+
 
 }
 # 43 "/usr/tce/packages/gcc/gcc-4.9.3/gnu/include/c++/4.9.3/cmath" 2 3
@@ -7924,25 +8260,22 @@ namespace __gnu_cxx __attribute__ ((__visibility__ ("default")))
 
 
   template<typename _Type>
-    inline
-   
-# 150 "/usr/tce/packages/gcc/gcc-4.9.3/gnu/include/c++/4.9.3/ext/type_traits.h" 3
-   
-# 149 "/usr/tce/packages/gcc/gcc-4.9.3/gnu/include/c++/4.9.3/ext/type_traits.h" 3
-           bool
+    inline bool
     __is_null_pointer(_Type* __ptr)
     { return __ptr == 0; }
 
   template<typename _Type>
-    inline
-   
-# 155 "/usr/tce/packages/gcc/gcc-4.9.3/gnu/include/c++/4.9.3/ext/type_traits.h" 3
-   
-# 154 "/usr/tce/packages/gcc/gcc-4.9.3/gnu/include/c++/4.9.3/ext/type_traits.h" 3
-           bool
+    inline bool
     __is_null_pointer(_Type)
     { return false; }
-# 165 "/usr/tce/packages/gcc/gcc-4.9.3/gnu/include/c++/4.9.3/ext/type_traits.h" 3
+
+
+  inline bool
+  __is_null_pointer(std::nullptr_t)
+  { return true; }
+
+
+
   template<typename _Tp, bool = std::__is_integer<_Tp>::__value>
     struct __promote
     { typedef double __type; };
@@ -8002,23 +8335,23 @@ namespace std __attribute__ ((__visibility__ ("default")))
 
 
 
-  inline double
+  inline constexpr double
   abs(double __x)
   { return __builtin_fabs(__x); }
 
 
 
-  inline float
+  inline constexpr float
   abs(float __x)
   { return __builtin_fabsf(__x); }
 
-  inline long double
+  inline constexpr long double
   abs(long double __x)
   { return __builtin_fabsl(__x); }
 
 
   template<typename _Tp>
-    inline
+    inline constexpr
     typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
                                     double>::__type
     abs(_Tp __x)
@@ -8027,17 +8360,17 @@ namespace std __attribute__ ((__visibility__ ("default")))
   using ::acos;
 
 
-  inline float
+  inline constexpr float
   acos(float __x)
   { return __builtin_acosf(__x); }
 
-  inline long double
+  inline constexpr long double
   acos(long double __x)
   { return __builtin_acosl(__x); }
 
 
   template<typename _Tp>
-    inline
+    inline constexpr
     typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
                                     double>::__type
     acos(_Tp __x)
@@ -8046,17 +8379,17 @@ namespace std __attribute__ ((__visibility__ ("default")))
   using ::asin;
 
 
-  inline float
+  inline constexpr float
   asin(float __x)
   { return __builtin_asinf(__x); }
 
-  inline long double
+  inline constexpr long double
   asin(long double __x)
   { return __builtin_asinl(__x); }
 
 
   template<typename _Tp>
-    inline
+    inline constexpr
     typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
                                     double>::__type
     asin(_Tp __x)
@@ -8065,17 +8398,17 @@ namespace std __attribute__ ((__visibility__ ("default")))
   using ::atan;
 
 
-  inline float
+  inline constexpr float
   atan(float __x)
   { return __builtin_atanf(__x); }
 
-  inline long double
+  inline constexpr long double
   atan(long double __x)
   { return __builtin_atanl(__x); }
 
 
   template<typename _Tp>
-    inline
+    inline constexpr
     typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
                                     double>::__type
     atan(_Tp __x)
@@ -8084,17 +8417,17 @@ namespace std __attribute__ ((__visibility__ ("default")))
   using ::atan2;
 
 
-  inline float
+  inline constexpr float
   atan2(float __y, float __x)
   { return __builtin_atan2f(__y, __x); }
 
-  inline long double
+  inline constexpr long double
   atan2(long double __y, long double __x)
   { return __builtin_atan2l(__y, __x); }
 
 
   template<typename _Tp, typename _Up>
-    inline
+    inline constexpr
     typename __gnu_cxx::__promote_2<_Tp, _Up>::__type
     atan2(_Tp __y, _Up __x)
     {
@@ -8105,17 +8438,17 @@ namespace std __attribute__ ((__visibility__ ("default")))
   using ::ceil;
 
 
-  inline float
+  inline constexpr float
   ceil(float __x)
   { return __builtin_ceilf(__x); }
 
-  inline long double
+  inline constexpr long double
   ceil(long double __x)
   { return __builtin_ceill(__x); }
 
 
   template<typename _Tp>
-    inline
+    inline constexpr
     typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
                                     double>::__type
     ceil(_Tp __x)
@@ -8124,17 +8457,17 @@ namespace std __attribute__ ((__visibility__ ("default")))
   using ::cos;
 
 
-  inline float
+  inline constexpr float
   cos(float __x)
   { return __builtin_cosf(__x); }
 
-  inline long double
+  inline constexpr long double
   cos(long double __x)
   { return __builtin_cosl(__x); }
 
 
   template<typename _Tp>
-    inline
+    inline constexpr
     typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
                                     double>::__type
     cos(_Tp __x)
@@ -8143,17 +8476,17 @@ namespace std __attribute__ ((__visibility__ ("default")))
   using ::cosh;
 
 
-  inline float
+  inline constexpr float
   cosh(float __x)
   { return __builtin_coshf(__x); }
 
-  inline long double
+  inline constexpr long double
   cosh(long double __x)
   { return __builtin_coshl(__x); }
 
 
   template<typename _Tp>
-    inline
+    inline constexpr
     typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
                                     double>::__type
     cosh(_Tp __x)
@@ -8162,17 +8495,17 @@ namespace std __attribute__ ((__visibility__ ("default")))
   using ::exp;
 
 
-  inline float
+  inline constexpr float
   exp(float __x)
   { return __builtin_expf(__x); }
 
-  inline long double
+  inline constexpr long double
   exp(long double __x)
   { return __builtin_expl(__x); }
 
 
   template<typename _Tp>
-    inline
+    inline constexpr
     typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
                                     double>::__type
     exp(_Tp __x)
@@ -8181,17 +8514,17 @@ namespace std __attribute__ ((__visibility__ ("default")))
   using ::fabs;
 
 
-  inline float
+  inline constexpr float
   fabs(float __x)
   { return __builtin_fabsf(__x); }
 
-  inline long double
+  inline constexpr long double
   fabs(long double __x)
   { return __builtin_fabsl(__x); }
 
 
   template<typename _Tp>
-    inline
+    inline constexpr
     typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
                                     double>::__type
     fabs(_Tp __x)
@@ -8200,17 +8533,17 @@ namespace std __attribute__ ((__visibility__ ("default")))
   using ::floor;
 
 
-  inline float
+  inline constexpr float
   floor(float __x)
   { return __builtin_floorf(__x); }
 
-  inline long double
+  inline constexpr long double
   floor(long double __x)
   { return __builtin_floorl(__x); }
 
 
   template<typename _Tp>
-    inline
+    inline constexpr
     typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
                                     double>::__type
     floor(_Tp __x)
@@ -8219,17 +8552,17 @@ namespace std __attribute__ ((__visibility__ ("default")))
   using ::fmod;
 
 
-  inline float
+  inline constexpr float
   fmod(float __x, float __y)
   { return __builtin_fmodf(__x, __y); }
 
-  inline long double
+  inline constexpr long double
   fmod(long double __x, long double __y)
   { return __builtin_fmodl(__x, __y); }
 
 
   template<typename _Tp, typename _Up>
-    inline
+    inline constexpr
     typename __gnu_cxx::__promote_2<_Tp, _Up>::__type
     fmod(_Tp __x, _Up __y)
     {
@@ -8250,7 +8583,7 @@ namespace std __attribute__ ((__visibility__ ("default")))
 
 
   template<typename _Tp>
-    inline
+    inline constexpr
     typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
                                     double>::__type
     frexp(_Tp __x, int* __exp)
@@ -8259,17 +8592,17 @@ namespace std __attribute__ ((__visibility__ ("default")))
   using ::ldexp;
 
 
-  inline float
+  inline constexpr float
   ldexp(float __x, int __exp)
   { return __builtin_ldexpf(__x, __exp); }
 
-  inline long double
+  inline constexpr long double
   ldexp(long double __x, int __exp)
   { return __builtin_ldexpl(__x, __exp); }
 
 
   template<typename _Tp>
-    inline
+    inline constexpr
     typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
                                     double>::__type
     ldexp(_Tp __x, int __exp)
@@ -8278,17 +8611,17 @@ namespace std __attribute__ ((__visibility__ ("default")))
   using ::log;
 
 
-  inline float
+  inline constexpr float
   log(float __x)
   { return __builtin_logf(__x); }
 
-  inline long double
+  inline constexpr long double
   log(long double __x)
   { return __builtin_logl(__x); }
 
 
   template<typename _Tp>
-    inline
+    inline constexpr
     typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
                                     double>::__type
     log(_Tp __x)
@@ -8297,17 +8630,17 @@ namespace std __attribute__ ((__visibility__ ("default")))
   using ::log10;
 
 
-  inline float
+  inline constexpr float
   log10(float __x)
   { return __builtin_log10f(__x); }
 
-  inline long double
+  inline constexpr long double
   log10(long double __x)
   { return __builtin_log10l(__x); }
 
 
   template<typename _Tp>
-    inline
+    inline constexpr
     typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
                                     double>::__type
     log10(_Tp __x)
@@ -8328,33 +8661,16 @@ namespace std __attribute__ ((__visibility__ ("default")))
   using ::pow;
 
 
-  inline float
+  inline constexpr float
   pow(float __x, float __y)
   { return __builtin_powf(__x, __y); }
 
-  inline long double
+  inline constexpr long double
   pow(long double __x, long double __y)
   { return __builtin_powl(__x, __y); }
-
-
-
-
-  inline double
-  pow(double __x, int __i)
-  { return __builtin_powi(__x, __i); }
-
-  inline float
-  pow(float __x, int __n)
-  { return __builtin_powif(__x, __n); }
-
-  inline long double
-  pow(long double __x, int __n)
-  { return __builtin_powil(__x, __n); }
-
-
-
+# 431 "/usr/tce/packages/gcc/gcc-4.9.3/gnu/include/c++/4.9.3/cmath" 3
   template<typename _Tp, typename _Up>
-    inline
+    inline constexpr
     typename __gnu_cxx::__promote_2<_Tp, _Up>::__type
     pow(_Tp __x, _Up __y)
     {
@@ -8365,17 +8681,17 @@ namespace std __attribute__ ((__visibility__ ("default")))
   using ::sin;
 
 
-  inline float
+  inline constexpr float
   sin(float __x)
   { return __builtin_sinf(__x); }
 
-  inline long double
+  inline constexpr long double
   sin(long double __x)
   { return __builtin_sinl(__x); }
 
 
   template<typename _Tp>
-    inline
+    inline constexpr
     typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
                                     double>::__type
     sin(_Tp __x)
@@ -8384,17 +8700,17 @@ namespace std __attribute__ ((__visibility__ ("default")))
   using ::sinh;
 
 
-  inline float
+  inline constexpr float
   sinh(float __x)
   { return __builtin_sinhf(__x); }
 
-  inline long double
+  inline constexpr long double
   sinh(long double __x)
   { return __builtin_sinhl(__x); }
 
 
   template<typename _Tp>
-    inline
+    inline constexpr
     typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
                                     double>::__type
     sinh(_Tp __x)
@@ -8403,17 +8719,17 @@ namespace std __attribute__ ((__visibility__ ("default")))
   using ::sqrt;
 
 
-  inline float
+  inline constexpr float
   sqrt(float __x)
   { return __builtin_sqrtf(__x); }
 
-  inline long double
+  inline constexpr long double
   sqrt(long double __x)
   { return __builtin_sqrtl(__x); }
 
 
   template<typename _Tp>
-    inline
+    inline constexpr
     typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
                                     double>::__type
     sqrt(_Tp __x)
@@ -8422,17 +8738,17 @@ namespace std __attribute__ ((__visibility__ ("default")))
   using ::tan;
 
 
-  inline float
+  inline constexpr float
   tan(float __x)
   { return __builtin_tanf(__x); }
 
-  inline long double
+  inline constexpr long double
   tan(long double __x)
   { return __builtin_tanl(__x); }
 
 
   template<typename _Tp>
-    inline
+    inline constexpr
     typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
                                     double>::__type
     tan(_Tp __x)
@@ -8441,17 +8757,17 @@ namespace std __attribute__ ((__visibility__ ("default")))
   using ::tanh;
 
 
-  inline float
+  inline constexpr float
   tanh(float __x)
   { return __builtin_tanhf(__x); }
 
-  inline long double
+  inline constexpr long double
   tanh(long double __x)
   { return __builtin_tanhl(__x); }
 
 
   template<typename _Tp>
-    inline
+    inline constexpr
     typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
                                     double>::__type
     tanh(_Tp __x)
@@ -8463,117 +8779,900 @@ namespace std __attribute__ ((__visibility__ ("default")))
 namespace std __attribute__ ((__visibility__ ("default")))
 {
 
-# 806 "/usr/tce/packages/gcc/gcc-4.9.3/gnu/include/c++/4.9.3/cmath" 3
-  template<typename _Tp>
-    inline typename __gnu_cxx::__enable_if<__is_arithmetic<_Tp>::__value,
-        int>::__type
-    fpclassify(_Tp __f)
-    {
-      typedef typename __gnu_cxx::__promote<_Tp>::__type __type;
-      return __builtin_fpclassify(0, 1, 4,
-      3, 2, __type(__f));
-    }
+
+
+  constexpr int
+  fpclassify(float __x)
+  { return __builtin_fpclassify(0, 1, 4,
+    3, 2, __x); }
+
+  constexpr int
+  fpclassify(double __x)
+  { return __builtin_fpclassify(0, 1, 4,
+    3, 2, __x); }
+
+  constexpr int
+  fpclassify(long double __x)
+  { return __builtin_fpclassify(0, 1, 4,
+    3, 2, __x); }
 
   template<typename _Tp>
-    inline typename __gnu_cxx::__enable_if<__is_arithmetic<_Tp>::__value,
-        int>::__type
-    isfinite(_Tp __f)
-    {
-      typedef typename __gnu_cxx::__promote<_Tp>::__type __type;
-      return __builtin_isfinite(__type(__f));
-    }
+    constexpr typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
+                                              int>::__type
+    fpclassify(_Tp __x)
+    { return __x != 0 ? 4 : 2; }
+
+  constexpr bool
+  isfinite(float __x)
+  { return __builtin_isfinite(__x); }
+
+  constexpr bool
+  isfinite(double __x)
+  { return __builtin_isfinite(__x); }
+
+  constexpr bool
+  isfinite(long double __x)
+  { return __builtin_isfinite(__x); }
 
   template<typename _Tp>
-    inline typename __gnu_cxx::__enable_if<__is_arithmetic<_Tp>::__value,
-        int>::__type
-    isinf(_Tp __f)
-    {
-      typedef typename __gnu_cxx::__promote<_Tp>::__type __type;
-      return __builtin_isinf(__type(__f));
-    }
+    constexpr typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
+                                              bool>::__type
+    isfinite(_Tp __x)
+    { return true; }
+
+  constexpr bool
+  isinf(float __x)
+  { return __builtin_isinf(__x); }
+
+  constexpr bool
+  isinf(double __x)
+  { return __builtin_isinf(__x); }
+
+  constexpr bool
+  isinf(long double __x)
+  { return __builtin_isinf(__x); }
 
   template<typename _Tp>
-    inline typename __gnu_cxx::__enable_if<__is_arithmetic<_Tp>::__value,
-        int>::__type
-    isnan(_Tp __f)
-    {
-      typedef typename __gnu_cxx::__promote<_Tp>::__type __type;
-      return __builtin_isnan(__type(__f));
-    }
+    constexpr typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
+                                              bool>::__type
+    isinf(_Tp __x)
+    { return false; }
+
+  constexpr bool
+  isnan(float __x)
+  { return __builtin_isnan(__x); }
+
+  constexpr bool
+  isnan(double __x)
+  { return __builtin_isnan(__x); }
+
+  constexpr bool
+  isnan(long double __x)
+  { return __builtin_isnan(__x); }
 
   template<typename _Tp>
-    inline typename __gnu_cxx::__enable_if<__is_arithmetic<_Tp>::__value,
-        int>::__type
-    isnormal(_Tp __f)
-    {
-      typedef typename __gnu_cxx::__promote<_Tp>::__type __type;
-      return __builtin_isnormal(__type(__f));
-    }
+    constexpr typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
+                                              bool>::__type
+    isnan(_Tp __x)
+    { return false; }
+
+  constexpr bool
+  isnormal(float __x)
+  { return __builtin_isnormal(__x); }
+
+  constexpr bool
+  isnormal(double __x)
+  { return __builtin_isnormal(__x); }
+
+  constexpr bool
+  isnormal(long double __x)
+  { return __builtin_isnormal(__x); }
 
   template<typename _Tp>
-    inline typename __gnu_cxx::__enable_if<__is_arithmetic<_Tp>::__value,
-        int>::__type
-    signbit(_Tp __f)
-    {
-      typedef typename __gnu_cxx::__promote<_Tp>::__type __type;
-      return __builtin_signbit(__type(__f));
-    }
+    constexpr typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
+                                              bool>::__type
+    isnormal(_Tp __x)
+    { return __x != 0 ? true : false; }
+
+
+  constexpr bool
+  signbit(float __x)
+  { return __builtin_signbitf(__x); }
+
+  constexpr bool
+  signbit(double __x)
+  { return __builtin_signbit(__x); }
+
+  constexpr bool
+  signbit(long double __x)
+  { return __builtin_signbitl(__x); }
 
   template<typename _Tp>
-    inline typename __gnu_cxx::__enable_if<__is_arithmetic<_Tp>::__value,
-        int>::__type
-    isgreater(_Tp __f1, _Tp __f2)
+    constexpr typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
+                                              bool>::__type
+    signbit(_Tp __x)
+    { return __x < 0 ? true : false; }
+
+  constexpr bool
+  isgreater(float __x, float __y)
+  { return __builtin_isgreater(__x, __y); }
+
+  constexpr bool
+  isgreater(double __x, double __y)
+  { return __builtin_isgreater(__x, __y); }
+
+  constexpr bool
+  isgreater(long double __x, long double __y)
+  { return __builtin_isgreater(__x, __y); }
+
+  template<typename _Tp, typename _Up>
+    constexpr typename
+    __gnu_cxx::__enable_if<(__is_arithmetic<_Tp>::__value
+       && __is_arithmetic<_Up>::__value), bool>::__type
+    isgreater(_Tp __x, _Up __y)
     {
-      typedef typename __gnu_cxx::__promote<_Tp>::__type __type;
-      return __builtin_isgreater(__type(__f1), __type(__f2));
+      typedef typename __gnu_cxx::__promote_2<_Tp, _Up>::__type __type;
+      return __builtin_isgreater(__type(__x), __type(__y));
     }
+
+  constexpr bool
+  isgreaterequal(float __x, float __y)
+  { return __builtin_isgreaterequal(__x, __y); }
+
+  constexpr bool
+  isgreaterequal(double __x, double __y)
+  { return __builtin_isgreaterequal(__x, __y); }
+
+  constexpr bool
+  isgreaterequal(long double __x, long double __y)
+  { return __builtin_isgreaterequal(__x, __y); }
+
+  template<typename _Tp, typename _Up>
+    constexpr typename
+    __gnu_cxx::__enable_if<(__is_arithmetic<_Tp>::__value
+       && __is_arithmetic<_Up>::__value), bool>::__type
+    isgreaterequal(_Tp __x, _Up __y)
+    {
+      typedef typename __gnu_cxx::__promote_2<_Tp, _Up>::__type __type;
+      return __builtin_isgreaterequal(__type(__x), __type(__y));
+    }
+
+  constexpr bool
+  isless(float __x, float __y)
+  { return __builtin_isless(__x, __y); }
+
+  constexpr bool
+  isless(double __x, double __y)
+  { return __builtin_isless(__x, __y); }
+
+  constexpr bool
+  isless(long double __x, long double __y)
+  { return __builtin_isless(__x, __y); }
+
+  template<typename _Tp, typename _Up>
+    constexpr typename
+    __gnu_cxx::__enable_if<(__is_arithmetic<_Tp>::__value
+       && __is_arithmetic<_Up>::__value), bool>::__type
+    isless(_Tp __x, _Up __y)
+    {
+      typedef typename __gnu_cxx::__promote_2<_Tp, _Up>::__type __type;
+      return __builtin_isless(__type(__x), __type(__y));
+    }
+
+  constexpr bool
+  islessequal(float __x, float __y)
+  { return __builtin_islessequal(__x, __y); }
+
+  constexpr bool
+  islessequal(double __x, double __y)
+  { return __builtin_islessequal(__x, __y); }
+
+  constexpr bool
+  islessequal(long double __x, long double __y)
+  { return __builtin_islessequal(__x, __y); }
+
+  template<typename _Tp, typename _Up>
+    constexpr typename
+    __gnu_cxx::__enable_if<(__is_arithmetic<_Tp>::__value
+       && __is_arithmetic<_Up>::__value), bool>::__type
+    islessequal(_Tp __x, _Up __y)
+    {
+      typedef typename __gnu_cxx::__promote_2<_Tp, _Up>::__type __type;
+      return __builtin_islessequal(__type(__x), __type(__y));
+    }
+
+  constexpr bool
+  islessgreater(float __x, float __y)
+  { return __builtin_islessgreater(__x, __y); }
+
+  constexpr bool
+  islessgreater(double __x, double __y)
+  { return __builtin_islessgreater(__x, __y); }
+
+  constexpr bool
+  islessgreater(long double __x, long double __y)
+  { return __builtin_islessgreater(__x, __y); }
+
+  template<typename _Tp, typename _Up>
+    constexpr typename
+    __gnu_cxx::__enable_if<(__is_arithmetic<_Tp>::__value
+       && __is_arithmetic<_Up>::__value), bool>::__type
+    islessgreater(_Tp __x, _Up __y)
+    {
+      typedef typename __gnu_cxx::__promote_2<_Tp, _Up>::__type __type;
+      return __builtin_islessgreater(__type(__x), __type(__y));
+    }
+
+  constexpr bool
+  isunordered(float __x, float __y)
+  { return __builtin_isunordered(__x, __y); }
+
+  constexpr bool
+  isunordered(double __x, double __y)
+  { return __builtin_isunordered(__x, __y); }
+
+  constexpr bool
+  isunordered(long double __x, long double __y)
+  { return __builtin_isunordered(__x, __y); }
+
+  template<typename _Tp, typename _Up>
+    constexpr typename
+    __gnu_cxx::__enable_if<(__is_arithmetic<_Tp>::__value
+       && __is_arithmetic<_Up>::__value), bool>::__type
+    isunordered(_Tp __x, _Up __y)
+    {
+      typedef typename __gnu_cxx::__promote_2<_Tp, _Up>::__type __type;
+      return __builtin_isunordered(__type(__x), __type(__y));
+    }
+# 917 "/usr/tce/packages/gcc/gcc-4.9.3/gnu/include/c++/4.9.3/cmath" 3
+
+}
+# 1033 "/usr/tce/packages/gcc/gcc-4.9.3/gnu/include/c++/4.9.3/cmath" 3
+namespace std __attribute__ ((__visibility__ ("default")))
+{
+
+
+
+  using ::double_t;
+  using ::float_t;
+
+
+  using ::acosh;
+  using ::acoshf;
+  using ::acoshl;
+
+  using ::asinh;
+  using ::asinhf;
+  using ::asinhl;
+
+  using ::atanh;
+  using ::atanhf;
+  using ::atanhl;
+
+  using ::cbrt;
+  using ::cbrtf;
+  using ::cbrtl;
+
+  using ::copysign;
+  using ::copysignf;
+  using ::copysignl;
+
+  using ::erf;
+  using ::erff;
+  using ::erfl;
+
+  using ::erfc;
+  using ::erfcf;
+  using ::erfcl;
+
+  using ::exp2;
+  using ::exp2f;
+  using ::exp2l;
+
+  using ::expm1;
+  using ::expm1f;
+  using ::expm1l;
+
+  using ::fdim;
+  using ::fdimf;
+  using ::fdiml;
+
+  using ::fma;
+  using ::fmaf;
+  using ::fmal;
+
+  using ::fmax;
+  using ::fmaxf;
+  using ::fmaxl;
+
+  using ::fmin;
+  using ::fminf;
+  using ::fminl;
+
+  using ::hypot;
+  using ::hypotf;
+  using ::hypotl;
+
+  using ::ilogb;
+  using ::ilogbf;
+  using ::ilogbl;
+
+  using ::lgamma;
+  using ::lgammaf;
+  using ::lgammal;
+
+  using ::llrint;
+  using ::llrintf;
+  using ::llrintl;
+
+  using ::llround;
+  using ::llroundf;
+  using ::llroundl;
+
+  using ::log1p;
+  using ::log1pf;
+  using ::log1pl;
+
+  using ::log2;
+  using ::log2f;
+  using ::log2l;
+
+  using ::logb;
+  using ::logbf;
+  using ::logbl;
+
+  using ::lrint;
+  using ::lrintf;
+  using ::lrintl;
+
+  using ::lround;
+  using ::lroundf;
+  using ::lroundl;
+
+  using ::nan;
+  using ::nanf;
+  using ::nanl;
+
+  using ::nearbyint;
+  using ::nearbyintf;
+  using ::nearbyintl;
+
+  using ::nextafter;
+  using ::nextafterf;
+  using ::nextafterl;
+
+  using ::nexttoward;
+  using ::nexttowardf;
+  using ::nexttowardl;
+
+  using ::remainder;
+  using ::remainderf;
+  using ::remainderl;
+
+  using ::remquo;
+  using ::remquof;
+  using ::remquol;
+
+  using ::rint;
+  using ::rintf;
+  using ::rintl;
+
+  using ::round;
+  using ::roundf;
+  using ::roundl;
+
+  using ::scalbln;
+  using ::scalblnf;
+  using ::scalblnl;
+
+  using ::scalbn;
+  using ::scalbnf;
+  using ::scalbnl;
+
+  using ::tgamma;
+  using ::tgammaf;
+  using ::tgammal;
+
+  using ::trunc;
+  using ::truncf;
+  using ::truncl;
+
+
+  constexpr float
+  acosh(float __x)
+  { return __builtin_acoshf(__x); }
+
+  constexpr long double
+  acosh(long double __x)
+  { return __builtin_acoshl(__x); }
 
   template<typename _Tp>
-    inline typename __gnu_cxx::__enable_if<__is_arithmetic<_Tp>::__value,
-        int>::__type
-    isgreaterequal(_Tp __f1, _Tp __f2)
-    {
-      typedef typename __gnu_cxx::__promote<_Tp>::__type __type;
-      return __builtin_isgreaterequal(__type(__f1), __type(__f2));
-    }
+    constexpr typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
+                                              double>::__type
+    acosh(_Tp __x)
+    { return __builtin_acosh(__x); }
+
+  constexpr float
+  asinh(float __x)
+  { return __builtin_asinhf(__x); }
+
+  constexpr long double
+  asinh(long double __x)
+  { return __builtin_asinhl(__x); }
 
   template<typename _Tp>
-    inline typename __gnu_cxx::__enable_if<__is_arithmetic<_Tp>::__value,
-        int>::__type
-    isless(_Tp __f1, _Tp __f2)
-    {
-      typedef typename __gnu_cxx::__promote<_Tp>::__type __type;
-      return __builtin_isless(__type(__f1), __type(__f2));
-    }
+    constexpr typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
+                                              double>::__type
+    asinh(_Tp __x)
+    { return __builtin_asinh(__x); }
+
+  constexpr float
+  atanh(float __x)
+  { return __builtin_atanhf(__x); }
+
+  constexpr long double
+  atanh(long double __x)
+  { return __builtin_atanhl(__x); }
 
   template<typename _Tp>
-    inline typename __gnu_cxx::__enable_if<__is_arithmetic<_Tp>::__value,
-        int>::__type
-    islessequal(_Tp __f1, _Tp __f2)
-    {
-      typedef typename __gnu_cxx::__promote<_Tp>::__type __type;
-      return __builtin_islessequal(__type(__f1), __type(__f2));
-    }
+    constexpr typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
+                                              double>::__type
+    atanh(_Tp __x)
+    { return __builtin_atanh(__x); }
+
+  constexpr float
+  cbrt(float __x)
+  { return __builtin_cbrtf(__x); }
+
+  constexpr long double
+  cbrt(long double __x)
+  { return __builtin_cbrtl(__x); }
 
   template<typename _Tp>
-    inline typename __gnu_cxx::__enable_if<__is_arithmetic<_Tp>::__value,
-        int>::__type
-    islessgreater(_Tp __f1, _Tp __f2)
+    constexpr typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
+                                              double>::__type
+    cbrt(_Tp __x)
+    { return __builtin_cbrt(__x); }
+
+  constexpr float
+  copysign(float __x, float __y)
+  { return __builtin_copysignf(__x, __y); }
+
+  constexpr long double
+  copysign(long double __x, long double __y)
+  { return __builtin_copysignl(__x, __y); }
+
+  template<typename _Tp, typename _Up>
+    constexpr typename __gnu_cxx::__promote_2<_Tp, _Up>::__type
+    copysign(_Tp __x, _Up __y)
     {
-      typedef typename __gnu_cxx::__promote<_Tp>::__type __type;
-      return __builtin_islessgreater(__type(__f1), __type(__f2));
+      typedef typename __gnu_cxx::__promote_2<_Tp, _Up>::__type __type;
+      return copysign(__type(__x), __type(__y));
     }
+
+  constexpr float
+  erf(float __x)
+  { return __builtin_erff(__x); }
+
+  constexpr long double
+  erf(long double __x)
+  { return __builtin_erfl(__x); }
 
   template<typename _Tp>
-    inline typename __gnu_cxx::__enable_if<__is_arithmetic<_Tp>::__value,
-        int>::__type
-    isunordered(_Tp __f1, _Tp __f2)
+    constexpr typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
+                                              double>::__type
+    erf(_Tp __x)
+    { return __builtin_erf(__x); }
+
+  constexpr float
+  erfc(float __x)
+  { return __builtin_erfcf(__x); }
+
+  constexpr long double
+  erfc(long double __x)
+  { return __builtin_erfcl(__x); }
+
+  template<typename _Tp>
+    constexpr typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
+                                              double>::__type
+    erfc(_Tp __x)
+    { return __builtin_erfc(__x); }
+
+  constexpr float
+  exp2(float __x)
+  { return __builtin_exp2f(__x); }
+
+  constexpr long double
+  exp2(long double __x)
+  { return __builtin_exp2l(__x); }
+
+  template<typename _Tp>
+    constexpr typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
+                                              double>::__type
+    exp2(_Tp __x)
+    { return __builtin_exp2(__x); }
+
+  constexpr float
+  expm1(float __x)
+  { return __builtin_expm1f(__x); }
+
+  constexpr long double
+  expm1(long double __x)
+  { return __builtin_expm1l(__x); }
+
+  template<typename _Tp>
+    constexpr typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
+                                              double>::__type
+    expm1(_Tp __x)
+    { return __builtin_expm1(__x); }
+
+  constexpr float
+  fdim(float __x, float __y)
+  { return __builtin_fdimf(__x, __y); }
+
+  constexpr long double
+  fdim(long double __x, long double __y)
+  { return __builtin_fdiml(__x, __y); }
+
+  template<typename _Tp, typename _Up>
+    constexpr typename __gnu_cxx::__promote_2<_Tp, _Up>::__type
+    fdim(_Tp __x, _Up __y)
     {
-      typedef typename __gnu_cxx::__promote<_Tp>::__type __type;
-      return __builtin_isunordered(__type(__f1), __type(__f2));
+      typedef typename __gnu_cxx::__promote_2<_Tp, _Up>::__type __type;
+      return fdim(__type(__x), __type(__y));
     }
 
+  constexpr float
+  fma(float __x, float __y, float __z)
+  { return __builtin_fmaf(__x, __y, __z); }
 
+  constexpr long double
+  fma(long double __x, long double __y, long double __z)
+  { return __builtin_fmal(__x, __y, __z); }
+
+  template<typename _Tp, typename _Up, typename _Vp>
+    constexpr typename __gnu_cxx::__promote_3<_Tp, _Up, _Vp>::__type
+    fma(_Tp __x, _Up __y, _Vp __z)
+    {
+      typedef typename __gnu_cxx::__promote_3<_Tp, _Up, _Vp>::__type __type;
+      return fma(__type(__x), __type(__y), __type(__z));
+    }
+
+  constexpr float
+  fmax(float __x, float __y)
+  { return __builtin_fmaxf(__x, __y); }
+
+  constexpr long double
+  fmax(long double __x, long double __y)
+  { return __builtin_fmaxl(__x, __y); }
+
+  template<typename _Tp, typename _Up>
+    constexpr typename __gnu_cxx::__promote_2<_Tp, _Up>::__type
+    fmax(_Tp __x, _Up __y)
+    {
+      typedef typename __gnu_cxx::__promote_2<_Tp, _Up>::__type __type;
+      return fmax(__type(__x), __type(__y));
+    }
+
+  constexpr float
+  fmin(float __x, float __y)
+  { return __builtin_fminf(__x, __y); }
+
+  constexpr long double
+  fmin(long double __x, long double __y)
+  { return __builtin_fminl(__x, __y); }
+
+  template<typename _Tp, typename _Up>
+    constexpr typename __gnu_cxx::__promote_2<_Tp, _Up>::__type
+    fmin(_Tp __x, _Up __y)
+    {
+      typedef typename __gnu_cxx::__promote_2<_Tp, _Up>::__type __type;
+      return fmin(__type(__x), __type(__y));
+    }
+
+  constexpr float
+  hypot(float __x, float __y)
+  { return __builtin_hypotf(__x, __y); }
+
+  constexpr long double
+  hypot(long double __x, long double __y)
+  { return __builtin_hypotl(__x, __y); }
+
+  template<typename _Tp, typename _Up>
+    constexpr typename __gnu_cxx::__promote_2<_Tp, _Up>::__type
+    hypot(_Tp __x, _Up __y)
+    {
+      typedef typename __gnu_cxx::__promote_2<_Tp, _Up>::__type __type;
+      return hypot(__type(__x), __type(__y));
+    }
+
+  constexpr int
+  ilogb(float __x)
+  { return __builtin_ilogbf(__x); }
+
+  constexpr int
+  ilogb(long double __x)
+  { return __builtin_ilogbl(__x); }
+
+  template<typename _Tp>
+    constexpr
+    typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
+                                    int>::__type
+    ilogb(_Tp __x)
+    { return __builtin_ilogb(__x); }
+
+  constexpr float
+  lgamma(float __x)
+  { return __builtin_lgammaf(__x); }
+
+  constexpr long double
+  lgamma(long double __x)
+  { return __builtin_lgammal(__x); }
+
+  template<typename _Tp>
+    constexpr typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
+                                              double>::__type
+    lgamma(_Tp __x)
+    { return __builtin_lgamma(__x); }
+
+  constexpr long long
+  llrint(float __x)
+  { return __builtin_llrintf(__x); }
+
+  constexpr long long
+  llrint(long double __x)
+  { return __builtin_llrintl(__x); }
+
+  template<typename _Tp>
+    constexpr typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
+                                              long long>::__type
+    llrint(_Tp __x)
+    { return __builtin_llrint(__x); }
+
+  constexpr long long
+  llround(float __x)
+  { return __builtin_llroundf(__x); }
+
+  constexpr long long
+  llround(long double __x)
+  { return __builtin_llroundl(__x); }
+
+  template<typename _Tp>
+    constexpr typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
+                                              long long>::__type
+    llround(_Tp __x)
+    { return __builtin_llround(__x); }
+
+  constexpr float
+  log1p(float __x)
+  { return __builtin_log1pf(__x); }
+
+  constexpr long double
+  log1p(long double __x)
+  { return __builtin_log1pl(__x); }
+
+  template<typename _Tp>
+    constexpr typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
+                                              double>::__type
+    log1p(_Tp __x)
+    { return __builtin_log1p(__x); }
+
+
+  constexpr float
+  log2(float __x)
+  { return __builtin_log2f(__x); }
+
+  constexpr long double
+  log2(long double __x)
+  { return __builtin_log2l(__x); }
+
+  template<typename _Tp>
+    constexpr typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
+                                              double>::__type
+    log2(_Tp __x)
+    { return __builtin_log2(__x); }
+
+  constexpr float
+  logb(float __x)
+  { return __builtin_logbf(__x); }
+
+  constexpr long double
+  logb(long double __x)
+  { return __builtin_logbl(__x); }
+
+  template<typename _Tp>
+    constexpr typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
+                                              double>::__type
+    logb(_Tp __x)
+    { return __builtin_logb(__x); }
+
+  constexpr long
+  lrint(float __x)
+  { return __builtin_lrintf(__x); }
+
+  constexpr long
+  lrint(long double __x)
+  { return __builtin_lrintl(__x); }
+
+  template<typename _Tp>
+    constexpr typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
+                                              long>::__type
+    lrint(_Tp __x)
+    { return __builtin_lrint(__x); }
+
+  constexpr long
+  lround(float __x)
+  { return __builtin_lroundf(__x); }
+
+  constexpr long
+  lround(long double __x)
+  { return __builtin_lroundl(__x); }
+
+  template<typename _Tp>
+    constexpr typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
+                                              long>::__type
+    lround(_Tp __x)
+    { return __builtin_lround(__x); }
+
+  constexpr float
+  nearbyint(float __x)
+  { return __builtin_nearbyintf(__x); }
+
+  constexpr long double
+  nearbyint(long double __x)
+  { return __builtin_nearbyintl(__x); }
+
+  template<typename _Tp>
+    constexpr typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
+                                              double>::__type
+    nearbyint(_Tp __x)
+    { return __builtin_nearbyint(__x); }
+
+  constexpr float
+  nextafter(float __x, float __y)
+  { return __builtin_nextafterf(__x, __y); }
+
+  constexpr long double
+  nextafter(long double __x, long double __y)
+  { return __builtin_nextafterl(__x, __y); }
+
+  template<typename _Tp, typename _Up>
+    constexpr typename __gnu_cxx::__promote_2<_Tp, _Up>::__type
+    nextafter(_Tp __x, _Up __y)
+    {
+      typedef typename __gnu_cxx::__promote_2<_Tp, _Up>::__type __type;
+      return nextafter(__type(__x), __type(__y));
+    }
+
+  constexpr float
+  nexttoward(float __x, long double __y)
+  { return __builtin_nexttowardf(__x, __y); }
+
+  constexpr long double
+  nexttoward(long double __x, long double __y)
+  { return __builtin_nexttowardl(__x, __y); }
+
+  template<typename _Tp>
+    constexpr typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
+                                              double>::__type
+    nexttoward(_Tp __x, long double __y)
+    { return __builtin_nexttoward(__x, __y); }
+
+  constexpr float
+  remainder(float __x, float __y)
+  { return __builtin_remainderf(__x, __y); }
+
+  constexpr long double
+  remainder(long double __x, long double __y)
+  { return __builtin_remainderl(__x, __y); }
+
+  template<typename _Tp, typename _Up>
+    constexpr typename __gnu_cxx::__promote_2<_Tp, _Up>::__type
+    remainder(_Tp __x, _Up __y)
+    {
+      typedef typename __gnu_cxx::__promote_2<_Tp, _Up>::__type __type;
+      return remainder(__type(__x), __type(__y));
+    }
+
+  inline float
+  remquo(float __x, float __y, int* __pquo)
+  { return __builtin_remquof(__x, __y, __pquo); }
+
+  inline long double
+  remquo(long double __x, long double __y, int* __pquo)
+  { return __builtin_remquol(__x, __y, __pquo); }
+
+  template<typename _Tp, typename _Up>
+    inline typename __gnu_cxx::__promote_2<_Tp, _Up>::__type
+    remquo(_Tp __x, _Up __y, int* __pquo)
+    {
+      typedef typename __gnu_cxx::__promote_2<_Tp, _Up>::__type __type;
+      return remquo(__type(__x), __type(__y), __pquo);
+    }
+
+  constexpr float
+  rint(float __x)
+  { return __builtin_rintf(__x); }
+
+  constexpr long double
+  rint(long double __x)
+  { return __builtin_rintl(__x); }
+
+  template<typename _Tp>
+    constexpr typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
+                                              double>::__type
+    rint(_Tp __x)
+    { return __builtin_rint(__x); }
+
+  constexpr float
+  round(float __x)
+  { return __builtin_roundf(__x); }
+
+  constexpr long double
+  round(long double __x)
+  { return __builtin_roundl(__x); }
+
+  template<typename _Tp>
+    constexpr typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
+                                              double>::__type
+    round(_Tp __x)
+    { return __builtin_round(__x); }
+
+  constexpr float
+  scalbln(float __x, long __ex)
+  { return __builtin_scalblnf(__x, __ex); }
+
+  constexpr long double
+  scalbln(long double __x, long __ex)
+  { return __builtin_scalblnl(__x, __ex); }
+
+  template<typename _Tp>
+    constexpr typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
+                                              double>::__type
+    scalbln(_Tp __x, long __ex)
+    { return __builtin_scalbln(__x, __ex); }
+
+  constexpr float
+  scalbn(float __x, int __ex)
+  { return __builtin_scalbnf(__x, __ex); }
+
+  constexpr long double
+  scalbn(long double __x, int __ex)
+  { return __builtin_scalbnl(__x, __ex); }
+
+  template<typename _Tp>
+    constexpr typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
+                                              double>::__type
+    scalbn(_Tp __x, int __ex)
+    { return __builtin_scalbn(__x, __ex); }
+
+  constexpr float
+  tgamma(float __x)
+  { return __builtin_tgammaf(__x); }
+
+  constexpr long double
+  tgamma(long double __x)
+  { return __builtin_tgammal(__x); }
+
+  template<typename _Tp>
+    constexpr typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
+                                              double>::__type
+    tgamma(_Tp __x)
+    { return __builtin_tgamma(__x); }
+
+  constexpr float
+  trunc(float __x)
+  { return __builtin_truncf(__x); }
+
+  constexpr long double
+  trunc(long double __x)
+  { return __builtin_truncl(__x); }
+
+  template<typename _Tp>
+    constexpr typename __gnu_cxx::__enable_if<__is_integer<_Tp>::__value,
+                                              double>::__type
+    trunc(_Tp __x)
+    { return __builtin_trunc(__x); }
 
 
 }
@@ -8595,7 +9694,7 @@ namespace std __attribute__ ((__visibility__ ("default")))
   using ::atexit;
 
 
-
+  using ::at_quick_exit;
 
 
   using ::atof;
@@ -8618,7 +9717,7 @@ namespace std __attribute__ ((__visibility__ ("default")))
   using ::qsort;
 
 
-
+  using ::quick_exit;
 
 
   using ::rand;
@@ -8647,8 +9746,8 @@ namespace std __attribute__ ((__visibility__ ("default")))
 
 
 
-  inline __int128
-  abs(__int128 __x) { return __x >= 0 ? __x : -__x; }
+
+
 
 
 
@@ -8788,9 +9887,16 @@ extern __attribute__((host)) __attribute__((device)) __attribute__((cudart_built
 extern __attribute__((host)) __attribute__((device)) __attribute__((cudart_builtin)) float floor(float);
 extern __attribute__((host)) __attribute__((device)) __attribute__((cudart_builtin)) float sqrt(float);
 extern __attribute__((host)) __attribute__((device)) __attribute__((cudart_builtin)) float pow(float, float);
-# 9483 "/usr/tce/packages/cuda/cuda-9.2.148/nvidia/bin/../targets/ppc64le-linux/include/crt/math_functions.h"
-extern __attribute__((host)) __attribute__((device)) __attribute__((cudart_builtin)) float pow(float, int);
-extern __attribute__((host)) __attribute__((device)) __attribute__((cudart_builtin)) double pow(double, int);
+
+
+
+
+template<typename _Tp, typename _Up>
+extern __attribute__((host)) __attribute__((device)) __attribute__((cudart_builtin))
+typename __gnu_cxx::__promote_2<_Tp, _Up>::__type pow(_Tp, _Up);
+
+
+
 
 
 
@@ -15595,17 +16701,44 @@ static __inline__ __attribute__((host)) cudaError_t cudaBindSurfaceToArray(
 # 2047 "/usr/tce/packages/cuda/cuda-9.2.148/nvidia/bin/../targets/ppc64le-linux/include/cuda_runtime.h"
 #pragma GCC diagnostic pop
 # 1 "<command-line>" 2
-# 1 "comp.cu"
-
-# 1 "comp.h" 1
+# 1 "/usr/WS1/laguna/fpchecker/FPChecker/tests/parser/static/test_match_device_host_spaces/dot_product.cu"
 
 
-__attribute__((device)) void comp();
-__attribute__((host)) void comp_host();
-# 3 "comp.cu" 2
 
-__attribute__((device)) double calc() {
+__attribute__((device)) void mul(double a, double b, double *res)
+{
+  *res = a * b;
 
-  return 3.4*4.5;
+  *res = (*res)-(*res) / (*res)-(*res);
+}
 
+__attribute__((global)) void dot_prod(double *x, double *y, int size)
+{
+  double d;
+  for (int i=0; i < size; ++i)
+  {
+    double tmp;
+    mul(x[i], y[i], &tmp);
+    d += tmp;
+  }
+
+  int tid = blockIdx.x * blockDim.x + threadIdx.x;
+  if (tid == 0) {
+    printf("dot: %f\n", d);
+  }
+}
+# 34 "/usr/WS1/laguna/fpchecker/FPChecker/tests/parser/static/test_match_device_host_spaces/dot_product.cu"
+    __attribute__((device)) __attribute__((host)) void comp(double *x, int s) {
+  for (int i=0; i < s; ++i) {
+    x[i] = x[i] + 3.1;
+  }
+}
+
+  __attribute__((device))
+
+
+ __attribute__((host)) void comp2(double *x, int s) {
+  for (int i=0; i < s; ++i) {
+    x[i] = x[i] + 3.1;
+  }
 }

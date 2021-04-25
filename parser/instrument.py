@@ -4,10 +4,11 @@ import tempfile
 import sys
 from collections import defaultdict
 from tokenizer import Tokenizer
-from match import Match
+from match import Match, FunctionType
 from match import FunctionType
 from deprocess import Deprocess
 from fpc_logging import verbose, logMessage
+from config_reader import Config
 
 ## Assumes we already pre-processed the file
 class Instrument:
@@ -20,10 +21,15 @@ class Instrument:
     self.allTokens = []
     self.linesOfAssigments = defaultdict(list)
     self.transformedLines = {}
+    self.PRE_HOST         = '_FPC_CHECK_HD_'
     self.PRE_DEVICE       = '_FPC_CHECK_D_'
     self.PRE_HOST_DEVICE  = '_FPC_CHECK_HD_'
     self.functionTypeMap = {} # key: token, value: function type
     self.instrumentedFileName = None
+    if 'FPC_CONF' in os.environ:
+      self.conf = Config(os.environ['FPC_CONF'])
+    else:
+      self.conf = Config('fpchecker.ini')
 
   def __del__(self):
     if self.deprocessedFile:
@@ -36,16 +42,32 @@ class Instrument:
     dp = Deprocess(self.preFileName, tmpFname)
     if verbose(): print('Running de-processor...')
     dp.run()
+    if verbose(): print('... de-preprocessor done.')
     #os.close(tmpFd)
     #if 'FPC_LEAVE_TEMP_FILES' not in os.environ:
     #  os.remove(tmpFname)
 
+  # Identify all device or host-device code regions
   def findDeviceDeclarations(self):
     t = Tokenizer(self.deprocessedFile)
     for token in t.tokenize():
       self.allTokens.append(token)
     m = Match()
     self.deviceDclLines = m.match_device_function(self.allTokens)
+
+  ## This simply uses the entire file as a big code region
+  ## Intended to be used to instrument the entire file
+  def findAllDeclarations(self):
+    t = Tokenizer(self.deprocessedFile)
+    for token in t.tokenize():
+      self.allTokens.append(token)
+    #m = Match()
+    startLine = self.allTokens[0].lineNumber()
+    endLine = self.allTokens[-1:][0].lineNumber()
+    startIndex = 0
+    endIndex = len(self.allTokens) - 1
+    func_type = FunctionType.host 
+    self.deviceDclLines  = [(startLine, endLine, startIndex, endIndex, func_type)]
 
   ## Finds ranges of lines that contain assigments
   def findAssigments(self):
@@ -83,6 +105,7 @@ class Instrument:
         if self.functionTypeMap[i] == FunctionType.device: pre = self.PRE_DEVICE
         elif self.functionTypeMap[i] == FunctionType.device_host: pre = self.PRE_HOST_DEVICE
         elif self.functionTypeMap[i] == FunctionType.host_device: pre = self.PRE_HOST_DEVICE
+        elif self.functionTypeMap[i] == FunctionType.host: pre = self.PRE_HOST
         newLine += pre + '('+str(self.allTokens[i])
       elif i in end_tokens:
         # Add line number
@@ -118,6 +141,9 @@ class Instrument:
         if verbose(): print('[New Line]: ==>', newLine)
         self.transformedLines[currentLine] = newLine
 
+  def is_omitted_line(self, file_name: str, line: int):
+    return self.conf.is_line_omitted(file_name, line)
+
   def instrument(self):
     fileName, ext = os.path.splitext(self.sourceFileName)
     self.instrumentedFileName = fileName+'_inst'+ext
@@ -127,9 +153,12 @@ class Instrument:
         for line in fd:
           l += 1
           if l in self.transformedLines.keys():
-            newLine = self.transformedLines[l]
-            if verbose(): print(newLine[:-1])
-            outFile.write(newLine[:-1]+'\n')
+            if not self.is_omitted_line(self.sourceFileName, l):
+              newLine = self.transformedLines[l]
+              if verbose(): print(newLine[:-1])
+              outFile.write(newLine[:-1]+'\n')
+            else:
+              outFile.write(line[:-1]+'\n')
           else:
             if verbose(): print(line[:-1])
             outFile.write(line[:-1]+'\n')

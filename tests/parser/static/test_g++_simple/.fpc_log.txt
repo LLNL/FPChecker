@@ -1,0 +1,18 @@
+Failed: /usr/workspace/wsa/laguna/fpchecker/FPChecker/bin/g++-fpc -c prog_1.cpp
+'list' object has no attribute 'lineNumber'
+Failed: /usr/workspace/wsa/laguna/fpchecker/FPChecker/bin/g++-fpc -c prog_1.cpp
+local variable 'pre' referenced before assignment
+Failed: /usr/workspace/wsa/laguna/fpchecker/FPChecker/bin/g++-fpc -c prog_1.cpp
+Command 'g++ -include /usr/workspace/wsa/laguna/fpchecker/FPChecker/bin/../src/Runtime_parser.h -c prog_1_inst.cpp -o prog_1.o' returned non-zero exit status 1.
+Could not compile instrumented file
+Could not compile instrumented file
+Failed: /usr/workspace/wsa/laguna/fpchecker/FPChecker/bin/g++-fpc -c prog_1.cpp
+Command 'g++ -include /usr/workspace/wsa/laguna/fpchecker/FPChecker/bin/../src/Runtime_g++.h -c prog_1_inst.cpp -o prog_1.o' returned non-zero exit status 1.
+Could not compile instrumented file
+Could not compile instrumented file
+Failed: /usr/workspace/wsa/laguna/fpchecker/FPChecker/bin/g++-fpc -c prog_1.cpp
+Command 'g++ -E -c prog_1.cpp -std=C++11 -o prog_1.cpp.ii' returned non-zero exit status 1.
+Could not execute pre-processor
+Could not execute pre-processor
+Failed: /usr/workspace/wsa/laguna/fpchecker/FPChecker/bin/g++-fpc -c prog_1.cpp -std=C++11
+Instrumented: prog_1_inst.cpp

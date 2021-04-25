@@ -8,7 +8,6 @@ from colors import prGreen, prCyan, prRed
 from instrument import Instrument
 from exceptions import CommandException, CompileException, EmptyFileException
 from fpc_logging import logMessage, verbose
-from config_reader import Config
 
 # --------------------------------------------------------------------------- #
 # --- Installation Paths ---------------------------------------------------- #
@@ -16,8 +15,7 @@ from config_reader import Config
 
 # Main installation path
 FPCHECKER_PATH      = str(pathlib.Path(__file__).parent.absolute())
-FPCHECKER_LIB       = FPCHECKER_PATH+'/../lib/libfpchecker_plugin.so'
-FPCHECKER_RUNTIME   = FPCHECKER_PATH+'/../src/Runtime_parser.h'
+FPCHECKER_RUNTIME   = FPCHECKER_PATH+'/../src/Runtime_g++.h'
 
 #
 # --------------------------------------------------------------------------- #
@@ -25,7 +23,8 @@ FPCHECKER_RUNTIME   = FPCHECKER_PATH+'/../src/Runtime_parser.h'
 # --------------------------------------------------------------------------- #
 
 # File extensions that can have CUDA code
-CUDA_EXTENSION = ['.cu', '.cuda'] + ['.C', '.cc', '.cpp', '.CPP', '.c++', '.cp', '.cxx']
+CPP_EXTENSION = ['.C', '.cc', '.cpp', '.CPP', '.c++', '.cp', '.cxx']
+COMPILER_NAME = 'g++'
 
 # --------------------------------------------------------------------------- #
 # --- Classes --------------------------------------------------------------- #
@@ -41,23 +40,19 @@ class Command:
 
   def executeOriginalCommand(self):
     try:
-      cmd = ['nvcc'] + self.parameters
+      cmd = [COMPILER_NAME] + self.parameters
       if verbose(): print('Executing original command:', cmd)
       subprocess.run(' '.join(cmd), shell=True, check=True)
     except subprocess.CalledProcessError as e:
       prRed(e)
 
   def getOriginalCommand(self):
-    return ' '.join(['nvcc'] + self.parameters[1:])
+    return ' '.join([COMPILER_NAME] + self.parameters[1:])
 
   # It it a compilation command?
   def isCompileCommand(self) -> bool:
     if ('-c' in self.parameters or
-        '--compile' in self.parameters or
-        '-dc' in self.parameters or
-        '--device-c' in self.parameters or
-        '-dw' in self.parameters or
-        '--device-w' in self.parameters):
+        '--compile' in self.parameters):
       return True
     return False
 
@@ -65,11 +60,6 @@ class Command:
   def isLinkCommand(self) -> bool:
     if ('-c' not in self.parameters and 
         '--compile' not in self.parameters and
-        '-dw' not in self.parameters and
-        '--device-w' not in self.parameters and
-        '-cubin' not in self.parameters and
-        '-ptx' not in self.parameters and
-        '-fatbin' not in self.parameters and
         ('-o' in self.parameters or '--output-file' in self.parameters)):
       return True
     return False
@@ -77,15 +67,15 @@ class Command:
   # Get the name of the cuda file to be compiled
   # if the file exists.
   def getCodeFileNameIfExists(self):
-    global CUDA_EXTENSION
+    global CPP_EXTENSION
     fileName = None
     for t in self.parameters:
-      for ext in CUDA_EXTENSION:
+      for ext in CPP_EXTENSION:
         if t.endswith(ext):
           fileName = t
 
     if not fileName:
-      message = 'Could not find source file in nvcc command'
+      message = 'Could not find source file in command'
       logMessage(message)
       raise CommandException(message)
   
@@ -119,7 +109,7 @@ class Command:
       newParams.append('-o')
       newParams.append(self.preprocessedFile)
     
-    new_cmd = ['nvcc', '-E'] + newParams
+    new_cmd = [COMPILER_NAME, '-E'] + newParams
     try:
       if verbose(): prGreen(' '.join(new_cmd)) 
       cmdOutput = subprocess.run(' '.join(new_cmd), shell=True, check=True)
@@ -138,7 +128,8 @@ class Command:
     sourceFileName = self.getCodeFileNameIfExists()
     inst = Instrument(preFileName, sourceFileName)
     inst.deprocess()
-    inst.findDeviceDeclarations()
+    #inst.findDeviceDeclarations()
+    inst.findAllDeclarations()
     if verbose(): print(inst.deviceDclLines)
     inst.findAssigments()
     inst.produceInstrumentedLines()
@@ -148,7 +139,7 @@ class Command:
   def compileInstrumentedFile(self):
     source = self.getCodeFileNameIfExists()
     # Copy original command
-    new_cmd = ['nvcc', '-include', FPCHECKER_RUNTIME] + self.parameters
+    new_cmd = [COMPILER_NAME, '-include', FPCHECKER_RUNTIME] + self.parameters
     # Replace file by instrumented file
     for i in range(len(new_cmd)):
       p = new_cmd[i]

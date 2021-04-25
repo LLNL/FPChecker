@@ -3,6 +3,9 @@
 class FPCheckerException(Exception):
   pass
 
+class TokenException(FPCheckerException):
+  pass
+
 class MatchException(FPCheckerException):
   pass
 

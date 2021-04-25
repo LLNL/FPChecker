@@ -3,7 +3,7 @@ import sys
 import os
 import re
 import tempfile
-from exceptions import MatchException, EmptyFileException
+from exceptions import MatchException, EmptyFileException, TokenException
 from fpc_logging import verbose, logMessage
 
 # Lookahead tokens: 1
@@ -195,13 +195,13 @@ class SymbolToken(Token):
     if (t not in CPP_SYMBOL_L1
       and t not in CPP_SYMBOL_L2
       and t not in CPP_SYMBOL_L3):
-      raise SystemExit('Error: unknown symbol token')
+      raise TokenException('Error: unknown symbol token')
     super().__init__(t, l)
 
 class KeywordToken(Token):
   def __init__(self, t: str, l: int):
     if t not in CPP_KEYWORD:
-      raise SystemExit('Error: unknown keyword token')
+      raise TokenException('Error: unknown keyword token')
     super().__init__(t, l)
 
 class WhiteSpaceToken(Token):
@@ -210,7 +210,7 @@ class WhiteSpaceToken(Token):
       t[0]!='\t' and 
       t[0]!='\n' and
       t[0]!='\r'):
-      raise SystemExit('Error: not a white space token')
+      raise TokenException('Error: not a white space token')
     super().__init__(t, l)
 
 class IdentifierToken(Token):
@@ -218,19 +218,20 @@ class IdentifierToken(Token):
     idMatch = identifierPattern.match(t)
     numMatch = numberPattern.match(t)
     if idMatch == None and numMatch == None:
-      raise SystemExit('Error: not an identifier token: ' + t)
+      raise TokenException('Error: not an identifier token: ' + t)
     super().__init__(t, l)
 
 class StringToken(Token):
   def __init__(self, t: str, l: int):
-    if t[0] != '"' and t[-1:][0] != '"':
-      raise SystemExit('Error: not a string token')
+    if t[0] != '"' or t[-1:][0] != '"':
+      print('--->', t)
+      raise TokenException('Error: not a string token')
     super().__init__(t, l)
 
 class CharToken(Token):
   def __init__(self, t: str, l: int):
-    if t[0] != "'" and t[-1:][0] != "'":
-      raise SystemExit('Error: not a char token')
+    if t[0] != "'" or t[-1:][0] != "'":
+      raise TokenException('Error: not a char token')
     super().__init__(t, l)
 
 #--------------------------------------------------------------------#
@@ -343,10 +344,17 @@ class Tokenizer:
     return None 
 
   ## Returns either a srtring token or None
+#  def match_string(self, buff: str):
+#    if buff[0] == '"' and buff[-1:][0] == '"':
+#      self.consume(len(buff))
+#      return StringToken(buff, self.current_line)
+#    return None
   def match_string(self, buff: str):
-    if buff[0] == '"' and buff[-1:][0] == '"':
-      self.consume(len(buff))
-      return StringToken(buff, self.current_line)
+    if buff[0] == '"':
+      for i in range(1, len(buff)):
+        if buff[i] == '"':
+          self.consume(i+1)
+          return StringToken(buff[0:i+1], self.current_line)
     return None
 
   ## Returns either a srtring token or None
@@ -426,7 +434,9 @@ class Tokenizer:
 if __name__ == '__main__':
   fileName = sys.argv[1]
   l = Tokenizer(fileName)
-  for token in l.tokenize():
-    sys.stdout.write('\n'+str(type(token))+':')
-    sys.stdout.write(str(token))
-
+  try:
+    for token in l.tokenize():
+      sys.stdout.write('\n'+str(type(token))+':')
+      sys.stdout.write(str(token))
+  except Exception as e:
+    print(e)
