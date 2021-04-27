@@ -17,3 +17,6 @@ class CompileException(FPCheckerException):
 
 class EmptyFileException(FPCheckerException):
   pass
+
+class DepreprocessorException(FPCheckerException):
+  pass

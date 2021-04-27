@@ -1,6 +1,7 @@
 
 import os
 import sys
+from exceptions import DepreprocessorException
 
 class Deprocess():
   ''' Remove content added by preprocessor. '''
@@ -23,7 +24,7 @@ class Deprocess():
           ## Get the original name of the file
           if c==1:
             if not line.startswith('# '):
-              raise SystemExit('Error: file has not been pre-processed: '+self.fileName)
+              raise DepreprocessorException('Error: file has not been pre-processed: '+self.fileName)
             else:
               sourceFile = line.split()[2]
 

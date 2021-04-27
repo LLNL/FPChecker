@@ -65,24 +65,60 @@ install(FILES "src/Runtime.h" "src/Runtime_plugin.h" "src/Runtime_parser.h"
         PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_WRITE GROUP_EXECUTE WORLD_READ
 )
 
+#install(FILES
+#        "tracing_tool/colors.py"
+#        "tracing_tool/expressions_parser.py"
+#        "tracing_tool/fpchecker.py"
+#        "tracing_tool/nvcc_options_table.py"
+#        "tracing_tool/nvcc_parser.py"
+#        "tracing_tool/strace_module.py"
+#        "tracing_tool/mpi_environment.py"
+#        "tracing_tool/debug_traces.py"
+#        DESTINATION bin
+#        PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_WRITE GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
+#)
+
 install(FILES
-        "tracing_tool/colors.py"
-        "tracing_tool/expressions_parser.py"
-        "tracing_tool/fpchecker.py"
-        "tracing_tool/nvcc_options_table.py"
-        "tracing_tool/nvcc_parser.py"
-        "tracing_tool/strace_module.py"
-        "tracing_tool/mpi_environment.py"
-        "tracing_tool/debug_traces.py"
-        DESTINATION bin
+        "parser/colors.py"
+        "parser/config_reader.py"
+        "parser/deprocess.py"
+        "parser/exceptions.py"
+        "parser/fpc-debug.py"
+        "parser/fpc_logging.py"
+        "parser/g++_fpchecker.py"
+        "parser/instrument.py"
+        "parser/match.py"
+        "parser/nvcc_fpchecker.py"
+        "parser/tokenizer.py"
+        DESTINATION front-end
         PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_WRITE GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
 )
 
 # Install link for fpchecker tracing tool
+#install(CODE "execute_process( \
+#        COMMAND ${CMAKE_COMMAND} -E create_symlink \
+#        ${CMAKE_INSTALL_PREFIX}/front-end/fpchecker.py ${CMAKE_INSTALL_PREFIX}/bin/fpchecker )"
+#        COMMENT "Creating link: fpchecker -> fpchecker.py"
+#)
+
+install(DIRECTORY
+        DESTINATION ${CMAKE_INSTALL_PREFIX}/bin
+        PATTERN "*"
+        PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_WRITE GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
+)
+
+# Install link for fpchecker wrappers
 install(CODE "execute_process( \
         COMMAND ${CMAKE_COMMAND} -E create_symlink \
-        ${CMAKE_INSTALL_PREFIX}/bin/fpchecker.py ${CMAKE_INSTALL_PREFIX}/bin/fpchecker )"
-        COMMENT "Creating link: fpchecker -> fpchecker.py"
+        ${CMAKE_INSTALL_PREFIX}/front-end/nvcc_fpchecker.py ${CMAKE_INSTALL_PREFIX}/bin/nvcc-fpc )"
+        COMMENT "Creating link: nvcc-fpc -> nvcc_fpchecker.py"
+)
+
+# Install link for fpchecker reports tool
+install(CODE "execute_process( \
+        COMMAND ${CMAKE_COMMAND} -E create_symlink \
+        ${CMAKE_INSTALL_PREFIX}/front-end/fpc-debug.py ${CMAKE_INSTALL_PREFIX}/bin/fpc-report )"
+        COMMENT "Creating link: fpc-report -> fpc-debug.py"
 )
 
 # Tests

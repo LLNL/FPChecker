@@ -144,23 +144,50 @@ class Match:
   ## Match anything until we see a particular token, e.g., ';',
   ## or until we see an inbalanaced parethesis ')'.
   ## If we see an assigment operator (=) we return False
+  ## If we see a curly bracket ({) we return False
   def _match_anything_until_or_imbalanced_parenthesis(self, buff, untilStr):
-    open_parenthesis = 0
+    open_parenthesis = 0      # (
+    open_square_brackets = 0  # [
+    open_less_than = 0        # <
     equal_sign = 0
+    found_match = False
     for i in range(len(buff)):
-      if str(buff[i])=='(':
-        open_parenthesis += 1
+      if str(buff[i])=='<':   open_less_than += 1
+      elif str(buff[i])=='>': open_less_than -= 1
+      elif str(buff[i])=='[': open_square_brackets += 1
+      elif str(buff[i])==']': open_square_brackets -= 1
+      elif str(buff[i])=='(': open_parenthesis += 1
       elif str(buff[i])==')':
         open_parenthesis -= 1
         if open_parenthesis == -1: # found imbalanced parenthesis
-          return i+1
+          #return i+1
+          found_match = True
+          break
       elif str(buff[i])=='=':
         equal_sign += 1
         if equal_sign > 1:
           return False
       elif str(buff[i])==untilStr:
         if open_parenthesis == 0:
+          found_match = True
+          break
+          #return i+1
+      elif str(buff[i])=='{' or str(buff[i])=='}': return False
+      elif str(buff[i])==',':
+        if (open_parenthesis==0 and 
+            open_square_brackets==0 and
+            open_less_than==0):
+          found_match = True
+          break
+          #return i+1
+
+    if found_match:
+      # Check there is at least one arithmetic operator
+      for k in range(0, i+1):
+        t = buff[k]
+        if str(t)=='+' or str(t)=='-' or str(t)=='*' or str(t)=='/':
           return i+1
+
     return False
 
   ## Get next non-white-space token
@@ -264,10 +291,8 @@ class Match:
   def match_assigment(self, tokensRange):
     startIndexes = self._find_indexes_with_assignmets(tokensRange)
     ret = []
-    #unallowedChars = set(['{', '}'])
     for i in startIndexes:
-      ## Match until ; except if we see a body {}
-      #m1 = self._match_anything_until_except(tokensRange[i:], ';', unallowedChars)
+      ## Match until ;
       m1 = self._match_anything_until_or_imbalanced_parenthesis(tokensRange[i:], ';')
       if m1:
         left = self._nextNonEmpty(tokensRange[i+1:])

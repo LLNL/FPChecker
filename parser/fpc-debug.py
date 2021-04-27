@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import argparse
 import sys
 import os
 
@@ -18,26 +19,47 @@ def removeFiles(fileList: list):
     print('Removing:', f)
     os.remove(f)
 
-def report(fileList: list):
-  inst = 0
+def getCommandsStatus(fileList: list):
+  proc = 0
   failed = 0
+  failed_list = []
   for f in fileList:
     with open(f, 'r') as fd:
       for line in fd:
         if line.startswith('Instrumented'):
-          inst += 1
+          proc += 1
         elif line.startswith('Failed:'):
           failed += 1
+          failed_list.append(line.split(':')[1].strip())
 
+  return proc, failed, failed_list
+
+def report(proc: int, failed: int):
   print('===== FPChcecker Report =====')
-  print('Instrumented files:', inst)
+  print('Processed files:', proc)
   print('Failed:', failed)
 
+def reportFailed(failed_list: list):
+    print('===== FPChcecker Report =====')
+    print('The following commnads failed:\n')
+    for l in failed_list:
+      print(l)
+
 if __name__ == '__main__':
+  parser = argparse.ArgumentParser(description='FPChecker reporting tool')
+  parser.add_argument('-r', '--remove', action='store_true', help='Remove log files.')
+  parser.add_argument('-f', '--failed', action='store_true', help='Show commands that failed.')
+  args = parser.parse_args()
+
   fileList = getLogFiles()
 
   if len(sys.argv) > 1:
-    if sys.argv[1] == '-r':
+    if args.remove:
       removeFiles(fileList)
+    if args.failed:
+      _, _, failed_list = getCommandsStatus(fileList)
+      reportFailed(failed_list)      
+
   else:
-    report(fileList)
+    proc, failed, _ = getCommandsStatus(fileList)
+    report(proc, failed)

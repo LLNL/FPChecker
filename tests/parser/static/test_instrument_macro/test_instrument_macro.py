@@ -36,6 +36,50 @@ __device__ void comp() {
 }
 """
 
+prog_2 = """
+#define MY_MACRO(x1, x2, x3, x4, x5) (x1+x2+x3+x4)
+
+__device__ void compute(double *y, double a1, double a2, double a3, double a4, double a5) {
+  y[0] = MY_MACRO(a1,
+        a2,
+        a3,
+        a4,
+        a5);
+}
+"""
+
+prog_3 = """
+
+__device__ void comp() {
+  double cross1, cross2, cross0;
+  struct facet_coords0 {
+    double x,y,z;
+  };
+  struct facet_coords1 {
+    double x,y,z;
+  };
+  struct facet_coords2 {
+    double x,y,z;
+  };
+  struct intersection_pt {
+    double x,y,z;
+  };
+
+#define AB_CROSS_AC(ax,ay,bx,by,cx,cy) ( (bx-ax)*(cy-ay) - (by-ay)*(cx-ax) )
+
+       cross1 = AB_CROSS_AC(facet_coords0.x, facet_coords0.y,
+                            facet_coords1.x, facet_coords1.y,
+                            intersection_pt.x,  intersection_pt.y);
+       cross2 = AB_CROSS_AC(facet_coords1.x, facet_coords1.y,
+                            facet_coords2.x, facet_coords2.y,
+                            intersection_pt.x,  intersection_pt.y);
+       cross0 = AB_CROSS_AC(facet_coords2.x, facet_coords2.y,
+                            facet_coords0.x, facet_coords0.y,
+                            intersection_pt.x,  intersection_pt.y);
+
+}
+"""
+
 def setup_module(module):
   THIS_DIR = os.path.dirname(os.path.abspath(__file__))
   os.chdir(THIS_DIR)
@@ -92,9 +136,9 @@ def inst_program(prog: str, prog_name: str, num_inst: int):
 
 def test_1():
   os.environ['FPC_VERBOSE'] = '1'
-  #os.environ['FPC_CONF'] = 'config.ini'
-  #assert inst_program(prog_1, 'prog_1', 3)
-  inst_program(prog_1, 'prog_1', 3)
+  #assert inst_program(prog_1, 'prog_1', 2)
+  #assert inst_program(prog_2, 'prog_2', 1)
+  inst_program(prog_3, 'prog_3', 1)
 
 if __name__ == '__main__':
   test_1()

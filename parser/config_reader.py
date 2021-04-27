@@ -25,7 +25,7 @@ class Config:
       x = int(lines_range.split('-')[0])
       y = int(lines_range.split('-')[1])
       self.omitted_lines[file_name].append((x,y))
-      print('In file', file_name, 'omit', lines_range)
+      #print('In file', file_name, 'omit', lines_range)
 
   def is_line_omitted(self, file_name: str, line: int) -> bool:
     if file_name in self.omitted_lines:

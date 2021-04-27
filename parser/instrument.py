@@ -18,7 +18,7 @@ class Instrument:
     self.sourceFileName = srcFile
     self.deprocessedFile = None
     self.deviceDclLines = []
-    self.allTokens = []
+    self.allTokens = [] # contain tokens of de-preprocessed file
     self.linesOfAssigments = defaultdict(list)
     self.transformedLines = {}
     self.PRE_HOST         = '_FPC_CHECK_HD_'
@@ -54,7 +54,7 @@ class Instrument:
       self.allTokens.append(token)
     m = Match()
     self.deviceDclLines = m.match_device_function(self.allTokens)
-
+  
   ## This simply uses the entire file as a big code region
   ## Intended to be used to instrument the entire file
   def findAllDeclarations(self):
@@ -69,6 +69,12 @@ class Instrument:
     func_type = FunctionType.host 
     self.deviceDclLines  = [(startLine, endLine, startIndex, endIndex, func_type)]
 
+  ## Add middle lines, i.e., lines in the middle of begin/end
+  def addMiddleLines(self, begin_line, end_line):
+    for i in range(begin_line, end_line+1):
+      if i != begin_line and i != end_line:
+        self.linesOfAssigments[i].append((0, 'm')) # token index doesn't matter
+
   ## Finds ranges of lines that contain assigments
   def findAssigments(self):
     for l in self.deviceDclLines:
@@ -82,6 +88,7 @@ class Instrument:
         j_line = self.allTokens[j_abs].lineNumber()
         self.linesOfAssigments[i_line].append((i_abs, 'b'))
         self.linesOfAssigments[j_line].append((j_abs, 'e'))
+        self.addMiddleLines(i_line, j_line)
         if verbose(): print('Lines with assigments:', self.linesOfAssigments)
         self.functionTypeMap[i_abs] = f_type
 
@@ -133,6 +140,10 @@ class Instrument:
       token = self.allTokens[index]
       if str(token)=='\n':
         currentLine += 1
+        if currentLine in self.linesOfAssigments.keys():
+          self.transformedLines[currentLine] = '\n'
+          if verbose(): print('[New Line]: ==>', self.transformedLines[currentLine])
+        #currentLine += 1
         continue
 
       if currentLine in self.linesOfAssigments.keys():
