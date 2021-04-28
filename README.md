@@ -19,7 +19,7 @@ FPChecker can also generate **warning reports** for computations that are close 
 ## How to Use FPChecker
 
 FPChecker instruments the CUDA application code. This instrumentation can be executed in one of three ways:
-- **FPChecker front-end version**: this version uses a basic front-end that instruments assignments only (e.g., `x[i] = a + b ...;`) and it has no dependencies on clang/LLVM. While this version is work in progress (see the [liimtations](limitations.md)), it can instrument 99% of HPC codes and catch most errors.
+- **FPChecker front-end version**: this version uses a basic front-end that instruments arithmetic operations (e.g., `x[i] = a + b ...;`) and it has no dependencies on clang/LLVM. While this version is work in progress (see the [liimtations](limitations.md)), it can instrument 99% of HPC codes and catch most errors.
 
 - **Clang front-end version**: this version instruments the application's source code using a clang plugin. After transformations are performed, the code can be compiled with nvcc.
 
