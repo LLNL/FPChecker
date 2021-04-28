@@ -2,31 +2,28 @@
 
 [![Build Status](https://travis-ci.org/LLNL/FPChecker.svg?branch=master)](https://travis-ci.org/LLNL/FPChecker)
 
-**FPChecker** (or Floating-Point Checker) is a framework to detect floating-point exceptions in CUDA. It is designed as a Clang/LLVM extension that instruments CUDA code to catch floating-point exceptions at runtime.
+**FPChecker** (Floating-Point Checker) is a framework to detect floating-point exceptional computations in CUDA. It is designed as a Clang/LLVM extension that instruments CUDA code to catch the result of floating-point exceptions (e.g., NaN and INF) at runtime.
 
 ## Detectable Errors and Warnings
 FPChecker detects floating-point computations that produce:
 - Overflows: +INF and -INF values
 - Underflows: subnormal (or denormalized) values
-- NANs:  coming, for example, from 0.0/0.0
+- NANs:  e.g., from 0.0/0.0
 
 When at least one of the threads in a CUDA grid produces any of the above cases, an error report is generated.
 
-FPChecker also generates **warning reports** for computations that are close to become overflows or underflows, i.e., `x%` from the limits of normal values, where `x` is configurable.
+FPChecker can also generate **warning reports** for computations that are close to become overflows or underflows, i.e., `x%` from the limits of normal values, where `x` is configurable.
 
 # Getting Started
 
 ## How to Use FPChecker
 
-FPChecker instruments the CUDA application code. This instrumentation can be executed via the *clang* frontend, or via the *llvm* intermediate representation. We call these two ways of using FPChecker the **Clang version** and the **LLVM version**, respectively.
+FPChecker instruments the CUDA application code. This instrumentation can be executed by one of three ways:
+- **FPChecker front-end version**: this version uses a basic front-end that instruments assigments only (e.g., `x[i] = a + b ...;`) and it has no dependencies on clang/LLVM. While this version is work in progress (see the liimtations), it is able to instrument 99% of HPC codes and can catch most errors.
 
-The **Clang version** instruments the source code of the application using a clang plugin. The instrumentation changes every expression `E` that evaluates to a floating-point value, to `_FPC_CHECK_(E)`. After theses transformations are performed, the code can be compiled with nvcc.
+- **Clang front-end version**: this version instruments the application's source code using a clang plugin. After theses transformations are performed, the code can be compiled with nvcc.
 
-The **LLVM version** on the other hand, performs instrumentation in the LLVM compiler itself (in the intermediate representation, or IR).
-
-Both versions have advantages and disadvantages:
-- **Clang version**: the final code can be compiled with nvcc; however, this version can be slower than the LLVM version and requires a two-pass compilation process (i.e., first instrument using clang and then compile/link with nvcc).
-- **LLVM version**: it is faster than the Clang version as code instrumented *after* optimizations are applied; however, it requires the application to be  compiled completely using clang (clang does not support the same functionality than nvcc, and some CUDA applications cannot be compiled with clang).
+- **LLVM middle-end version**: this version performs instrumentation in the LLVM compiler intermediate representation (IR). It requires the CUDA application to be fully compiled with clang/LLVM.
 
 ## Building
 You can build using `cmake`:
@@ -34,15 +31,47 @@ You can build using `cmake`:
 mkdir build
 cd build
 cmake -DCMAKE_INSTALL_PREFIX=/path/to/install ../
-make
-make install
+make && make install
 ```
 
 `cmake` will attempt to search for `clang++` and `llvm-config` in your environment. Make sure these commands are visible.
 
-Optionally you can run tests by running `make tests` after executing `make`. Tests are executed in `python` version 2.7.x, and require the `pytest` module. Also, the environment variable `CUDA_PATH` needs to be set to the location of the CUDA toolkit before running the tests.
+## Using the FPChecker Front-end Version
 
-## Using the FPChecker Clang Version
+To use this version, make sure the `bin` directory is available in your `PATH` variable. In LLNL systems, run `module load fpchecker`.
+
+Replace `nvcc` in your build system with `nvcc-fpc` (which acts as a wrapper for nvcc). For cmake, you can use `cmake -DCMAKE_CUDA_COMPILER=nvcc-fpc`. To instrument the code at build time, the `FPC_INSTRUMENT` environment variable must be set; this can be set when running `make`:
+
+```sh
+$ FPC_INSTRUMENT=1 make -j
+```
+If `FPC_INSTRUMENT` is not set, the application will be compiled wihout instrumentation.
+
+### Report of Instrumented Files
+
+After the code is built, we can see a report of the processed files (which can contained instrumentation) and failed compilations:
+
+```sh
+$ fpc-report
+===== FPChcecker Report =====
+Processed files: 198
+Failed: 0
+```
+
+If a compilation comnand failed, run `fpc-report -f` to see the exact failed command. To remove the compilation traces, run   `fpc-report -r`.
+
+### Blacklisting Files
+
+Files and lines of code can be blacklisted, so that they don't get instrumented. To do that, create a configuration file named `fpchecker.ini` in the build directory, or add an environement variable `FPC_CONF` with the path of the configuration file. The configuration file format is the following:
+
+```sh
+; The following lines are not instrumented
+[omit]
+omit_lines = file1.cu:10-20, compute.cu:30-35, compute.cu:42-46
+```
+
+
+## Using the Clang Front-end Version
 
 Using this version requires following two steps: (1) instrumenting the source code (with a clang plugin) and (2) compiling the code with nvcc.
 
@@ -115,7 +144,7 @@ We have tested this version so far with these versions of clang/LLVM:
 - clang 7.x
 - clang 8.0
 
-## Using the FPChecker LLVM Version
+## Using the LLVM Version
 Once you are able to compile and run your CUDA application with clang, follow this to enable FPChecker:
 
 1. Add this to your Makefile:
