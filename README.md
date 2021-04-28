@@ -12,16 +12,16 @@ FPChecker detects floating-point computations that produce:
 
 When at least one of the threads in a CUDA grid produces any of the above cases, an error report is generated.
 
-FPChecker can also generate **warning reports** for computations that are close to become overflows or underflows, i.e., `x%` from the limits of normal values, where `x` is configurable.
+FPChecker can also generate **warning reports** for computations that are close to becoming overflows or underflows, i.e., `x%` from the limits of normal values, where `x` is configurable.
 
 # Getting Started
 
 ## How to Use FPChecker
 
-FPChecker instruments the CUDA application code. This instrumentation can be executed by one of three ways:
-- **FPChecker front-end version**: this version uses a basic front-end that instruments assigments only (e.g., `x[i] = a + b ...;`) and it has no dependencies on clang/LLVM. While this version is work in progress (see the liimtations), it is able to instrument 99% of HPC codes and can catch most errors.
+FPChecker instruments the CUDA application code. This instrumentation can be executed in one of three ways:
+- **FPChecker front-end version**: this version uses a basic front-end that instruments assignments only (e.g., `x[i] = a + b ...;`) and it has no dependencies on clang/LLVM. While this version is work in progress (see the [liimtations](limitations.md)), it can instrument 99% of HPC codes and catch most errors.
 
-- **Clang front-end version**: this version instruments the application's source code using a clang plugin. After theses transformations are performed, the code can be compiled with nvcc.
+- **Clang front-end version**: this version instruments the application's source code using a clang plugin. After transformations are performed, the code can be compiled with nvcc.
 
 - **LLVM middle-end version**: this version performs instrumentation in the LLVM compiler intermediate representation (IR). It requires the CUDA application to be fully compiled with clang/LLVM.
 
@@ -38,14 +38,14 @@ make && make install
 
 ## Using the FPChecker Front-end Version
 
-To use this version, make sure the `bin` directory is available in your `PATH` variable. In LLNL systems, run `module load fpchecker`.
+To use this version, make sure the `bin` directory is available in your `PATH` variable. In LLNL systems, run `module load fpchecker`. This version requires the use of c++11 or later, i.e., `-std=c++11` should be added to compilation flags.
 
 Replace `nvcc` in your build system with `nvcc-fpc` (which acts as a wrapper for nvcc). For cmake, you can use `cmake -DCMAKE_CUDA_COMPILER=nvcc-fpc`. To instrument the code at build time, the `FPC_INSTRUMENT` environment variable must be set; this can be set when running `make`:
 
 ```sh
 $ FPC_INSTRUMENT=1 make -j
 ```
-If `FPC_INSTRUMENT` is not set, the application will be compiled wihout instrumentation.
+If `FPC_INSTRUMENT` is not set, the application will be compiled without instrumentation.
 
 ### Report of Instrumented Files
 
@@ -58,11 +58,11 @@ Processed files: 198
 Failed: 0
 ```
 
-If a compilation comnand failed, run `fpc-report -f` to see the exact failed command. To remove the compilation traces, run   `fpc-report -r`.
+If a compilation command failed, run `fpc-report -f` to see the exact failed command. To remove the compilation traces, run   `fpc-report -r`.
 
 ### Blacklisting Files
 
-Files and lines of code can be blacklisted, so that they don't get instrumented. To do that, create a configuration file named `fpchecker.ini` in the build directory, or add an environement variable `FPC_CONF` with the path of the configuration file. The configuration file format is the following:
+Files and lines of code can be blacklisted so that they don't get instrumented. To do that, create a configuration file named `fpchecker.ini` in the build directory, or add an environment variable `FPC_CONF` with the path of the configuration file. The configuration file format is the following:
 
 ```sh
 ; The following lines are not instrumented
