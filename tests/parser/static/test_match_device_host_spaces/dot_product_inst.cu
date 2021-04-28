@@ -32,7 +32,7 @@ void calc(double *x, int s) {
 }*/
 
     __device__     __host__     void   comp(double *x, int s) {
-  for (int i=_FPC_CHECK_HD_(0, 35, "/usr/WS1/laguna/fpchecker/FPChecker/tests/parser/static/test_match_device_host_spaces/dot_product.cu"); i < s; ++i) {
+  for (int i=0; i < s; ++i) {
     x[i] = _FPC_CHECK_HD_(x[i] + 3.1, 36, "/usr/WS1/laguna/fpchecker/FPChecker/tests/parser/static/test_match_device_host_spaces/dot_product.cu");
   }
 }
@@ -41,7 +41,7 @@ void calc(double *x, int s) {
 
 
  __host__     void   comp2(double *x, int s) {
-  for (int i=_FPC_CHECK_HD_(0, 44, "/usr/WS1/laguna/fpchecker/FPChecker/tests/parser/static/test_match_device_host_spaces/dot_product.cu"); i < s; ++i) {
+  for (int i=0; i < s; ++i) {
     x[i] = _FPC_CHECK_HD_(x[i] + 3.1, 45, "/usr/WS1/laguna/fpchecker/FPChecker/tests/parser/static/test_match_device_host_spaces/dot_product.cu");
   }
 }

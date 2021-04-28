@@ -142,8 +142,7 @@ class Instrument:
         currentLine += 1
         if currentLine in self.linesOfAssigments.keys():
           self.transformedLines[currentLine] = '\n'
-          if verbose(): print('[New Line]: ==>', self.transformedLines[currentLine])
-        #currentLine += 1
+          if verbose(): print('[New Line (empty)]: ==>', self.transformedLines[currentLine])
         continue
 
       if currentLine in self.linesOfAssigments.keys():

@@ -16,6 +16,7 @@ A calc(A a, B b);
 
 __device__ void comp(double *x) {
   x[0] = calc<double, double>(x[1], x[2]);
+  x[0] = x[1] + x[2];
 }
 """
 

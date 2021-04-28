@@ -1,0 +1,14 @@
+Instrumented: dot_product_inst.cu
+Instrumented: main_inst.cu
+Instrumented: dot_product_inst.cu
+Instrumented: main_inst.cu
+Instrumented: dot_product_inst.cu
+Instrumented: main_inst.cu
+Instrumented: dot_product_inst.cu
+Instrumented: main_inst.cu
+Instrumented: dot_product_inst.cu
+Instrumented: main_inst.cu
+Instrumented: dot_product_inst.cu
+Instrumented: main_inst.cu
+Instrumented: dot_product_inst.cu
+Instrumented: main_inst.cu

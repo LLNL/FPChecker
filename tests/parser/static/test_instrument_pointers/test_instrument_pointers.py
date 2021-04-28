@@ -11,11 +11,12 @@ RUNTIME='../../../../src/Runtime_parser.h'
 
 prog_1 = """
 __device__ void foo(char *c, double *d, int *i);
-__device__ void comp(double x) {
+__device__ void comp(double *x) {
   char *c = nullptr;
   double *d = nullptr;
   int *i = nullptr;
   foo(c, d, i);
+  x[0] = x[1] / 1.9;
 }
 """
 
@@ -75,7 +76,7 @@ def inst_program(prog: str, prog_name: str, num_inst: int):
 
 def test_1():
   os.environ['FPC_VERBOSE'] = '1'
-  assert inst_program(prog_1, 'prog_1', 3)
+  assert inst_program(prog_1, 'prog_1', 1)
 
 if __name__ == '__main__':
   test_1()

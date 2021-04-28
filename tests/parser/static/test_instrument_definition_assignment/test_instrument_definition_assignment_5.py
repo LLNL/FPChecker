@@ -75,7 +75,7 @@ def inst_program(prog: str, prog_name: str, num_inst: int):
 
 def test_1():
   os.environ['FPC_VERBOSE'] = '1'
-  assert inst_program(prog_5, 'prog_5', 6)
+  assert inst_program(prog_5, 'prog_5', 0)
 
 if __name__ == '__main__':
   test_1()

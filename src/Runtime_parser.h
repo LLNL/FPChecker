@@ -94,9 +94,16 @@ T _FPC_CHECK_D_(T t, int x, const char *str) {
 #define DANGER_ZONE_PERCENTAGE 0.05
 #endif
 
-#ifdef FPC_ERRORS_DONT_ABORT
-__attribute__((used)) __device__ static int ERRORS_DONT_ABORT = 1;
+// Enable short reports by default (i.e., errors don't abort)
+#ifndef FPC_ERRORS_ABORT
+#define FPC_SHORT_REPORTS
 #endif
+
+// Disable warning by default
+#ifndef FPC_ENABLE_WARNINGS
+#define FPC_DISABLE_WARNINGS
+#endif
+
 
 /* ----------------------------- Global Data ------------------------------- */
 
