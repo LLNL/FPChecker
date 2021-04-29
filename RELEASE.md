@@ -1,3 +1,9 @@
+## Release 0.2.0
+- Added a custom front-end that instruments CUDA. This front-end doesn't require clang/LLVM.
+- The new front-end is work in progress and has limitations
+- Fixed several bugs
+- The front-end version doesn't abort on errors by default.
+
 ## Release 0.1.2
 - Added clang version. It instruments source code via clang plugin. Instrumented code can be compiled with nvcc.
 - Added new flags: FPC_DISABLE_SUBNORMAL, FPC_DISABLE_WARNINGS 

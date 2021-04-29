@@ -19,7 +19,7 @@ FPChecker can also generate **warning reports** for computations that are close 
 ## How to Use FPChecker
 
 FPChecker instruments the CUDA application code. This instrumentation can be executed in one of three ways:
-- **FPChecker front-end version**: this version uses a basic front-end that instruments arithmetic operations (e.g., `x[i] = a + b ...;`) and it has no dependencies on clang/LLVM. While this version is work in progress (see the [liimtations](limitations.md)), it can instrument 99% of HPC codes and catch most errors.
+- **FPChecker front-end version**: this version uses a basic front-end that instruments arithmetic operations (e.g., `x[i] = a + b ...;`) and it has no dependencies on clang/LLVM. While this version is a work in progress (see the [limtations](limitations.md)), it can instrument 99% of HPC codes and catch most errors.
 
 - **Clang front-end version**: this version instruments the application's source code using a clang plugin. After transformations are performed, the code can be compiled with nvcc.
 
@@ -70,6 +70,10 @@ Files and lines of code can be blacklisted so that they don't get instrumented. 
 omit_lines = file1.cu:10-20, compute.cu:30-35, compute.cu:42-46
 ```
 
+### Behavior on Errors
+
+This version doesn't abort by default when an error is found, i.e., it will print all errors found. To abort on errors, use `-DFPC_ERRORS_ABORT`. This version also disables warnings by default. To enable warnings, use `-DFPC_ENABLE_WARNINGS`.
+
 
 ## Using the Clang Front-end Version
 
@@ -77,7 +81,7 @@ Using this version requires following two steps: (1) instrumenting the source co
 
 ### Step 1: Instrumenting the source code
 
-This step can be executed either by using the `clang-fpchecker` wrapper script or by directly loading the plugin (the `clang-fpchecker` wrapper automatically calls the required options to load the plugin). We explain both methods as follows.
+This step can be executed either using the `clang-fpchecker` wrapper script or by directly loading the plugin (the `clang-fpchecker` wrapper automatically calls the required options to load the plugin). We explain both methods as follows.
 
 #### Using the clang-fpchecker Wrapper Script
 
@@ -135,7 +139,7 @@ Like when using the `clang-fpchecker` wrapper, after this step, floating-point e
 
 In this step, you compile the instrumented code with nvcc, as you regularly do. The only addition is that you need to pre-include the runtime header file using `-include $(FPCHECKER_RUNTIME)`; otherwise nvcc will complain about not being able to understand the `_FPC_CHECK_()` function calls.
 
-## Requirements to the LLVM version
+## Requirements for the LLVM version
 The primary requirement for using this version is to be able to compile your CUDA code with a recent version of the clang/LLVM compiler. Pure CUDA code or RAJA (with CUDA execution) are supported.
 
 For more information about compiling CUDA with clang, please refer to [Compiling CUDA with clang](https://llvm.org/docs/CompileCudaWithLLVM.html). In particular, you should pay attention to the differences between clang/LLVM and nvcc with respect to overloading based on `__host__` and `__device__` attributes.
@@ -145,7 +149,7 @@ We have tested this version so far with these versions of clang/LLVM:
 - clang 8.0
 
 ## Using the LLVM Version
-Once you are able to compile and run your CUDA application with clang, follow this to enable FPChecker:
+Once you can to compile and run your CUDA application with clang, follow this to enable FPChecker:
 
 1. Add this to your Makefile:
 
@@ -156,7 +160,7 @@ LLVM_PASS       = -Xclang -load -Xclang $(FPCHECKER_PATH)/lib/libcudakernels.so 
 CXXFLAGS += $(LLVM_PASS)
 ```
 
-This will tell clang/LLVM where the FPChecker runtime is located. FPCHECKER_PATH is the where FPChecker is installed.
+This will tell clang/LLVM where the FPChecker runtime is located. FPCHECKER_PATH is where FPChecker is installed.
 
 2. Compile your code and run it.
 
