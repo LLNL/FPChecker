@@ -1,7 +1,5 @@
-Instrumented: dot_product_inst.cu
-Instrumented: main_inst.cu
-Instrumented: dot_product_inst.cu
-Instrumented: main_inst.cu
+Failed: /usr/workspace/wsa/laguna/fpchecker/FPChecker/bin/nvcc-fpc -O0 -x cu -arch=sm_70 -g -c dot_product.cu
+Failed: /usr/workspace/wsa/laguna/fpchecker/FPChecker/bin/nvcc-fpc -O0 -x cu -arch=sm_70 -g -c main.cu
 Instrumented: dot_product_inst.cu
 Instrumented: main_inst.cu
 Instrumented: dot_product_inst.cu

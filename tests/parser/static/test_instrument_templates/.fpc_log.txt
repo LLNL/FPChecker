@@ -21,3 +21,4 @@ Instrumented: compute_inst.cu
 Instrumented: compute_inst.cu
 Instrumented: compute_inst.cu
 Instrumented: compute_inst.cu
+Instrumented: compute_inst.cu

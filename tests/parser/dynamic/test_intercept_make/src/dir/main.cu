@@ -19,7 +19,7 @@ int main(int argc, char **argv)
   cudaMemcpy((void *)d_a, (void *)data, nbytes, cudaMemcpyHostToDevice);
 
   printf("Calling kernel\n");
-  dot_prod<<<1,1>>>(d_a, d_a, nbytes);
+  dot_prod<<<2,2>>>(d_a, d_a, nbytes);
   cudaDeviceSynchronize();
   printf("done\n");
 
