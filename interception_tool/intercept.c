@@ -5,10 +5,13 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include "intercept.h"
+
 typedef ssize_t (*execve_func_t)(const char* filename, char* const argv[], char* const envp[]);
 
 static execve_func_t old_execve = NULL;
-static const char *nvcc_fpc = "/usr/workspace/wsa/laguna/fpchecker/FPChecker/bin/nvcc-fpc";
+//static const char *nvcc_fpc = "/usr/workspace/wsa/laguna/fpchecker/FPChecker/bin/nvcc-fpc";
+static const char *nvcc_fpc = NVCC_WRAPPER;
 
 /** Return: one if the string t occurs at the end of the string s, and zero otherwise **/
 int str_end(const char *s, const char *t)

@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.11)
 set(CMAKE_CXX_COMPILER "clang++")
 set(CMAKE_C_COMPILER "clang")
 
-project(fpchecker VERSION 0.2.0 DESCRIPTION "FPChecker" LANGUAGES CXX)
+project(fpchecker VERSION 0.2.0 DESCRIPTION "FPChecker" LANGUAGES CXX C)
 
 execute_process(COMMAND llvm-config --ldflags 
 OUTPUT_VARIABLE CMAKE_SHARED_LINKER_FLAGS 
@@ -21,6 +21,9 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -O3 -g -std=c++14 -DFPC_DEBUG")
 
 include(GNUInstallDirs)
 
+set(NVCC_WRAPPER "${CMAKE_INSTALL_PREFIX}/bin/nvcc-fpc")
+configure_file(interception_tool/intercept.h.in intercept.h)
+
 add_library(fpchecker SHARED 
 	src/CodeMatching.cpp
 	src/Instrumentation.cpp
@@ -32,6 +35,13 @@ add_library(fpchecker SHARED
 add_library(fpchecker_plugin SHARED
 	plugin/instrumentation_plugin.cpp
 )
+
+add_library(fpchecker_intercept_lib SHARED
+	interception_tool/intercept.c
+)
+
+#set_target_properties(fpchecker_intercept_lib PROPERTIES LINKER_LANGUAGE C)
+target_include_directories(fpchecker_intercept_lib PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
 
 if(APPLE)
 	TARGET_LINK_LIBRARIES(fpchecker "-undefined dynamic_lookup")
@@ -48,7 +58,7 @@ set(CMAKE_INSTALL_DEFAULT_DIRECTORY_PERMISSIONS
     OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_WRITE GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
 )
 
-install(TARGETS fpchecker fpchecker_plugin
+install(TARGETS fpchecker fpchecker_plugin fpchecker_intercept_lib
         LIBRARY DESTINATION "lib64"
         PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_WRITE GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
 )
@@ -65,18 +75,12 @@ install(FILES "src/Runtime.h" "src/Runtime_plugin.h" "src/Runtime_parser.h"
         PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_WRITE GROUP_EXECUTE WORLD_READ
 )
 
-#install(FILES
-#        "tracing_tool/colors.py"
-#        "tracing_tool/expressions_parser.py"
-#        "tracing_tool/fpchecker.py"
-#        "tracing_tool/nvcc_options_table.py"
-#        "tracing_tool/nvcc_parser.py"
-#        "tracing_tool/strace_module.py"
-#        "tracing_tool/mpi_environment.py"
-#        "tracing_tool/debug_traces.py"
-#        DESTINATION bin
-#        PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_WRITE GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
-#)
+install(FILES
+	"interception_tool/fpchecker.py"
+	"interception_tool/colors.py"
+	DESTINATION interception 
+        PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_WRITE GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
+)
 
 install(FILES
         "parser/colors.py"
@@ -93,13 +97,6 @@ install(FILES
         DESTINATION front-end
         PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_WRITE GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
 )
-
-# Install link for fpchecker tracing tool
-#install(CODE "execute_process( \
-#        COMMAND ${CMAKE_COMMAND} -E create_symlink \
-#        ${CMAKE_INSTALL_PREFIX}/front-end/fpchecker.py ${CMAKE_INSTALL_PREFIX}/bin/fpchecker )"
-#        COMMENT "Creating link: fpchecker -> fpchecker.py"
-#)
 
 install(DIRECTORY
         DESTINATION ${CMAKE_INSTALL_PREFIX}/bin
@@ -121,6 +118,13 @@ install(CODE "execute_process( \
         COMMENT "Creating link: fpc-report -> fpc-debug.py"
 )
 
+# Install link for fpchecker reports tool
+install(CODE "execute_process( \
+        COMMAND ${CMAKE_COMMAND} -E create_symlink \
+        ${CMAKE_INSTALL_PREFIX}/interception/fpchecker.py ${CMAKE_INSTALL_PREFIX}/bin/fpchecker )"
+        COMMENT "Creating link: fpchecker -> fpchecker.py"
+)
+
 # Tests
 file(COPY tests DESTINATION ${CMAKE_BINARY_DIR})
 file(COPY src/Runtime.h DESTINATION ${CMAKE_BINARY_DIR}/src)
@@ -137,3 +141,4 @@ message(STATUS "CMAKE_CXX_COMPILER: " ${CMAKE_CXX_COMPILER})
 message(STATUS "CMAKE_CXX_FLAGS: " ${CMAKE_CXX_FLAGS})
 message(STATUS "CMAKE_CPP_FLAGS: " ${CMAKE_CPP_FLAGS})
 message(STATUS "CMAKE_SHARED_LINKER_FLAGS: " ${CMAKE_SHARED_LINKER_FLAGS})
+message(STATUS "CMAKE_INSTALL_PREFIX: " ${CMAKE_INSTALL_PREFIX})

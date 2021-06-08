@@ -2,9 +2,11 @@
 
 import subprocess
 import sys
+import os
 from colors import *
 
-INTERCEPT_LIB = '/usr/workspace/wsa/laguna/fpchecker/FPChecker/interception_tool/intercept.so'
+#INTERCEPT_LIB = '/usr/workspace/wsa/laguna/fpchecker/FPChecker/interception_tool/intercept.so'
+INTERCEPT_LIB = os.path.dirname(os.path.abspath(__file__))+"/../lib/libfpchecker_intercept_lib.so"
 
 def runBuildCommand(params):
   prGreen('*** FPChecker ***')

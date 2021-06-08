@@ -1,0 +1,9 @@
+
+
+#ifndef INTERCEPT_H
+#define INTERCEPT_H
+
+#cmakedefine NVCC_WRAPPER "@NVCC_WRAPPER@"
+
+#endif /* INTERCEPT_H */
+
