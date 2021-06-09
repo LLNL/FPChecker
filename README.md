@@ -38,7 +38,7 @@ make && make install
 
 ## Using the FPChecker Front-end Version
 
-To use this version, make sure the `bin` directory is available in your `PATH` variable. In LLNL systems, run `module load fpchecker`. This version requires the use of c++11 or later, i.e., `-std=c++11` should be added to compilation flags.
+To use this version, make sure the `bin` directory is available in your `PATH` variable. In LLNL systems, run `module load fpchecker`. This version requires the use of c++11 or later, so `-std=c++11` should be added to compilation flags.
 
 Replace `nvcc` in your build system with `nvcc-fpc` (which acts as a wrapper for nvcc). For cmake, you can use `cmake -DCMAKE_CUDA_COMPILER=nvcc-fpc`. To instrument the code at build time, the `FPC_INSTRUMENT` environment variable must be set; this can be set when running `make`:
 
@@ -46,6 +46,14 @@ Replace `nvcc` in your build system with `nvcc-fpc` (which acts as a wrapper for
 $ FPC_INSTRUMENT=1 make -j
 ```
 If `FPC_INSTRUMENT` is not set, the application will be compiled without instrumentation.
+
+As an alternative, we also provide an interception tool called `fpchecker` that automatically intercepts all nvcc calls from the build script and replaces them with `nvcc-fpc`. To use this tool, simply run `fpchecker` and pass the build script (and its parameters):
+
+```sh
+$ fpchecker make -j
+```
+
+The  `fpchecker` works in Linux only; it uses the LD_PRELOAD trick to intercept all calls to nvcc (via intercepting execve()).
 
 ### Report of Instrumented Files
 

@@ -1,3 +1,7 @@
+## Release 0.2.1
+- Added 'fpchecker' tool that intercepts all calls to nvcc from build script (e..g, make)
+- The interception tool uses the Linux LD_PRELOAD trick to intercept execve system calls
+
 ## Release 0.2.0
 - Added a custom front-end that instruments CUDA. This front-end doesn't require clang/LLVM.
 - The new front-end is work in progress and has limitations
