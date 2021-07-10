@@ -1,6 +1,6 @@
 
 #include "Utility.h"
-#include "Instrumentation.h"
+#include "Instrumentation_cpu.h"
 #include "CodeMatching.h"
 #include "Logging.h"
 //#include "CommonTypes.h"
@@ -17,10 +17,7 @@
 #include "llvm/Support/Casting.h"
 #include "llvm/Transforms/IPO/PassManagerBuilder.h"
 #include "llvm/CodeGen/RegAllocRegistry.h"
-//#include "llvm/PassRegistry.h"
 #include "llvm/IR/LegacyPassManager.h"
-//#include "llvm/lib/Target/NVPTX/NVPTXUtilities.h"
-
 
 #include <string>
 #include <iostream>
@@ -28,7 +25,6 @@
 #include <set>
 
 using namespace llvm;
-//using namespace std;
 
 namespace CPUAnalysis
 {
@@ -43,60 +39,31 @@ public:
 	virtual bool runOnModule(Module &M)
 	{
 		Module *m = &M;
-		FPInstrumentation *fpInstrumentation = new FPInstrumentation(m);
+		CPUFPInstrumentation *fpInstrumentation = new CPUFPInstrumentation(m);
 
 #ifdef FPC_DEBUG
 		std::string out = "Running Module pass on: " + m->getName().str();
-		Logging::info(out.c_str());
+		CUDAAnalysis::Logging::info(out.c_str());
 #endif
 
-		for (auto f = M.begin(), e = M.end(); f != e; ++f)
-		{
+		for (auto f = M.begin(), e = M.end(); f != e; ++f) {
 			// Discard function declarations
 			if (f->isDeclaration())
 				continue;
 
 			Function *F = &(*f);
 
-			if (CodeMatching::isDeviceCode(m))
-			{
-				if (CodeMatching::isUnwantedFunction(F))
-						continue;
+      if (CUDAAnalysis::CodeMatching::isUnwantedFunction(F))
+          continue;
 
-#ifdef FPC_DEBUG
-				std::string out = "Instrumenting function: " + f->getName().str();
-				Logging::info(out.c_str());
-#endif
-				fpInstrumentation->instrumentFunction(F);
+      fpInstrumentation->instrumentFunction(F);
 
-				if (fpInstrumentation->errorsDontAbortMode())
-				{
-					if (CodeMatching::isAKernelFunction(*F))
-					{
-	#ifdef FPC_DEBUG
-						std::string out = "<<< kernel >>> " + f->getName().str();
-						Logging::info(out.c_str());
-	#endif
-						fpInstrumentation->instrumentEndOfKernel(F);
-					}
-				}
-			}
-			else // host code
-			{
-				if (CodeMatching::isMainFunction(F))
-				{
+      if (CUDAAnalysis::CodeMatching::isMainFunction(F)) {
 #ifdef FPC_DEBUG
-					Logging::info("main() found");
+        CUDAAnalysis::Logging::info("main() found");
 #endif
-					fpInstrumentation->instrumentMainFunction(F);
-				}
-			}
-		}
-		
-		if (CodeMatching::isDeviceCode(m))
-		{
-			fpInstrumentation->generateCodeForInterruption();
-			fpInstrumentation->instrumentErrorArray();
+        fpInstrumentation->instrumentMainFunction(F);
+      }
 		}
 
 		delete fpInstrumentation;
@@ -105,17 +72,17 @@ public:
 
 };
 
-char CUDAKernelAnalysis::ID = 0;
+char CPUKernelAnalysis::ID = 0;
 
-static RegisterPass<CUDAKernelAnalysis> X(
-		"cudakernels",
-		"CUDAKernelAnalysis Pass",
+static RegisterPass<CPUKernelAnalysis> X(
+		"cpukernels",
+		"CPUKernelAnalysis Pass",
 		false,
 		false);
 
 static void registerPass(const PassManagerBuilder &, legacy::PassManagerBase &PM)
 {
-	PM.add(new CUDAKernelAnalysis());
+	PM.add(new CPUKernelAnalysis());
 }
 
 static RegisterStandardPasses

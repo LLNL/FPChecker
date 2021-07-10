@@ -22,7 +22,7 @@
 #include <string>
 
 using namespace CPUAnalysis;
-using namespace CUDAAnalysis;
+//using namespace CUDAAnalysis;
 using namespace llvm;
 
 /* This function configures the function found (e.g., calling conventions) and
@@ -32,7 +32,7 @@ void confFunction(Function *found, Function **saveHere,
 {
 #ifdef FPC_DEBUG
 	std::string out = std::string("Found ") + std::string(name);
-  Logging::info(out.c_str());
+	CUDAAnalysis::Logging::info(out.c_str());
 #endif
 
   if (saveHere != nullptr) // if we want to save the function pointer
@@ -60,7 +60,7 @@ CPUFPInstrumentation::CPUFPInstrumentation(Module *M) :
 		fpc_print_locations(nullptr) {
 
 #ifdef FPC_DEBUG
-	Logging::info("Initializing instrumentation");
+  CUDAAnalysis::Logging::info("Initializing instrumentation");
 #endif
 
   // Find and configure instrumentation functions
@@ -130,14 +130,14 @@ CPUFPInstrumentation::CPUFPInstrumentation(Module *M) :
 
 void CPUFPInstrumentation::instrumentFunction(Function *f)
 {
-	if (CodeMatching::isUnwantedFunction(f))
+	if (CUDAAnalysis::CodeMatching::isUnwantedFunction(f))
 		return;
 
   assert((fp32_check_function!=nullptr) && "Function not initialized!");
   assert((fp64_check_function!=nullptr) && "Function not initialized!");
 
 #ifdef FPC_DEBUG
-	Logging::info("Entering main loop in instrumentFunction");
+  CUDAAnalysis::Logging::info("Entering main loop in instrumentFunction");
 #endif
 
 	int instrumentedOps = 0;
@@ -157,15 +157,16 @@ void CPUFPInstrumentation::instrumentFunction(Function *f)
 			  if (inst->getOpcode() != Instruction::FCmp) {
 			    args.push_back(inst);
 			  } else {
-			    ConstantFP* tmpFP = ConstantFP::get(builder.getDoubleTy(), 0.0);
-			    args.push_back(tmpFP);
+			    //ConstantFP* tmpFP = ConstantFP::get(builder.getDoubleTy(), 0.0);
+			    //args.push_back(tmpFP);
+			    args.push_back(ConstantFP::get(builder.getDoubleTy(), 0.0));
 			  }
 				args.push_back(inst->getOperand(0));
 				args.push_back(inst->getOperand(1));
 				//args.push_back(ConstantFP::get(builder.getDoubleTy(), 999.0));
 
 				// Push location parameter (line number)
-				int lineNumber = getLineOfCode(inst);
+				int lineNumber = CUDAAnalysis::getLineOfCode(inst);
 				ConstantInt* locId = ConstantInt::get(mod->getContext(),
 				    APInt(32, lineNumber, true));
 				args.push_back(locId);
@@ -175,11 +176,11 @@ void CPUFPInstrumentation::instrumentFunction(Function *f)
         GlobalVariable *fName = nullptr;
         fName = mod->getGlobalVariable("_ZL15_FPC_FILE_NAME_", true);
         assert((fName!=nullptr) && "Global array not found");
-        auto loadInst = builder.CreateAlignedLoad(fName, 4, "my");
+        auto loadInst = builder.CreateAlignedLoad(fName, MaybeAlign(), "my");
 
         //std::string fileName = getFileNameFromModule(mod);
         //std::string fileName = mod->getSourceFileName();
-        std::string fileName = getFileNameFromInstruction(inst);
+        std::string fileName = CUDAAnalysis::getFileNameFromInstruction(inst);
         Constant *c = builder.CreateGlobalStringPtr(fileName);
         fName->setInitializer(NULL);
         fName->setInitializer(c);
@@ -221,8 +222,8 @@ void CPUFPInstrumentation::instrumentFunction(Function *f)
 #ifdef FPC_DEBUG
 	std::stringstream out;
 	out << "Instrumented operations: " << instrumentedOps;
-	Logging::info(out.str().c_str());
-	Logging::info("Leaving main loop in instrumentFunction");
+	CUDAAnalysis::Logging::info(out.str().c_str());
+	CUDAAnalysis::Logging::info("Leaving main loop in instrumentFunction");
 #endif
 }
 
