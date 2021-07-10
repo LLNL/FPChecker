@@ -179,7 +179,21 @@ void FPInstrumentation::instrumentFunction(Function *f)
 			if (isFPOperation(inst))
 			{
 				DebugLoc loc = inst->getDebugLoc();
-				IRBuilder<> builder = createBuilderAfter(inst);
+
+
+			  // Get next instruction
+			  //BasicBlock::iterator tmpIt(inst);
+			  //tmpIt++;
+			  //Instruction *nextInst = &(*(tmpIt));
+			  //assert(nextInst && "Invalid instruction!");
+			  //IRBuilder<> builder(nextInst);
+			  //return builder;
+
+				// Create builder to add stuff after the instruction
+			  BasicBlock::iterator nextInst(inst);
+			  IRBuilder<> builder( &(*(nextInst++)) );
+
+				//IRBuilder<> builder = createBuilderAfter(inst);
 
 				// Push parameters
 				std::vector<Value *> args;
@@ -292,7 +306,7 @@ bool FPInstrumentation::isSingleFPOperation(const Instruction *inst)
 	return inst->getType()->isFloatTy();
 }
 
-IRBuilder<> FPInstrumentation::createBuilderAfter(Instruction *inst)
+/*IRBuilder<> FPInstrumentation::createBuilderAfter(Instruction *inst)
 {
 	// Get next instruction
   BasicBlock::iterator tmpIt(inst);
@@ -303,20 +317,21 @@ IRBuilder<> FPInstrumentation::createBuilderAfter(Instruction *inst)
 	IRBuilder<> builder(nextInst);
 
 	return builder;
-}
+}*/
 
-IRBuilder<> FPInstrumentation::createBuilderBefore(Instruction *inst)
+/*IRBuilder<> FPInstrumentation::createBuilderBefore(Instruction *inst)
 {
 	IRBuilder<> builder(inst);
 
 	return builder;
-}
+}*/
 
 void FPInstrumentation::setFakeDebugLocation(Function *f, Instruction *inst)
 {
 	MDNode *node = f->getMetadata(0);
 	assert(node && "Invalid node!");
-	DebugLoc newLoc = DebugLoc::get(1, 1, node);
+	//DebugLoc newLoc = DebugLoc::get(1, 1, node);
+	DebugLoc newLoc;
 	inst->setDebugLoc(newLoc);
 }
 
@@ -397,7 +412,7 @@ void FPInstrumentation::instrumentMainFunction(Function *f)
 {
 	BasicBlock *bb = &(*(f->begin()));
 	Instruction *inst = bb->getFirstNonPHIOrDbg();
-	IRBuilder<> builder = createBuilderBefore(inst);
+	IRBuilder<> builder(inst);
 	std::vector<Value *> args;
 	CallInst *callInst = nullptr;
 	assert(print_at_main && "print_at_main not set!");
@@ -443,7 +458,7 @@ void FPInstrumentation::createReadFunctionForGlobalArray(GlobalVariable *arr, Ar
 			Instruction *prevInst = &(*(tmpIt));
 			assert(prevInst && "Invalid instruction!");
 
-			IRBuilder<> builder = createBuilderBefore(retInst);
+			IRBuilder<> builder(retInst);
 
 			// Create signed extension of parameter
 			auto arg = f->arg_begin();
@@ -504,7 +519,7 @@ void FPInstrumentation::createWriteFunctionForGlobalArray(GlobalVariable *arr, A
 			Instruction *prevInst = &(*(tmpIt));
 			assert(prevInst && "Invalid instruction!");
 
-			IRBuilder<> builder = createBuilderBefore(retInst);
+			IRBuilder<> builder(retInst);
 
 			// Create signed extension of parameter
 			auto arg = f->arg_begin();
@@ -570,7 +585,7 @@ void FPInstrumentation::instrumentErrorArray()
 
 	auto bb = _fpc_interrupt_->begin();
 	Instruction *inst = &(*(bb->getFirstNonPHIOrDbg()));
-	IRBuilder<> builder = createBuilderBefore(inst);
+	IRBuilder<> builder(inst);
 
 	auto arg = _fpc_interrupt_->arg_begin();
 	arg++; arg++; // get third arg
@@ -613,7 +628,7 @@ void FPInstrumentation::instrumentErrorArray()
 
 	auto bbTmp = _fpc_warning_->begin();
 	Instruction *firstInst = &(*(bbTmp->getFirstNonPHIOrDbg()));
-	IRBuilder<> builderTmp = createBuilderBefore(firstInst);
+	IRBuilder<> builderTmp(firstInst);
 
 	auto argTmp = _fpc_warning_->arg_begin();
 	argTmp++; argTmp++; argTmp++; argTmp++; // get 5th arg
@@ -662,7 +677,7 @@ void FPInstrumentation::instrumentEndOfKernel(Function *f)
 			Instruction *inst = &(*i);
 			if (isa<ReturnInst>(inst))
 			{
-				IRBuilder<> builder = createBuilderBefore(inst);
+				IRBuilder<> builder(inst);
 				std::vector<Value *> args;
 				CallInst *callInst = builder.CreateCall(_fpc_print_errors_, args);
 				assert(callInst && "Invalid call instruction!");

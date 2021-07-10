@@ -12,7 +12,7 @@
 #include "llvm/IR/BasicBlock.h"
 #include "llvm/IR/Instruction.h"
 #include "llvm/IR/Instructions.h"
-#include "llvm/Support/MutexGuard.h"
+//#include "llvm/Support/MutexGuard.h"
 #include "llvm/Support/ManagedStatic.h"
 
 using namespace CUDAAnalysis;
@@ -24,46 +24,10 @@ typedef std::map<const GlobalValue *, key_val_pair_t> global_val_annot_t;
 typedef std::map<const Module *, global_val_annot_t> per_module_annot_t;
 } // anonymous namespace
 static ManagedStatic<per_module_annot_t> annotationCache;
-static sys::Mutex Lock;
+//static sys::Mutex Lock;
 
-bool CodeMatching::isUnwantedFunction(Function *f)
-{
+bool CodeMatching::isUnwantedFunction(Function *f) {
 	bool ret = false;
-	/*if (
-			f->getName().str().find("_FPC_INTERRUPT_") != std::string::npos ||
-			f->getName().str().find("_FPC_DEVICE_CODE_FUNC_") != std::string::npos ||
-			f->getName().str().find("_FPC_FP32_CHECK_ADD_") != std::string::npos ||
-			f->getName().str().find("_FPC_FP32_CHECK_SUB_") != std::string::npos ||
-			f->getName().str().find("_FPC_FP32_CHECK_MUL_") != std::string::npos ||
-			f->getName().str().find("_FPC_FP32_CHECK_DIV_") != std::string::npos ||
-			f->getName().str().find("_FPC_FP64_CHECK_ADD_") != std::string::npos ||
-			f->getName().str().find("_FPC_FP64_CHECK_SUB_") != std::string::npos ||
-			f->getName().str().find("_FPC_FP64_CHECK_MUL_") != std::string::npos ||
-			f->getName().str().find("_FPC_FP64_CHECK_DIV_") != std::string::npos ||
-			f->getName().str().find("_FPC_FP32_IS_SUBNORMAL") != std::string::npos ||
-			f->getName().str().find("_FPC_FP64_IS_SUBNORMAL") != std::string::npos ||
-			f->getName().str().find("_FPC_LEN_") != std::string::npos ||
-			f->getName().str().find("_FPC_CPY_") != std::string::npos ||
-			f->getName().str().find("_FPC_CAT_") != std::string::npos ||
-			f->getName().str().find("_FPC_PRINT_REPORT_LINE_") != std::string::npos ||
-			f->getName().str().find("_FPC_PRINT_REPORT_HEADER_") != std::string::npos ||
-			f->getName().str().find("_FPC_PRINT_REPORT_ROW_") != std::string::npos ||
-			f->getName().str().find("_FPC_FP32_IS_ALMOST_OVERFLOW") != std::string::npos ||
-			f->getName().str().find("_FPC_FP32_IS_ALMOST_SUBNORMAL") != std::string::npos ||
-			f->getName().str().find("_FPC_FP64_IS_ALMOST_OVERFLOW") != std::string::npos ||
-			f->getName().str().find("_FPC_FP64_IS_ALMOST_SUBNORMAL") != std::string::npos ||
-			f->getName().str().find("_FPC_WARNING_") != std::string::npos ||
-			f->getName().str().find("_FPC_PRINT_ERRORS_") != std::string::npos ||
-			f->getName().str().find("_FPC_GET_GLOBAL_IDX_3D_3D") != std::string::npos ||
-			f->getName().str().find("_FPC_FP32_CHECK_OPERATION_") != std::string::npos ||
-			f->getName().str().find("_FPC_FP64_CHECK_OPERATION_") != std::string::npos ||
-			f->getName().str().find("_FPC_READ_GLOBAL_ERRORS_ARRAY_") != std::string::npos ||
-			f->getName().str().find("_FPC_WRITE_GLOBAL_ERRORS_ARRAY_") != std::string::npos ||
-			f->getName().str().find("_FPC_READ_FP64_GLOBAL_ARRAY_") != std::string::npos ||
-			f->getName().str().find("_FPC_WRITE_FP64_GLOBAL_ARRAY_") != std::string::npos
-			)
-			*/
-
 	/// We assume all functions in the runtime begin with _FPC_, so we will
 	/// not instrument device functions that contain this
 	if (f->getName().str().find("_FPC_") != std::string::npos)
@@ -77,7 +41,7 @@ bool CodeMatching::isMainFunction(Function *f)
 	return (f->getName().str().compare("main") == 0);
 }
 
-static void cacheAnnotationFromMD(const MDNode *md, key_val_pair_t &retval)
+/*static void cacheAnnotationFromMD(const MDNode *md, key_val_pair_t &retval)
 {
   MutexGuard Guard(Lock);
   assert(md && "Invalid mdnode for annotation");
@@ -102,9 +66,9 @@ static void cacheAnnotationFromMD(const MDNode *md, key_val_pair_t &retval)
       retval[keyname] = tmp;
     }
   }
-}
+}*/
 
-static void cacheAnnotationFromMD(const Module *m, const GlobalValue *gv)
+/*static void cacheAnnotationFromMD(const Module *m, const GlobalValue *gv)
 {
   MutexGuard Guard(Lock);
   NamedMDNode *NMD = m->getNamedMetadata("nvvm.annotations");
@@ -136,9 +100,9 @@ static void cacheAnnotationFromMD(const Module *m, const GlobalValue *gv)
     tmp1[gv] = std::move(tmp);
     (*annotationCache)[m] = std::move(tmp1);
   }
-}
+}*/
 
-bool findOneNVVMAnnotation(const GlobalValue *gv, const std::string &prop,
+/*bool findOneNVVMAnnotation(const GlobalValue *gv, const std::string &prop,
                            unsigned &retval)
 {
   MutexGuard Guard(Lock);
@@ -151,9 +115,9 @@ bool findOneNVVMAnnotation(const GlobalValue *gv, const std::string &prop,
     return false;
   retval = (*annotationCache)[m][gv][prop][0];
   return true;
-}
+}*/
 
-bool CodeMatching::isAKernelFunction(const Function &F)
+/*bool CodeMatching::isAKernelFunction(const Function &F)
 {
   unsigned x = 0;
   bool retval = findOneNVVMAnnotation(&F, "kernel", x);
@@ -162,9 +126,9 @@ bool CodeMatching::isAKernelFunction(const Function &F)
     return F.getCallingConv() == CallingConv::PTX_Kernel;
   }
   return (x == 1);
-}
+}*/
 
-bool CodeMatching::isDeviceCode(Module *mod)
+/*bool CodeMatching::isDeviceCode(Module *mod)
 {
 	bool ret = false;
 	for (auto f = mod->begin(), e = mod->end(); f != e; ++f)
@@ -182,4 +146,4 @@ bool CodeMatching::isDeviceCode(Module *mod)
 	}
 
 	return ret;
-}
+}*/
