@@ -231,8 +231,7 @@ int _FPC_FP64_IS_LATENT_INFINITY_NEG(double x) {
   return 0;
 }
 
-int _FPC_FP64_IS_LATENT_SUBNORMAL(double x)
-{
+int _FPC_FP64_IS_LATENT_SUBNORMAL(double x) {
   int ret = 0;
   uint64_t val;
   memcpy((void *) &val, (void *) &x, sizeof(val));
@@ -251,6 +250,22 @@ int _FPC_FP64_IS_LATENT_SUBNORMAL(double x)
 /* Generic checking functions                                                 */
 /*----------------------------------------------------------------------------*/
 
+int _FPC_EVENT_OCURRED(_FPC_ITEM_T_ *item) {
+  return (
+      item->infinity_pos ||
+      item->infinity_neg ||
+      item->nan ||
+      item->division_zero ||
+      item->cancellation ||
+      item->compare_zero ||
+      item->underflow ||
+      item->latent_infinity_pos ||
+      item->latent_infinity_neg ||
+      item->latent_underflow
+      );
+}
+
+
 /**
  * Operations table
  * -------------------------
@@ -264,7 +279,8 @@ int _FPC_FP64_IS_LATENT_SUBNORMAL(double x)
  * -------------------------
  **/
 
-void _FPC_FP32_CHECK_(float x,float y,float z,int loc,char *file_name,int op) {
+void _FPC_FP32_CHECK_(
+    float x, float y, float z, int loc, char *file_name, int op) {
   _FPC_ITEM_T_ item;
   // Set file name and line
   item.file_name = file_name;
@@ -282,10 +298,12 @@ void _FPC_FP32_CHECK_(float x,float y,float z,int loc,char *file_name,int op) {
   item.latent_infinity_neg  = _FPC_FP32_IS_LATENT_INFINITY_NEG(x);
   item.latent_underflow     = _FPC_FP32_IS_LATENT_SUBNORMAL(x);
 
-  _FPC_HT_SET_(_FPC_HTABLE_, &item);
+  if (_FPC_EVENT_OCURRED(&item))
+    _FPC_HT_SET_(_FPC_HTABLE_, &item);
 }
 
-void _FPC_FP64_CHECK_(double x,double y,double z,int loc,char *file_name,int op) {
+void _FPC_FP64_CHECK_(
+    double x, double y, double z, int loc, char *file_name, int op) {
   _FPC_ITEM_T_ item;
   // Set file name and line
   item.file_name = file_name;
@@ -303,7 +321,8 @@ void _FPC_FP64_CHECK_(double x,double y,double z,int loc,char *file_name,int op)
   item.latent_infinity_neg  = _FPC_FP64_IS_LATENT_INFINITY_NEG(x);
   item.latent_underflow     = _FPC_FP64_IS_LATENT_SUBNORMAL(x);
 
-  _FPC_HT_SET_(_FPC_HTABLE_, &item);
+  if (_FPC_EVENT_OCURRED(&item))
+    _FPC_HT_SET_(_FPC_HTABLE_, &item);
 }
 
 

@@ -56,6 +56,10 @@ public:
       if (CUDAAnalysis::CodeMatching::isUnwantedFunction(F))
           continue;
 
+#ifdef FPC_DEBUG
+      std::string fname = "Instrumenting function: " + F->getName().str();
+      CUDAAnalysis::Logging::info(fname.c_str());
+#endif
       fpInstrumentation->instrumentFunction(F);
 
       if (CUDAAnalysis::CodeMatching::isMainFunction(F)) {

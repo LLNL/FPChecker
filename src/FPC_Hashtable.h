@@ -63,9 +63,8 @@ _FPC_HTABLE_T *_FPC_HT_CREATE_(int64_t size)
   }
 
   // Allocate pointers to the head nodes
-  if( ( hashtable->table =
-      (struct _FPC_ENTRY_S_ **)
-      malloc( sizeof(_FPC_ITEM_T_ *) * size)) == NULL) {
+  if( (hashtable->table =
+      (struct _FPC_ITEM_S_ **)malloc(sizeof(_FPC_ITEM_S_ *) * size)) == NULL) {
     printf("#FPCHECKER: hash table out of memory error!");
     exit(EXIT_FAILURE);
   }
@@ -226,18 +225,18 @@ void _FPC_PRINT_HASH_TABLE_(_FPC_HTABLE_T *hashtable)
     while(next != NULL) {
       fprintf(fp, "  {\n");
       fprintf(fp, "\t\"file\": \"%s\",\n", next->file_name);
-      fprintf(fp, "\t\"line\": %d,\n", next->line);
+      fprintf(fp, "\t\"line\": %llu,\n", next->line);
 
-      fprintf(fp, "\t\"infinity_pos\": %ld,\n", next->infinity_pos);
-      fprintf(fp, "\t\"infinity_neg\": %ld,\n", next->infinity_neg);
-      fprintf(fp, "\t\"nan\": %ld,\n", next->nan);
-      fprintf(fp, "\t\"division_zero\": %ld,\n", next->division_zero);
-      fprintf(fp, "\t\"cancellation\": %ld,\n", next->cancellation);
-      fprintf(fp, "\t\"compare_zero\": %ld,\n", next->compare_zero);
-      fprintf(fp, "\t\"underflow\": %ld,\n", next->underflow);
-      fprintf(fp, "\t\"latent_infinity_pos\": %ld,\n", next->latent_infinity_pos);
-      fprintf(fp, "\t\"latent_infinity_neg\": %ld,\n", next->latent_infinity_neg);
-      fprintf(fp, "\t\"latent_underflow\": %ld,\n", next->latent_underflow);
+      fprintf(fp, "\t\"infinity_pos\": %llu,\n", next->infinity_pos);
+      fprintf(fp, "\t\"infinity_neg\": %llu,\n", next->infinity_neg);
+      fprintf(fp, "\t\"nan\": %llu,\n", next->nan);
+      fprintf(fp, "\t\"division_zero\": %llu,\n", next->division_zero);
+      fprintf(fp, "\t\"cancellation\": %llu,\n", next->cancellation);
+      fprintf(fp, "\t\"compare_zero\": %llu,\n", next->compare_zero);
+      fprintf(fp, "\t\"underflow\": %llu,\n", next->underflow);
+      fprintf(fp, "\t\"latent_infinity_pos\": %llu,\n", next->latent_infinity_pos);
+      fprintf(fp, "\t\"latent_infinity_neg\": %llu,\n", next->latent_infinity_neg);
+      fprintf(fp, "\t\"latent_underflow\": %llu,\n", next->latent_underflow);
 
       next = next->next;
       printed++;

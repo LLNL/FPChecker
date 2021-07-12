@@ -126,6 +126,7 @@ CPUFPInstrumentation::CPUFPInstrumentation(Module *M) :
   table = mod->getGlobalVariable ("_FPC_HTABLE_", true);
   assert(table && "Invalid table!");
   table->setLinkage(GlobalValue::LinkageTypes::LinkOnceODRLinkage);
+  //table->setLinkage(GlobalValue::LinkageTypes::LinkOnceAnyLinkage);
 }
 
 void CPUFPInstrumentation::instrumentFunction(Function *f)
@@ -145,7 +146,8 @@ void CPUFPInstrumentation::instrumentFunction(Function *f)
 		for (auto i=bb->begin(), bend=bb->end(); i != bend; ++i) {
 			Instruction *inst = &(*i);
 
-			if (isFPOperation(inst)) {
+			if (isFPOperation(inst) &&
+			    (isSingleFPOperation(inst) || isDoubleFPOperation(inst))) {
 				DebugLoc loc = inst->getDebugLoc();
 
 				// Create builder to add stuff after the instruction

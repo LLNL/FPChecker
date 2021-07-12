@@ -1,0 +1,16 @@
+[
+  {
+	"file": "/Users/lagunaperalt1/projects/fpchecker/FPChecker/tests/cpu_checking/dynamic/test_multi_files/./header.h",
+	"line": 9,
+	"infinity_pos": 0,
+	"infinity_neg": 0,
+	"nan": 0,
+	"division_zero": 0,
+	"cancellation": 0,
+	"compare_zero": 0,
+	"underflow": 1,
+	"latent_infinity_pos": 0,
+	"latent_infinity_neg": 0,
+	"latent_underflow": 1,
+  }
+]
