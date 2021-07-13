@@ -7,4 +7,4 @@ all:
 	$(CC) -o main main.o
 
 clean:
-	rm -rf *.o main __pycache__
+	rm -rf *.o main __pycache__ .fpc_logs

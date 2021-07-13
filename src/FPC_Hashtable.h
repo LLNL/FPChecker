@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <stdint.h>
+#include <sys/stat.h>
 
 /*----------------------------------------------------------------------------*/
 /* Hash table item                                                            */
@@ -190,8 +191,14 @@ void _FPC_HT_SET_(_FPC_HTABLE_T *hashtable, _FPC_ITEM_T_ *newVal)
 
 void _FPC_PRINT_HASH_TABLE_(_FPC_HTABLE_T *hashtable)
 {
-  /// Set filename
-  size_t len=128;
+  // Create directory
+  struct stat st = {0};
+  if (stat(".fpc_logs", &st) == -1) {
+      mkdir(".fpc_logs", 0775);
+  }
+
+  // Set filename
+  size_t len=256;
   char nodeName[len];
   nodeName[0] = '\0';
   if(gethostname(nodeName, len) != 0)
@@ -199,7 +206,8 @@ void _FPC_PRINT_HASH_TABLE_(_FPC_HTABLE_T *hashtable)
 
   char fileName[len];
   fileName[0] = '\0';
-  strcpy(fileName, "fpc_");
+  strcpy(fileName, ".fpc_logs/fpc_");
+  //strcpy(fileName, "fpc_");
   strcat(fileName, nodeName);
 
   int pid = (int)getpid();

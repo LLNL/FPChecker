@@ -110,6 +110,7 @@ CPUFPInstrumentation::CPUFPInstrumentation(Module *M) :
     SET_ODR_LIKAGE("_FPC_FP64_IS_LATENT_INFINITY_POS")
     SET_ODR_LIKAGE("_FPC_FP64_IS_LATENT_INFINITY_NEG")
     SET_ODR_LIKAGE("_FPC_FP64_IS_LATENT_SUBNORMAL")
+    SET_ODR_LIKAGE("_FPC_EVENT_OCURRED")
     SET_ODR_LIKAGE("_FPC_FP32_CHECK_")
     SET_ODR_LIKAGE("_FPC_FP64_CHECK_")
     // Hash table
@@ -119,6 +120,7 @@ CPUFPInstrumentation::CPUFPInstrumentation(Module *M) :
     SET_ODR_LIKAGE("_FPC_ITEMS_EQUAL_")
     SET_ODR_LIKAGE("_FPC_HT_SET_")
     SET_ODR_LIKAGE("_FPC_PRINT_HASH_TABLE_")
+
   }
 
   // Globals initialization
