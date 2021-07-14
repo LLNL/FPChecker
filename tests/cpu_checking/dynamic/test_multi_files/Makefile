@@ -1,10 +1,10 @@
-include ../../Makefile.config
 
-OP	= $(LLVM_PASS) -O0 -g -fvisibility=hidden
+OP = 	-O0 
+CXX = FPC_INSTRUMENT=1 clang++-fpchecker
 
 all:
-	$(CC) -c main.cpp $(OP)
-	$(CC) -o main main.o
+	$(CXX) -c main.cpp $(OP)
+	$(CXX) -o main main.o
 
 clean:
 	rm -rf *.o main __pycache__ .fpc_logs

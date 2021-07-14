@@ -233,18 +233,18 @@ void _FPC_PRINT_HASH_TABLE_(_FPC_HTABLE_T *hashtable)
     while(next != NULL) {
       fprintf(fp, "  {\n");
       fprintf(fp, "\t\"file\": \"%s\",\n", next->file_name);
-      fprintf(fp, "\t\"line\": %llu,\n", next->line);
+      fprintf(fp, "\t\"line\": %lu,\n", next->line);
 
-      fprintf(fp, "\t\"infinity_pos\": %llu,\n", next->infinity_pos);
-      fprintf(fp, "\t\"infinity_neg\": %llu,\n", next->infinity_neg);
-      fprintf(fp, "\t\"nan\": %llu,\n", next->nan);
-      fprintf(fp, "\t\"division_zero\": %llu,\n", next->division_zero);
-      fprintf(fp, "\t\"cancellation\": %llu,\n", next->cancellation);
-      fprintf(fp, "\t\"compare_zero\": %llu,\n", next->compare_zero);
-      fprintf(fp, "\t\"underflow\": %llu,\n", next->underflow);
-      fprintf(fp, "\t\"latent_infinity_pos\": %llu,\n", next->latent_infinity_pos);
-      fprintf(fp, "\t\"latent_infinity_neg\": %llu,\n", next->latent_infinity_neg);
-      fprintf(fp, "\t\"latent_underflow\": %llu,\n", next->latent_underflow);
+      fprintf(fp, "\t\"infinity_pos\": %lu,\n", next->infinity_pos);
+      fprintf(fp, "\t\"infinity_neg\": %lu,\n", next->infinity_neg);
+      fprintf(fp, "\t\"nan\": %lu,\n", next->nan);
+      fprintf(fp, "\t\"division_zero\": %lu,\n", next->division_zero);
+      fprintf(fp, "\t\"cancellation\": %lu,\n", next->cancellation);
+      fprintf(fp, "\t\"compare_zero\": %lu,\n", next->compare_zero);
+      fprintf(fp, "\t\"underflow\": %lu,\n", next->underflow);
+      fprintf(fp, "\t\"latent_infinity_pos\": %lu,\n", next->latent_infinity_pos);
+      fprintf(fp, "\t\"latent_infinity_neg\": %lu,\n", next->latent_infinity_neg);
+      fprintf(fp, "\t\"latent_underflow\": %lu\n", next->latent_underflow);
 
       next = next->next;
       printed++;

@@ -30,7 +30,7 @@ private:
 
   //IRBuilder<> createBuilderAfter(Instruction *inst);
   //IRBuilder<> createBuilderBefore(Instruction *inst);
-  void setFakeDebugLocation(Function *f, Instruction *inst);
+  void setFakeDebugLocation(Instruction *old_inst, Instruction *new_inst);
   Instruction* firstInstrution();
 
   GlobalVariable* generateIntArrayGlobalVariable(ArrayType *arrType);

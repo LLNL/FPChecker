@@ -154,7 +154,8 @@ void CPUFPInstrumentation::instrumentFunction(Function *f)
 
 				// Create builder to add stuff after the instruction
 			  BasicBlock::iterator nextInst(inst);
-			  IRBuilder<> builder( &(*(nextInst++)) );
+        nextInst++;
+			  IRBuilder<> builder( &(*nextInst) );
 
 			  // Push parameters
 			  std::vector<Value *> args;
@@ -218,9 +219,19 @@ void CPUFPInstrumentation::instrumentFunction(Function *f)
         }
 
 				assert(callInst && "Invalid call instruction!");
-				setFakeDebugLocation(f, callInst);
+				//setFakeDebugLocation(inst, inst);
+        callInst->setDebugLoc(inst->getDebugLoc());
+        assert(callInst->getDebugLoc() && "Invalid debug loc! Please use -g");
 			}
 		}
+
+    //errs() << "*** Function ***\n";
+	  //for (auto bb=f->begin(), end=f->end(); bb != end; ++bb) {
+		//  for (auto i=bb->begin(), bend=bb->end(); i != bend; ++i) {
+		//	  Instruction *inst = &(*i);
+    //    errs() << CUDAAnalysis::inst2str(inst) << "\n";
+    //  }
+    //}
 	}
 
 #ifdef FPC_DEBUG
@@ -257,14 +268,15 @@ bool CPUFPInstrumentation::isSingleFPOperation(const Instruction *inst)
 	return inst->getType()->isFloatTy();
 }
 
-void CPUFPInstrumentation::setFakeDebugLocation(Function *f, Instruction *inst)
-{
-	MDNode *node = f->getMetadata(0);
-	assert(node && "Invalid node!");
+//void CPUFPInstrumentation::setFakeDebugLocation(Function *f, Instruction *inst)
+//void CPUFPInstrumentation::setFakeDebugLocation(Instruction *old_inst, Instruction *new_inst)
+//{
+	//MDNode *node = f->getMetadata(0);
+	//assert(node && "No metadata found - it is possible that debug information is missing (use -g)");
 	//DebugLoc newLoc = DebugLoc::get(1, 1, node);
-	DebugLoc newLoc;
-	inst->setDebugLoc(newLoc);
-}
+	//DebugLoc newLoc(node);
+	//new_inst->setDebugLoc(old_inst->getDebugLoc());
+//}
 
 /* Returns the return instructions of a function */
 /*InstSet FPInstrumentation::finalInstrutions(Function *f)
@@ -314,7 +326,17 @@ void CPUFPInstrumentation::instrumentMainFunction(Function *f)
   CallInst *callInst = nullptr;
   callInst = builder.CreateCall(fpc_init_htable, args);
   assert(callInst && "Invalid call instruction!");
-  setFakeDebugLocation(f, callInst);
+ 
+  // Set debug location 
+  for (auto i=bb->begin(), bend=bb->end(); i != bend; ++i) {
+    Instruction *inst = &(*i);
+    if (inst->getDebugLoc()) {
+      callInst->setDebugLoc(inst->getDebugLoc());
+      break;
+    }
+  }
+  //callInst->setDebugLoc(inst->getDebugLoc());
+  assert(callInst->getDebugLoc() && "Invalid debug loc! Please use -g");
 
 
   /// ------------------ END ----------------------------
@@ -322,12 +344,14 @@ void CPUFPInstrumentation::instrumentMainFunction(Function *f)
   for (auto bb=f->begin(), end=f->end(); bb != end; ++bb) {
     for (auto i=bb->begin(), iend=bb->end(); i != iend; ++i) {
       Instruction *inst = &(*i);
-      if (isa<ReturnInst>(inst)) {
+      if (isa<ReturnInst>(inst) || isa<ResumeInst>(inst)) {
         std::vector<Value *> args;
         ArrayRef<Value *> args_ref(args);
         IRBuilder<> builder(inst);
         auto callInst = builder.CreateCall(fpc_print_locations, args_ref);
         assert(callInst && "Invalid call instruction!");
+        callInst->setDebugLoc(inst->getDebugLoc());
+        assert(callInst->getDebugLoc() && "Invalid debug loc! Please use -g");
       }
     }
   }
