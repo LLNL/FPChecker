@@ -37,9 +37,10 @@ def test_1():
     data = report.loadReport(fileName)
     for i in range(len(data)):
       print('i', i, data[i])
-      if data[i]['file'].endswith('header.h'):
-        if data[i]['line'] == 10:
-          found = True
+      if data[i]['file'].endswith('compute.cpp'):
+        if data[i]['infinity_pos'] == 0 and data[i]['infinity_neg'] > 0:
+          if data[i]['line'] == 10:
+            found = True
 
     assert found
 

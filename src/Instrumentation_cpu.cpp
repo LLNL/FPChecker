@@ -225,13 +225,13 @@ void CPUFPInstrumentation::instrumentFunction(Function *f)
 			}
 		}
 
-    //errs() << "*** Function ***\n";
-	  //for (auto bb=f->begin(), end=f->end(); bb != end; ++bb) {
-		//  for (auto i=bb->begin(), bend=bb->end(); i != bend; ++i) {
-		//	  Instruction *inst = &(*i);
-    //    errs() << CUDAAnalysis::inst2str(inst) << "\n";
-    //  }
-    //}
+    /*errs() << "*** Function ***\n";
+	  for (auto bb=f->begin(), end=f->end(); bb != end; ++bb) {
+		  for (auto i=bb->begin(), bend=bb->end(); i != bend; ++i) {
+			  Instruction *inst = &(*i);
+        errs() << CUDAAnalysis::inst2str(inst) << "\n";
+      }
+    }*/
 	}
 
 #ifdef FPC_DEBUG
