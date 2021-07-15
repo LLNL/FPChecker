@@ -93,7 +93,7 @@ CPUFPInstrumentation::CPUFPInstrumentation(Module *M) :
     SET_ODR_LIKAGE("_FPC_FP32_IS_NAN")
     SET_ODR_LIKAGE("_FPC_FP32_IS_DIVISON_ZERO")
     SET_ODR_LIKAGE("_FPC_FP32_IS_CANCELLATION")
-    SET_ODR_LIKAGE("_FPC_FP32_IS_COMPARISON_ZERO")
+    SET_ODR_LIKAGE("_FPC_FP32_IS_COMPARISON")
     SET_ODR_LIKAGE("_FPC_FP32_IS_SUBNORMAL")
     SET_ODR_LIKAGE("_FPC_FP32_IS_LATENT_INFINITY")
     SET_ODR_LIKAGE("_FPC_FP32_IS_LATENT_INFINITY_POS")
@@ -104,7 +104,7 @@ CPUFPInstrumentation::CPUFPInstrumentation(Module *M) :
     SET_ODR_LIKAGE("_FPC_FP64_IS_NAN")
     SET_ODR_LIKAGE("_FPC_FP64_IS_DIVISON_ZERO")
     SET_ODR_LIKAGE("_FPC_FP64_IS_CANCELLATION")
-    SET_ODR_LIKAGE("_FPC_FP64_IS_COMPARISON_ZERO")
+    SET_ODR_LIKAGE("_FPC_FP64_IS_COMPARISON")
     SET_ODR_LIKAGE("_FPC_FP64_IS_SUBNORMAL")
     SET_ODR_LIKAGE("_FPC_FP64_IS_LATENT_INFINITY")
     SET_ODR_LIKAGE("_FPC_FP64_IS_LATENT_INFINITY_POS")
@@ -148,8 +148,8 @@ void CPUFPInstrumentation::instrumentFunction(Function *f)
 		for (auto i=bb->begin(), bend=bb->end(); i != bend; ++i) {
 			Instruction *inst = &(*i);
 
-			if (isFPOperation(inst) &&
-			    (isSingleFPOperation(inst) || isDoubleFPOperation(inst))) {
+			if (isFPOperation(inst) && 
+        (isSingleFPOperation(inst) || isDoubleFPOperation(inst))) {
 				DebugLoc loc = inst->getDebugLoc();
 
 				// Create builder to add stuff after the instruction
@@ -159,12 +159,13 @@ void CPUFPInstrumentation::instrumentFunction(Function *f)
 
 			  // Push parameters
 			  std::vector<Value *> args;
-			  if (inst->getOpcode() != Instruction::FCmp) {
+			  if (!isCmpEqual(inst)) {
 			    args.push_back(inst);
 			  } else {
-			    //ConstantFP* tmpFP = ConstantFP::get(builder.getDoubleTy(), 0.0);
-			    //args.push_back(tmpFP);
-			    args.push_back(ConstantFP::get(builder.getDoubleTy(), 0.0));
+          if (isSingleFPOperation(inst))
+			      args.push_back(ConstantFP::get(builder.getFloatTy(), 0.0));
+          else
+			      args.push_back(ConstantFP::get(builder.getDoubleTy(), 0.0));
 			  }
 				args.push_back(inst->getOperand(0));
 				args.push_back(inst->getOperand(1));
@@ -192,15 +193,16 @@ void CPUFPInstrumentation::instrumentFunction(Function *f)
         args.push_back(loadInst);
 
         // Push operation type
-        int operationType;
+        int operationType = 0;
         if      (inst->getOpcode() == Instruction::FAdd) operationType=0;
         else if (inst->getOpcode() == Instruction::FSub) operationType=1;
         else if (inst->getOpcode() == Instruction::FMul) operationType=2;
         else if (inst->getOpcode() == Instruction::FDiv) operationType=3;
-        else if (inst->getOpcode() == Instruction::FCmp) operationType=4;
+        else if (isCmpEqual(inst))                       operationType=4;
         else if (inst->getOpcode() == Instruction::FRem) operationType=5;
         else operationType=-1;
         assert(operationType >=0 && "Unknown operation");
+
 
         ConstantInt* opType = ConstantInt::get(mod->getContext(),
             APInt(32, operationType, true));
@@ -242,6 +244,17 @@ void CPUFPInstrumentation::instrumentFunction(Function *f)
 #endif
 }
 
+bool CPUFPInstrumentation::isCmpEqual(const Instruction *inst) {
+  if (inst->getOpcode() == Instruction::FCmp) {
+    if (const CmpInst *cmpInst = dyn_cast<CmpInst>(inst)) {
+      if (cmpInst->getPredicate() == llvm::CmpInst::Predicate::FCMP_OEQ ||
+          cmpInst->getPredicate() == llvm::CmpInst::Predicate::FCMP_UEQ)
+          return true;
+    }
+  }
+  return false;
+}
+
 bool CPUFPInstrumentation::isFPOperation(const Instruction *inst)
 {
 	return (
@@ -249,7 +262,7 @@ bool CPUFPInstrumentation::isFPOperation(const Instruction *inst)
 			(inst->getOpcode() == Instruction::FDiv) ||
 			(inst->getOpcode() == Instruction::FAdd) ||
 			(inst->getOpcode() == Instruction::FSub) ||
-			(inst->getOpcode() == Instruction::FCmp) ||
+			isCmpEqual(inst)                         ||
 			(inst->getOpcode() == Instruction::FRem)
 				 );
 }
@@ -258,14 +271,16 @@ bool CPUFPInstrumentation::isDoubleFPOperation(const Instruction *inst)
 {
 	if (!isFPOperation(inst))
 		return false;
-	return inst->getType()->isDoubleTy();
+	//return inst->getType()->isDoubleTy();
+  return inst->getOperand(0)->getType()->isDoubleTy();
 }
 
 bool CPUFPInstrumentation::isSingleFPOperation(const Instruction *inst)
 {
 	if (!isFPOperation(inst))
 		return false;
-	return inst->getType()->isFloatTy();
+	//return inst->getType()->isFloatTy();
+	return inst->getOperand(0)->getType()->isFloatTy();
 }
 
 //void CPUFPInstrumentation::setFakeDebugLocation(Function *f, Instruction *inst)

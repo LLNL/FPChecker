@@ -23,7 +23,7 @@ struct _FPC_ITEM_S_ {
   uint64_t nan;
   uint64_t division_zero;
   uint64_t cancellation;
-  uint64_t compare_zero;
+  uint64_t comparison;
   uint64_t underflow;
   uint64_t latent_infinity_pos;
   uint64_t latent_infinity_neg;
@@ -111,7 +111,7 @@ _FPC_ITEM_T_ *_FPC_HT_NEWPAIR_(_FPC_ITEM_T_ *val)
   newpair->nan                  = val->nan;
   newpair->division_zero        = val->division_zero;
   newpair->cancellation         = val->cancellation;
-  newpair->compare_zero         = val->compare_zero;
+  newpair->comparison           = val->comparison;
   newpair->underflow            = val->underflow;
   newpair->latent_infinity_pos  = val->latent_infinity_pos;
   newpair->latent_infinity_neg  = val->latent_infinity_neg;
@@ -160,7 +160,7 @@ void _FPC_HT_SET_(_FPC_HTABLE_T *hashtable, _FPC_ITEM_T_ *newVal)
     next->nan                  += newVal->nan;
     next->division_zero        += newVal->division_zero;
     next->cancellation         += newVal->cancellation;
-    next->compare_zero         += newVal->compare_zero;
+    next->comparison           += newVal->comparison;
     next->underflow            += newVal->underflow;
     next->latent_infinity_pos  += newVal->latent_infinity_pos;
     next->latent_infinity_neg  += newVal->latent_infinity_neg;
@@ -240,7 +240,7 @@ void _FPC_PRINT_HASH_TABLE_(_FPC_HTABLE_T *hashtable)
       fprintf(fp, "\t\"nan\": %lu,\n", next->nan);
       fprintf(fp, "\t\"division_zero\": %lu,\n", next->division_zero);
       fprintf(fp, "\t\"cancellation\": %lu,\n", next->cancellation);
-      fprintf(fp, "\t\"compare_zero\": %lu,\n", next->compare_zero);
+      fprintf(fp, "\t\"comparison\": %lu,\n", next->comparison);
       fprintf(fp, "\t\"underflow\": %lu,\n", next->underflow);
       fprintf(fp, "\t\"latent_infinity_pos\": %lu,\n", next->latent_infinity_pos);
       fprintf(fp, "\t\"latent_infinity_neg\": %lu,\n", next->latent_infinity_neg);

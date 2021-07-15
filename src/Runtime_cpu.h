@@ -76,7 +76,9 @@ int _FPC_FP32_IS_CANCELLATION(float x, float y, float z, int op) {
   return 0;
 }
 
-int _FPC_FP32_IS_COMPARISON_ZERO(float x, float y, float z, int op) {
+int _FPC_FP32_IS_COMPARISON(float x, float y, float z, int op) {
+  if (op == 4)
+    return 1;
 
   return 0;
 }
@@ -179,7 +181,9 @@ int _FPC_FP64_IS_CANCELLATION(double x, double y, double z, int op) {
   return 0;
 }
 
-int _FPC_FP64_IS_COMPARISON_ZERO(double x, double y, double z, int op) {
+int _FPC_FP64_IS_COMPARISON(double x, double y, double z, int op) {
+  if (op == 4)
+    return 1;
 
   return 0;
 }
@@ -257,7 +261,7 @@ int _FPC_EVENT_OCURRED(_FPC_ITEM_T_ *item) {
       item->nan ||
       item->division_zero ||
       item->cancellation ||
-      item->compare_zero ||
+      item->comparison ||
       item->underflow ||
       item->latent_infinity_pos ||
       item->latent_infinity_neg ||
@@ -292,7 +296,7 @@ void _FPC_FP32_CHECK_(
   item.nan                  = _FPC_FP32_IS_NAN(x);
   item.division_zero        = _FPC_FP32_IS_DIVISON_ZERO(x, y, z, op);
   item.cancellation         = _FPC_FP32_IS_CANCELLATION(x, y, z, op);
-  item.compare_zero         = _FPC_FP32_IS_COMPARISON_ZERO(x, y, z, op);
+  item.comparison           = _FPC_FP32_IS_COMPARISON(x, y, z, op);
   item.underflow            = _FPC_FP32_IS_SUBNORMAL(x);
   item.latent_infinity_pos  = _FPC_FP32_IS_LATENT_INFINITY_POS(x);
   item.latent_infinity_neg  = _FPC_FP32_IS_LATENT_INFINITY_NEG(x);
@@ -315,7 +319,7 @@ void _FPC_FP64_CHECK_(
   item.nan                  = _FPC_FP64_IS_NAN(x);
   item.division_zero        = _FPC_FP64_IS_DIVISON_ZERO(x, y, z, op);
   item.cancellation         = _FPC_FP64_IS_CANCELLATION(x, y, z, op);
-  item.compare_zero         = _FPC_FP64_IS_COMPARISON_ZERO(x, y, z, op);
+  item.comparison           = _FPC_FP64_IS_COMPARISON(x, y, z, op);
   item.underflow            = _FPC_FP64_IS_SUBNORMAL(x);
   item.latent_infinity_pos  = _FPC_FP64_IS_LATENT_INFINITY_POS(x);
   item.latent_infinity_neg  = _FPC_FP64_IS_LATENT_INFINITY_NEG(x);

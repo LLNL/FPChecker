@@ -33,10 +33,9 @@ private:
   void setFakeDebugLocation(Instruction *old_inst, Instruction *new_inst);
   Instruction* firstInstrution();
 
-  GlobalVariable* generateIntArrayGlobalVariable(ArrayType *arrType);
-  void createReadFunctionForGlobalArray(GlobalVariable *arr, ArrayType *arrType, std::string funcName);
-  void createWriteFunctionForGlobalArray(GlobalVariable *arr, ArrayType *arrType, std::string funcName);
-
+  //GlobalVariable* generateIntArrayGlobalVariable(ArrayType *arrType);
+  //void createReadFunctionForGlobalArray(GlobalVariable *arr, ArrayType *arrType, std::string funcName);
+  //void createWriteFunctionForGlobalArray(GlobalVariable *arr, ArrayType *arrType, std::string funcName);
 
 public:
   CPUFPInstrumentation(Module *M);
@@ -54,6 +53,7 @@ public:
   static bool isSingleFPOperation(const Instruction *inst);
   //static bool isMainFunction(Function *f);
   //bool errorsDontAbortMode();
+  static bool isCmpEqual(const Instruction *inst);
 };
 
 }
