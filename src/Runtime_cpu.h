@@ -6,6 +6,8 @@
 #include <stdio.h>
 #include <math.h>
 
+#define MAX(a,b) (((a)>(b))?(a):(b))
+
 /*----------------------------------------------------------------------------*/
 /* Global data                                                                */
 /*----------------------------------------------------------------------------*/
@@ -71,7 +73,27 @@ int _FPC_FP32_IS_DIVISON_ZERO(float x, float y, float z, int op) {
   return 0;
 }
 
+uint32_t _FPC_FP32_GET_EXPONENT(float x) {
+  uint32_t val;
+  memcpy((void *) &val, (void *) &x, sizeof(val));
+  val = val << 1;   // get rid of sign bit
+  val = val >> 24;  // get rid of the mantissa bits
+  return val;
+}
+
+// Number of cancelled digits calculated as:
+//    max{exponent(op1), exponent(op2)} - exponent(res)
+// res = result
+// A cancellation has happened if the number of canceled digits 
+// is greater than zero
 int _FPC_FP32_IS_CANCELLATION(float x, float y, float z, int op) {
+  if (op==0 || op==1) {
+    uint32_t e1 = _FPC_FP32_GET_EXPONENT(y);
+    uint32_t e2 = _FPC_FP32_GET_EXPONENT(z);
+    uint32_t re = _FPC_FP32_GET_EXPONENT(x);
+    if ((MAX((int)e1,(int)e2) - (int)re) > 30)
+      return 1;
+  }
 
   return 0;
 }
@@ -85,12 +107,8 @@ int _FPC_FP32_IS_COMPARISON(float x, float y, float z, int op) {
 
 int _FPC_FP32_IS_SUBNORMAL(float x) {
   int ret = 0;
-  uint32_t val;
-  memcpy((void *) &val, (void *) &x, sizeof(val));
-  val = val << 1;   // get rid of sign bit
-  val = val >> 24;  // get rid of the mantissa bits
-  if (x != 0.0 && x != -0.0)
-  {
+  uint32_t val = _FPC_FP32_GET_EXPONENT(x);
+  if (x != 0.0 && x != -0.0) {
     if (val == 0)
       ret = 1;
   }
@@ -99,13 +117,9 @@ int _FPC_FP32_IS_SUBNORMAL(float x) {
 
 int _FPC_FP32_IS_LATENT_INFINITY(float x) {
   int ret = 0;
-  uint32_t val;
-  memcpy((void *) &val, (void *) &x, sizeof(val));
-  val = val << 1;   // get rid of sign bit
-  val = val >> 24;  // get rid of the mantissa bits
-  if (x != 0.0 && x != -0.0)
-  {
-    int maxVal = 256 - (int)(DANGER_ZONE_PERCENTAGE*256.0);
+  uint32_t val = _FPC_FP32_GET_EXPONENT(x);
+  if (x != 0.0 && x != -0.0){
+    uint64_t maxVal = 256 - (uint64_t)(DANGER_ZONE_PERCENTAGE*256.0);
     if (val >= maxVal)
       ret = 1;
   }
@@ -130,13 +144,9 @@ int _FPC_FP32_IS_LATENT_INFINITY_NEG(float x) {
 
 int _FPC_FP32_IS_LATENT_SUBNORMAL(float x) {
   int ret = 0;
-  uint32_t val;
-  memcpy((void *) &val, (void *) &x, sizeof(val));
-  val = val << 1;   // get rid of sign bit
-  val = val >> 24;  // get rid of the mantissa bits
-  if (x != 0.0 && x != -0.0)
-  {
-    int minVal = (int)(DANGER_ZONE_PERCENTAGE*256.0);
+  uint32_t val = _FPC_FP32_GET_EXPONENT(x);
+  if (x != 0.0 && x != -0.0) {
+    uint64_t minVal = (uint64_t)(DANGER_ZONE_PERCENTAGE*256.0);
     if (val <= minVal)
       ret = 1;
   }
@@ -176,7 +186,29 @@ int _FPC_FP64_IS_DIVISON_ZERO(double x, double y, double z, int op) {
   return 0;
 }
 
+uint64_t _FPC_FP64_GET_EXPONENT(double x) {
+  uint64_t val;
+  memcpy((void *) &val, (void *) &x, sizeof(val));
+  val = val << 1;   // get rid of sign bit
+  val = val >> 53;  // get rid of the mantissa bits
+  return val;
+}
+
+// Number of cancelled digits calculated as:
+//    max{exponent(op1), exponent(op2)} - exponent(res)
+// res = result
+// A cancellation has happened if the number of canceled digits 
+// is greater than zero
+// Threshold: 10^9 or 2^30, i.e., 9 decimal digits or 30 binary digits
 int _FPC_FP64_IS_CANCELLATION(double x, double y, double z, int op) {
+  if (op==0 || op==1) {
+    uint32_t e1 = _FPC_FP64_GET_EXPONENT(y);
+    uint32_t e2 = _FPC_FP64_GET_EXPONENT(z);
+    uint32_t re = _FPC_FP64_GET_EXPONENT(x);
+    if ((MAX((int)e1,(int)e2) - (int)re) > 30) {
+      return 1;
+    }
+  }
 
   return 0;
 }
@@ -191,10 +223,10 @@ int _FPC_FP64_IS_COMPARISON(double x, double y, double z, int op) {
 int _FPC_FP64_IS_SUBNORMAL(double x)
 {
   int ret = 0;
-  uint64_t val;
-  memcpy((void *) &val, (void *) &x, sizeof(val));
-  val = val << 1;   // get rid of sign bit
-  val = val >> 53;  // get rid of the mantissa bits
+  uint64_t val = _FPC_FP64_GET_EXPONENT(x);
+  //memcpy((void *) &val, (void *) &x, sizeof(val));
+  //val = val << 1;   // get rid of sign bit
+  //val = val >> 53;  // get rid of the mantissa bits
   if (x != 0.0 && x != -0.0)
   {
     if (val == 0)
@@ -206,13 +238,9 @@ int _FPC_FP64_IS_SUBNORMAL(double x)
 int _FPC_FP64_IS_LATENT_INFINITY(double x)
 {
   int ret = 0;
-  uint64_t val;
-  memcpy((void *) &val, (void *) &x, sizeof(val));
-  val = val << 1;   // get rid of sign bit
-  val = val >> 53;  // get rid of the mantissa bits
-  if (x != 0.0 && x != -0.0)
-  {
-    int maxVal = 2048 - (int)(DANGER_ZONE_PERCENTAGE*2048.0);
+  uint64_t val = _FPC_FP64_GET_EXPONENT(x);
+  if (x != 0.0 && x != -0.0) {
+    uint64_t maxVal = 2048 - (uint64_t)(DANGER_ZONE_PERCENTAGE*2048.0);
     if (val >= maxVal)
       ret = 1;
   }
@@ -237,13 +265,9 @@ int _FPC_FP64_IS_LATENT_INFINITY_NEG(double x) {
 
 int _FPC_FP64_IS_LATENT_SUBNORMAL(double x) {
   int ret = 0;
-  uint64_t val;
-  memcpy((void *) &val, (void *) &x, sizeof(val));
-  val = val << 1;   // get rid of sign bit
-  val = val >> 53;  // get rid of the mantissa bits
-  if (x != 0.0 && x != -0.0)
-  {
-    int minVal = (int)(DANGER_ZONE_PERCENTAGE*2048.0);
+  uint64_t val = _FPC_FP64_GET_EXPONENT(x);
+  if (x != 0.0 && x != -0.0) {
+    uint64_t minVal = (uint64_t)(DANGER_ZONE_PERCENTAGE*2048.0);
     if (val <= minVal)
       ret = 1;
   }
