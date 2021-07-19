@@ -70,6 +70,10 @@ public:
       }
 		}
 
+  // This emulates a failure in the pass
+  if (getenv("FPC_INJECT_FAULT") != NULL)
+    exit(-1);
+
 		delete fpInstrumentation;
 		return false;
 	}

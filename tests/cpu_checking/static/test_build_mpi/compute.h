@@ -1,0 +1,3 @@
+
+
+void compute(double x);

@@ -1,9 +1,5 @@
 #!/usr/bin/env python3
 
-# Description: This script replaces the clang or clang++ command.
-#              It adds the flags required to load the LLVM pass
-#              and include the runtime header file.
-
 import os
 import pathlib
 import subprocess
@@ -24,24 +20,48 @@ FPCHECKER_RUNTIME   = FPCHECKER_PATH+'/../src/Runtime_cpu.h'
 LLVM_PASS           = "-Xclang -load -Xclang " + FPCHECKER_LIB + " -include " + FPCHECKER_RUNTIME + ' -g '
 
 # --------------------------------------------------------------------------- #
+# --- Global variables ------------------------------------------------------ #
+# --------------------------------------------------------------------------- #
+
+C_WRAPPER_NAMES   = ['mpicc', 'mpiclang', 'mpigcc']
+CXX_WRAPPER_NAMES = ['mpiCC', 'mpic++', 'mpicxx', 'mpiclang++', 'mpig++']
+
+# --------------------------------------------------------------------------- #
 # --- Classes --------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
 class Command:
   def __init__(self, cmd):
-    # We assume the command is clang-fpchecker or clang++-fpchecker
-    if os.path.split(cmd[0])[1].split('-')[0].endswith('clang++'):
-      self.name = 'clang++'
+    # We assume the command is NAME-fpchecker, where NAME is one of the
+    # supported C or CXX wrapper names
+    wrapper_name = os.path.split(cmd[0])[1].split('-')[0]
+    if (wrapper_name in C_WRAPPER_NAMES):
+      self.name = "clang"
+    elif (wrapper_name in CXX_WRAPPER_NAMES):
+      self.name = "clang++"
     else:
-      self.name = 'clang'
+      raise CompileException("Invalid MPI wrapper name")
+    self.wrapper_name = wrapper_name
     self.parameters = cmd[1:]
-    self.preprocessedFile = None
-    self.instrumentedFile = None
-    self.outputFile = None
+    self.mpi_params = self.getMPICompileParams()
+
+  def getMPICompileParams(self):
+    cmd = self.wrapper_name + ' --showme:compile'
+    try:
+      cmdOutput = subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True)
+      params = cmdOutput.decode('utf-8')
+      ret = []
+      for i in params.split():
+        if 'rpath' not in i:
+          ret.append(i)
+      return ret
+    except subprocess.CalledProcessError as e:
+      prRed(e)
 
   def executeOriginalCommand(self):
+    print('original....')
     try:
-      cmd = [self.name] + self.parameters
+      cmd = [self.wrapper_name] + self.parameters
       if verbose(): print('Executing original command:', ' '.join(cmd))
       subprocess.run(' '.join(cmd), shell=True, check=True)
     except subprocess.CalledProcessError as e:
@@ -64,16 +84,8 @@ class Command:
       return True
     return False
 
-  def getOutputFileIfExists(self):
-    for i in range(len(self.parameters)):
-      p = self.parameters[i]
-      if p == '-o' or p == '--output-file':
-        self.outputFile = self.parameters[i+1]
-        return self.parameters[i+1]
-    return None
-
   def instrumentIR(self):
-    new_cmd = [self.name] + LLVM_PASS.split() + self.parameters
+    new_cmd = [self.name] + self.mpi_params + LLVM_PASS.split() + self.parameters
     try:
       cmdOutput = subprocess.run(' '.join(new_cmd), shell=True, check=True)
     except Exception as e:

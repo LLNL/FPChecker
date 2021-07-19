@@ -1,0 +1,44 @@
+[
+  {
+	"file": "/path/file_1.cpp",
+	"line": 1,
+	"infinity_pos": 1,
+	"infinity_neg": 1,
+	"nan": 1,
+	"division_zero": 1,
+	"cancellation": 1,
+	"comparison": 1,
+	"underflow": 1,
+	"latent_infinity_pos": 1,
+	"latent_infinity_neg": 1,
+	"latent_underflow": 1
+  },
+  {
+	"file": "/path/file_1.cpp",
+	"line": 2,
+	"infinity_pos": 1,
+	"infinity_neg": 1,
+	"nan": 1,
+	"division_zero": 1,
+	"cancellation": 1,
+	"comparison": 1,
+	"underflow": 1,
+	"latent_infinity_pos": 1,
+	"latent_infinity_neg": 1,
+	"latent_underflow": 1
+  },
+  {
+	"file": "/path/file_2.cpp",
+	"line": 3,
+	"infinity_pos": 1,
+	"infinity_neg": 1,
+	"nan": 1,
+	"division_zero": 1,
+	"cancellation": 1,
+	"comparison": 1,
+	"underflow": 1,
+	"latent_infinity_pos": 1,
+	"latent_infinity_neg": 1,
+	"latent_underflow": 1
+  }
+]
