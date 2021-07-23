@@ -11,7 +11,7 @@
     border-color: #1F53D2;
 }
 .report_box {
-    width: 500px;
+    width: 700px;
     color: #5D5D5D;
     height: 375px;
     border-style: solid;
@@ -23,7 +23,7 @@
     font-family: "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", "DejaVu Sans", Verdana, sans-serif;
 }
 .report_box_files {
-    width: 500px;
+    width: 600px;
     color: #5D5D5D;
     border-style: solid;
     -webkit-box-shadow: 4px 4px 5px #D5D5D5;
@@ -48,7 +48,7 @@
     border-width: thin;
 }
 .report_box_stats {
-    width: 500px;
+    width: 700px;
     color: #000000;
     border-left-style: solid;
     border-right-style: solid;
@@ -64,8 +64,7 @@
     font-style: normal;
     text-align: center;
     font-size: small;
-    max-width: 500px;
-    min-width: 500px;
+    max-width: 700px;
 }
 .body_class {
     background-color: #F2F2F2;
@@ -157,6 +156,8 @@ a:hover span {
     padding-right: 10px;
     padding-bottom: 10px;
     text-align: left;
+    max-width: 400px;
+    overflow-x: scroll;
 }
 code {
 	font-family: Consolas, "Andale Mono", "Lucida Console", "Lucida Sans Typewriter", Monaco, "Courier New", "monospace";
@@ -164,4 +165,7 @@ code {
 }
 .highlightme { 
 	background-color:#FFFF00; 
+}
+.th_class {
+    text-align: left;
 }

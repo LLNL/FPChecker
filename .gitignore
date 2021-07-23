@@ -14,3 +14,4 @@ main
 *.pytest_cache*
 .cache
 .fpchecker/
+.DS_Store
