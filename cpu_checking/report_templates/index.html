@@ -1,0 +1,151 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>FPChecker Report</title>
+<link href="sitestyle.css" rel="stylesheet" type="text/css">	
+	
+</head>
+<body class="body_class">
+<header>
+<div class="header_class">&nbsp;&nbsp;<img src="icons/logo_fpchecker.png" alt=""/></div>
+</header>
+<div class="separation_class"></div>
+<div class="hierarchy_class"><a href="#">Main Report</a></div>
+<h2 id="heading">Main Report</h2>
+	
+
+<table width="150" border="0" class="report_box">
+  <tbody>
+    <tr>
+      <td class="icon_class"><img src="icons/infinity_pos.svg" alt="" width="50"/>
+      <td><div class="tooltip">Infinity (+)
+  		<span class="tooltiptext">This is detected when operations produce positive infinity, such as 1.0 / 0.0. 
+			Infinities propagate through calculations: for example, 2 + ∞ = ∞.</span></div>
+	  </td>
+      <td>
+		  <!-- INFINITY_POS --><a href="./infinity_pos/infinity_pos.html">2</a>
+	  </td>
+    </tr>
+    <tr>
+      <td class="icon_class">
+		  <img src="icons/infinity_neg.svg" alt="" width="50"/>
+		</td>
+      <td><div class="tooltip">Infinity (-)
+		  <span class="tooltiptext">This is detected when operations produce negative infinity.</span></div>
+		</td>
+      <td>
+		  <!-- INFINITY_NEG --><a href="#">0</a>
+	  </td>
+    </tr>
+    <tr>
+      <td class="icon_class"><img src="icons/nan.svg" alt="" width="30"/></td>
+      <td><div class="tooltip">NaN
+		  <span class="tooltiptext">NaN (not a number) are the result of invalid operations, such as 0/0 or sqrt(-1).</span></div>
+	   </td>
+       <td>
+		   <!-- NAN --><a href="#">1</a>
+	   </td>
+    </tr>
+    <tr>
+      <td class="icon_class"><img src="icons/div_zero.svg" alt="" width="35"/></td>
+      <td><div class="tooltip">Division by zero
+		  <span class="tooltiptext">This occurs when a finite nonzero number is divided by zero. This typically produce an infinity.</span></div>
+	  </td>
+      <td>
+		  <!-- DIV_ZERO --><a href="#">1</a>
+	  </td>
+    </tr>
+    <tr>
+      <td class="icon_class"><img src="icons/cancellation.svg" alt="" width="40"/></td>
+      <td><div class="tooltip">Cancellation
+		  <span class="tooltiptext">Cancellation occurs when two nearly equal numbers are subtracted. 
+			  By default, this event is detected when at least ten decimal digits are lost due to a subtraction.</span></div>
+	  </td>
+      <td>
+		  <!-- CANCELLATION --><a href="#">335</a>
+	  </td>
+    </tr>
+    <tr>
+      <td class="icon_class"><img src="icons/comparison.svg" alt="" width="50"/></td>
+      <td><div class="tooltip">Comparison
+		  <span class="tooltiptext">This occurs when two floating-point numbers are compared for equality. 
+			  Often comparing if two floating-point numbers are equal is not a good idea.</span></div>
+	  </td>
+      <td>
+		  <!-- COMPARISON --><a href="#">10</a>
+	  </td>
+    </tr>
+    <tr>
+      <td class="icon_class"><img src="icons/underflow.svg" alt="" width="30"/></td>
+      <td><div class="tooltip">Underflow (subnormal)
+		  <span class="tooltiptext">Underflows are detected when an operation produces a subnormal number 
+			  because the result was not representable as a normal number. Certain compiler optimizations 
+			  can produce unexpected results when operands are subnormal numbers.</span></div>
+	  </td>
+      <td>
+		  <!-- UNDERFLOW --><a href="#">567</a>
+	  </td>
+    </tr>
+    <tr>
+      <td class="icon_class"><img src="icons/latent_infinity_pos.svg" alt="" width="50"/></td>
+      <td><div class="tooltip">Latent Infinity (+)
+		  <span class="tooltiptext">This is detected when an operation produces a normal number that is large, 
+			  and it is in close proximity to positive infinity.</span></div>
+	  </td>
+      <td>
+		  <!-- LATENT_INFINITY_POS --><a href="#">3378</a>
+	  </td>
+    </tr>
+    <tr>
+      <td class="icon_class"><img src="icons/latent_infinity_pos.svg" alt="" width="50"/></td>
+      <td><div class="tooltip">Latent Infinity (-)
+		  <span class="tooltiptext">This is detected when an operation produces a normal number that is large, 
+			  and it is in close proximity to negative infinity.</span></div>
+	  </td>
+      <td>
+		  <!-- LATENT_INFINITY_NEG --><a href="#">0</a>
+	  </td>
+    </tr>
+    <tr>
+      <td class="icon_class"><img src="icons/latent_underflow.svg" alt="" width="40"/></td>
+      <td><div class="tooltip">Latent underflow
+		  <span class="tooltiptext">This is detected when an operation produces a normal number that is small 
+			  and it is in close proximity to becoming an underflow (subnormal number).</span></div>
+	  </td>
+      <td>
+		  <!-- LATENT_UNDERFLOW --><a href="#">2456</a>
+	  </td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="separation_class"></div>
+<div class="separation_class"></div>
+	
+<table width="200" border="0" class="report_box_stats">
+  <tbody>
+    <tr>
+      <td class="td_class">Code paths:</td>
+      <td class="td_class">
+		  <!-- CODE_PATHS -->/path/to/long/code/name/in/filesystem/very/very/, /path/to/long/code/name/in/filesystem
+	  </td>
+    </tr>
+    <tr>
+      <td class="td_class">Files affected:</td>
+      <td class="td_class">
+		  <!-- FILES_AFFECTED -->24
+	  </td>
+    </tr>
+    <tr>
+      <td class="td_class">Lines affected:</td>
+      <td class="td_class">
+		  <!-- LINES_AFFECTED -->3456
+	  </td>
+    </tr>
+  </tbody>
+</table>
+
+	
+</body>
+</html>
