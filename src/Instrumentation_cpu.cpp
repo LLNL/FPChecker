@@ -175,6 +175,9 @@ void CPUFPInstrumentation::instrumentFunction(Function *f)
 
 				// Push location parameter (line number)
 				int lineNumber = CUDAAnalysis::getLineOfCode(inst);
+        // Discard if line number is invalid (no debug info for inst)
+        if (lineNumber == -1)
+          continue;
 				ConstantInt* locId = ConstantInt::get(mod->getContext(),
 				    APInt(32, lineNumber, true));
 				args.push_back(locId);
@@ -223,9 +226,10 @@ void CPUFPInstrumentation::instrumentFunction(Function *f)
         }
 
 				assert(callInst && "Invalid call instruction!");
+        setFakeDebugLocation(inst, callInst, f);
 				//setFakeDebugLocation(inst, inst);
-        callInst->setDebugLoc(inst->getDebugLoc());
-        assert(callInst->getDebugLoc() && "Invalid debug loc! Please use -g");
+        //callInst->setDebugLoc(inst->getDebugLoc());
+        //assert(callInst->getDebugLoc() && "Invalid debug loc! Please use -g");
 			}
 		}
 
@@ -283,6 +287,21 @@ bool CPUFPInstrumentation::isSingleFPOperation(const Instruction *inst)
 		return false;
 	//return inst->getType()->isFloatTy();
 	return inst->getOperand(0)->getType()->isFloatTy();
+}
+
+void CPUFPInstrumentation::setFakeDebugLocation(Instruction *old_inst, Instruction *new_inst, Function *f) {
+  auto di = old_inst->getDebugLoc();
+  if (!di) { // couldn't find debug info
+    for (auto bb=f->begin(), end=f->end(); bb != end; ++bb) {
+		  for (auto i=bb->begin(), bend=bb->end(); i != bend; ++i) {
+			  Instruction *inst = &(*i);
+        auto tmp_di = inst->getDebugLoc();
+        if (tmp_di)
+          new_inst->setDebugLoc(inst->getDebugLoc());
+      }
+    } 
+  }
+  assert(new_inst->getDebugLoc() && "Invalid debug loc! Please use -g");
 }
 
 //void CPUFPInstrumentation::setFakeDebugLocation(Function *f, Instruction *inst)

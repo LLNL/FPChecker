@@ -59,7 +59,6 @@ class Command:
       prRed(e)
 
   def executeOriginalCommand(self):
-    print('original....')
     try:
       cmd = [self.wrapper_name] + self.parameters
       if verbose(): print('Executing original command:', ' '.join(cmd))
