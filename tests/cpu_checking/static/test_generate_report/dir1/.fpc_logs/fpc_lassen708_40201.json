@@ -1,6 +1,6 @@
 [
   {
-	"file": "/path/file_1.cpp",
+	"file": "./test.cpp",
 	"line": 1,
 	"infinity_pos": 1,
 	"infinity_neg": 1,
@@ -14,7 +14,7 @@
 	"latent_underflow": 1
   },
   {
-	"file": "/path/file_1.cpp",
+	"file": "./test.cpp",
 	"line": 2,
 	"infinity_pos": 1,
 	"infinity_neg": 1,
@@ -28,7 +28,7 @@
 	"latent_underflow": 1
   },
   {
-	"file": "/path/file_2.cpp",
+	"file": "./test.cpp",
 	"line": 3,
 	"infinity_pos": 1,
 	"infinity_neg": 1,

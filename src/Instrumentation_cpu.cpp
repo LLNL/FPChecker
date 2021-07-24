@@ -296,11 +296,15 @@ void CPUFPInstrumentation::setFakeDebugLocation(Instruction *old_inst, Instructi
 		  for (auto i=bb->begin(), bend=bb->end(); i != bend; ++i) {
 			  Instruction *inst = &(*i);
         auto tmp_di = inst->getDebugLoc();
-        if (tmp_di)
+        if (tmp_di) {
           new_inst->setDebugLoc(inst->getDebugLoc());
+          return;
+        }
       }
     } 
   }
+  // IF we reach it, it means we couldn't find debug information
+  //new_inst->eraseFromParent();
   assert(new_inst->getDebugLoc() && "Invalid debug loc! Please use -g");
 }
 

@@ -3,6 +3,7 @@
 import os
 import pathlib
 import subprocess
+import platform
 import sys
 from colors import prGreen, prCyan, prRed
 from exceptions import CommandException, CompileException, EmptyFileException
@@ -14,8 +15,10 @@ from fpc_logging import logMessage, verbose
 
 # Main installation path
 FPCHECKER_PATH      = str(pathlib.Path(__file__).parent.absolute())
-#FPCHECKER_LIB       = FPCHECKER_PATH+'/../lib/libfpchecker_cpu.so'
-FPCHECKER_LIB       = FPCHECKER_PATH+'/../src/libfpchecker_cpu.so'
+if platform.system() == 'Darwin':
+  FPCHECKER_LIB       = FPCHECKER_PATH+'/../lib/libfpchecker_cpu.dylib'
+else:
+  FPCHECKER_LIB       = FPCHECKER_PATH+'/../lib/libfpchecker_cpu.so'
 FPCHECKER_RUNTIME   = FPCHECKER_PATH+'/../src/Runtime_cpu.h'
 LLVM_PASS           = "-Xclang -load -Xclang " + FPCHECKER_LIB + " -include " + FPCHECKER_RUNTIME + ' -g '
 

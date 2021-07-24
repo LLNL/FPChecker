@@ -8,4 +8,4 @@ all:
 	$(CXX) -o main compute.o main.o
 
 clean:
-	rm -rf *.o main __pycache__ .fpc_logs
+	rm -rf *.o main __pycache__ .fpc_logs .fpc_log.txt

@@ -21,6 +21,14 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -O3 -g -std=c++14 -DFPC_DEBUG")
 
 include(GNUInstallDirs)
 
+#enable_testing()
+#include(CTest)
+#find_package(Python3 COMPONENTS Interpreter)
+#if(Python3_Interpreter_FOUND)
+#  add_test(NAME fpchecker-tests COMMAND Python3::Interpreter -m pytest 
+#            WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/tests/cpu_checking/static)
+#endif()
+
 set(NVCC_WRAPPER "${CMAKE_INSTALL_PREFIX}/bin/nvcc-fpc")
 configure_file(interception_tool/intercept.h.in intercept.h)
 
@@ -30,6 +38,14 @@ add_library(fpchecker SHARED
 	src/Logging.cpp
 	src/Utility.cpp
 	src/driver.cpp
+)
+
+add_library(fpchecker_cpu SHARED 
+	src/CodeMatching.cpp
+	src/Instrumentation_cpu.cpp
+	src/Logging.cpp
+	src/Utility.cpp
+	src/driver_cpu.cpp
 )
 
 add_library(fpchecker_plugin SHARED
@@ -45,6 +61,7 @@ target_include_directories(fpchecker_intercept_lib PUBLIC ${CMAKE_CURRENT_BINARY
 
 if(APPLE)
 	TARGET_LINK_LIBRARIES(fpchecker "-undefined dynamic_lookup")
+	TARGET_LINK_LIBRARIES(fpchecker_cpu "-undefined dynamic_lookup")
 	TARGET_LINK_LIBRARIES(fpchecker_plugin "-Wl,-flat_namespace -Wl,-undefined -Wl,suppress")
 endif()
 
@@ -58,7 +75,7 @@ set(CMAKE_INSTALL_DEFAULT_DIRECTORY_PERMISSIONS
     OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_WRITE GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
 )
 
-install(TARGETS fpchecker fpchecker_plugin fpchecker_intercept_lib
+install(TARGETS fpchecker fpchecker_plugin fpchecker_intercept_lib fpchecker_cpu
         LIBRARY DESTINATION "lib64"
         PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_WRITE GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
 )
@@ -70,7 +87,7 @@ install(CODE "execute_process( \
         COMMENT "Creating link: /lib --> /lib64"
 )
 
-install(FILES "src/Runtime.h" "src/Runtime_plugin.h" "src/Runtime_parser.h"
+install(FILES "src/Runtime.h" "src/Runtime_plugin.h" "src/Runtime_parser.h" "src/Runtime_cpu.h" "src/FPC_Hashtable.h"
         DESTINATION "src"
         PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_WRITE GROUP_EXECUTE WORLD_READ
 )
@@ -97,6 +114,20 @@ install(FILES
         DESTINATION front-end
         PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_WRITE GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
 )
+
+install(FILES
+        "cpu_checking/clang_fpchecker.py"
+        "cpu_checking/colors.py"
+        "cpu_checking/exceptions.py"
+        "cpu_checking/fpc_create_report.py"
+        "cpu_checking/fpc_logging.py"
+        "cpu_checking/line_highlighting.py"
+        "cpu_checking/mpicc_fpchecker.py"
+        DESTINATION cpu_checking
+        PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_WRITE GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
+)
+
+install(DIRECTORY "cpu_checking/report_templates/" DESTINATION cpu_checking/report_templates)
 
 install(DIRECTORY
         DESTINATION ${CMAKE_INSTALL_PREFIX}/bin
@@ -125,16 +156,39 @@ install(CODE "execute_process( \
         COMMENT "Creating link: fpchecker -> fpchecker.py"
 )
 
+# Clang wrappers
+install(CODE "execute_process( COMMAND ${CMAKE_COMMAND} -E create_symlink \
+        ${CMAKE_INSTALL_PREFIX}/cpu_checking/clang_fpchecker.py ${CMAKE_INSTALL_PREFIX}/bin/clang-fpchecker )"
+)
+
+install(CODE "execute_process( COMMAND ${CMAKE_COMMAND} -E create_symlink \
+        ${CMAKE_INSTALL_PREFIX}/cpu_checking/clang_fpchecker.py ${CMAKE_INSTALL_PREFIX}/bin/clang++-fpchecker )"
+)
+
+install(CODE "execute_process( COMMAND ${CMAKE_COMMAND} -E create_symlink \
+        ${CMAKE_INSTALL_PREFIX}/cpu_checking/fpc_create_report.py ${CMAKE_INSTALL_PREFIX}/bin/fpc-create-report )"
+)
+
+install(CODE "execute_process( COMMAND ${CMAKE_COMMAND} -E create_symlink \
+        ${CMAKE_INSTALL_PREFIX}/cpu_checking/mpicc_fpchecker.py ${CMAKE_INSTALL_PREFIX}/bin/mpic++-fpchecker )"
+)
+
+install(CODE "execute_process( COMMAND ${CMAKE_COMMAND} -E create_symlink \
+        ${CMAKE_INSTALL_PREFIX}/cpu_checking/mpicc_fpchecker.py ${CMAKE_INSTALL_PREFIX}/bin/mpicxx-fpchecker )"
+)
+
+install(CODE "execute_process( COMMAND ${CMAKE_COMMAND} -E create_symlink \
+        ${CMAKE_INSTALL_PREFIX}/cpu_checking/mpicc_fpchecker.py ${CMAKE_INSTALL_PREFIX}/bin/mpicc-fpchecker )"
+)
+
 # Tests
-file(COPY tests DESTINATION ${CMAKE_BINARY_DIR})
-file(COPY src/Runtime.h DESTINATION ${CMAKE_BINARY_DIR}/src)
-configure_file(tests/tests_Makefile.in tests/Makefile.config)
-configure_file(tests/llvm/static/_test_config.py.in tests/static/test_config.py)
-configure_file(tests/llvm/dynamic/_test_config.py.in tests/dynamic/test_config.py)
-#enable_testing()
-#add_test(NAME static_tests COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_BINARY_DIR}/tests/static/test.py)
-#add_test(NAME dynamic_tests COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_BINARY_DIR}/tests/dynamic/test.py)
-add_custom_target(tests COMMAND bash ${CMAKE_BINARY_DIR}/tests/tests.sh)
+#file(COPY tests DESTINATION ${CMAKE_BINARY_DIR})
+#file(COPY src/Runtime.h DESTINATION ${CMAKE_BINARY_DIR}/src)
+#configure_file(tests/tests_Makefile.in tests/Makefile.config)
+#configure_file(tests/llvm/static/_test_config.py.in tests/static/test_config.py)
+#configure_file(tests/llvm/dynamic/_test_config.py.in tests/dynamic/test_config.py)
+#add_custom_target(tests COMMAND bash ${CMAKE_BINARY_DIR}/tests/tests.sh)
+#find_package(Python3 COMPONENTS Interpreter)
 
 message(STATUS "CMAKE_CXX_COMPILE_FLAGS: " ${CMAKE_CXX_COMPILE_FLAGS})
 message(STATUS "CMAKE_CXX_COMPILER: " ${CMAKE_CXX_COMPILER})
