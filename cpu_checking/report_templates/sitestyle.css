@@ -15,12 +15,13 @@
     color: #5D5D5D;
     height: 375px;
     border-style: solid;
-    -webkit-box-shadow: 4px 4px 5px #D5D5D5;
-    box-shadow: 4px 4px 5px #D5D5D5;
+    -webkit-box-shadow: 3px 3px 3px #D5D5D5;
+    box-shadow: 3px 3px 3px #D5D5D5;
     background-color: #FFFFFF;
     margin-left: auto;
     margin-right: auto;
     font-family: "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", "DejaVu Sans", Verdana, sans-serif;
+    border-collapse: collapse;
 }
 .report_box_files {
     width: 600px;
@@ -53,8 +54,8 @@
     border-left-style: solid;
     border-right-style: solid;
     border-top-style: solid;
-    -webkit-box-shadow: 4px 4px 5px #D5D5D5;
-    box-shadow: 4px 4px 5px #D5D5D5;
+    -webkit-box-shadow: 3px 3px 3px #D5D5D5;
+    box-shadow: 3px 3px 3px #D5D5D5;
     background-color: #FFFFFF;
     margin-left: auto;
     margin-right: auto;
@@ -92,16 +93,16 @@
 .body_class header .header_class {
     background-color: #FFFFFF;
     width: 100%;
-    -webkit-box-shadow: 4px 4px 5px #D5D5D5;
-    box-shadow: 4px 4px 5px #D5D5D5;
+    -webkit-box-shadow: 3px 3px 3px #D5D5D5;
+    box-shadow: 3px 3px 3px #D5D5D5;
 }
 .body_class .hierarchy_class {
     height: 40px;
     line-height: 40px;
     background-color: #FFFFFF;
     padding-left: 10px;
-    -webkit-box-shadow: 4px 4px 5px #D5D5D5;
-    box-shadow: 4px 4px 5px #D5D5D5;
+    -webkit-box-shadow: 3px 3px 3px #D5D5D5;
+    box-shadow: 3px 3px 3px #D5D5D5;
 }
 .body_class .separation_class {
     height: 7px;
@@ -168,4 +169,8 @@ code {
 }
 .th_class {
     text-align: left;
+    height: 40px;
+}
+.tr_class {
+    border-bottom: thin solid #E5E5E5;
 }

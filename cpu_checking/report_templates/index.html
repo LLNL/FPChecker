@@ -17,11 +17,11 @@
 
 <table width="150" border="0" class="report_box">
   <tbody>
-	<tr>
-	<th></th> <th> </th> <th class="th_class"> Events</th> <th> Severity</th>
+	<tr class="tr_class">
+	<th></th> <th> </th> <th class="th_class"> Events</th> <th class="th_class"> Severity</th>
 	</tr>
-    <tr>
-      <td class="icon_class"><img src="icons/infinity_pos.svg" alt="" width="50"/></td>
+    <tr class="tr_class">
+      <td class="icon_class"><img src="icons_3/infinity_pos.svg" alt="" width="50"/></td>
       <td><div class="tooltip">Infinity (+)
   		<span class="tooltiptext">This is detected when operations produce positive infinity, such as 1.0 / 0.0. 
 			Infinities propagate through calculations: for example, 2 + ∞ = ∞.</span></div>
@@ -29,62 +29,40 @@
       <td>
 		  <!-- INFINITY_POS --><a href="./infinity_pos/infinity_pos.html">2</a>
 	  </td>
-	  <td class="icon_class"><img src="icons/high_icon.svg" alt="" width="50"/></td>
+	  <td><img src="icons/high_icon.svg" alt="" width="50"/></td>
     </tr>
-    <tr>
-      <td class="icon_class"><img src="icons/infinity_neg.svg" alt="" width="50"/></td>
+    <tr class="tr_class">
+      <td class="icon_class"><img src="icons_3/infinity_neg.svg" alt="" width="50"/></td>
       <td><div class="tooltip">Infinity (-)
 		  <span class="tooltiptext">This is detected when operations produce negative infinity.</span></div>
 		</td>
       <td>
 		  <!-- INFINITY_NEG --><a href="#">0</a>
 	  </td>
-	  <td class="icon_class"><img src="icons/high_icon.svg" alt="" width="50"/></td>
+	  <td><img src="icons/high_icon.svg" alt="" width="50"/></td>
     </tr>
-    <tr>
-      <td class="icon_class"><img src="icons/nan.svg" alt="" width="30"/></td>
+    <tr class="tr_class">
+      <td class="icon_class"><img src="icons_3/nan.svg" alt="" width="50"/></td>
       <td><div class="tooltip">NaN
 		  <span class="tooltiptext">NaN (not a number) are the result of invalid operations, such as 0/0 or sqrt(-1).</span></div>
 	   </td>
        <td>
 		   <!-- NAN --><a href="#">1</a>
 	   </td>
-	   <td class="icon_class"><img src="icons/high_icon.svg" alt="" width="50"/></td>
+	   <td><img src="icons/high_icon.svg" alt="" width="50"/></td>
     </tr>
-    <tr>
-      <td class="icon_class"><img src="icons/div_zero.svg" alt="" width="35"/></td>
+    <tr class="tr_class">
+      <td class="icon_class"><img src="icons_3/div_zero.svg" alt="" width="50"/></td>
       <td><div class="tooltip">Division by zero
 		  <span class="tooltiptext">This occurs when a finite nonzero number is divided by zero. This typically produce an infinity.</span></div>
 	  </td>
       <td>
 		  <!-- DIV_ZERO --><a href="#">1</a>
 	  </td>
-	  <td class="icon_class"><img src="icons/high_icon.svg" alt="" width="50"/></td>
+	  <td><img src="icons/high_icon.svg" alt="" width="50"/></td>
     </tr>
-    <tr>
-      <td class="icon_class"><img src="icons/cancellation.svg" alt="" width="40"/></td>
-      <td><div class="tooltip">Cancellation
-		  <span class="tooltiptext">Cancellation occurs when two nearly equal numbers are subtracted. 
-			  By default, this event is detected when at least ten decimal digits are lost due to a subtraction.</span></div>
-	  </td>
-      <td>
-		  <!-- CANCELLATION --><a href="#">335</a>
-	  </td>
-	  <td class="icon_class"><img src="icons/medium_icon.svg" alt="" width="75"/></td>
-    </tr>
-    <tr>
-      <td class="icon_class"><img src="icons/comparison.svg" alt="" width="50"/></td>
-      <td><div class="tooltip">Comparison
-		  <span class="tooltiptext">This occurs when two floating-point numbers are compared for equality. 
-			  Often comparing if two floating-point numbers are equal is not a good idea.</span></div>
-	  </td>
-      <td>
-		  <!-- COMPARISON --><a href="#">10</a>
-	  </td>
-	  <td class="icon_class"><img src="icons/medium_icon.svg" alt="" width="75"/></td>
-    </tr>
-    <tr>
-      <td class="icon_class"><img src="icons/underflow.svg" alt="" width="30"/></td>
+	<tr class="tr_class">
+      <td class="icon_class"><img src="icons_3/underflow.svg" alt="" width="50"/></td>
       <td><div class="tooltip">Underflow (subnormal)
 		  <span class="tooltiptext">Underflows are detected when an operation produces a subnormal number 
 			  because the result was not representable as a normal number. Certain compiler optimizations 
@@ -93,10 +71,32 @@
       <td>
 		  <!-- UNDERFLOW --><a href="#">567</a>
 	  </td>
-	  <td class="icon_class"><img src="icons/medium_icon.svg" alt="" width="75"/></td>
+	  <td><img src="icons/medium_icon.svg" alt="" width="75"/></td>
     </tr>
-    <tr>
-      <td class="icon_class"><img src="icons/latent_infinity_pos.svg" alt="" width="50"/></td>
+    <tr class="tr_class">
+      <td class="icon_class"><img src="icons_3/comparison.svg" alt="" width="50"/></td>
+      <td><div class="tooltip">Comparison
+		  <span class="tooltiptext">This occurs when two floating-point numbers are compared for equality. 
+			  Often comparing if two floating-point numbers are equal is not a good idea.</span></div>
+	  </td>
+      <td>
+		  <!-- COMPARISON --><a href="#">10</a>
+	  </td>
+	  <td><img src="icons/medium_icon.svg" alt="" width="75"/></td>
+    </tr>
+	<tr class="tr_class">
+      <td class="icon_class"><img src="icons_3/cancellation.svg" alt="" width="50"/></td>
+      <td><div class="tooltip">Cancellation
+		  <span class="tooltiptext">Cancellation occurs when two nearly equal numbers are subtracted. 
+			  By default, this event is detected when at least ten decimal digits are lost due to a subtraction.</span></div>
+	  </td>
+      <td>
+		  <!-- CANCELLATION --><a href="#">335</a>
+	  </td>
+	  <td><img src="icons/low_icon.svg" alt="" width="45"/></td>
+    </tr>
+    <tr class="tr_class">
+      <td class="icon_class"><img src="icons_3/warning.svg" alt="" width="50"/></td>
       <td><div class="tooltip">Latent Infinity (+)
 		  <span class="tooltiptext">This is detected when an operation produces a normal number that is large, 
 			  and it is in close proximity to positive infinity.</span></div>
@@ -104,10 +104,10 @@
       <td>
 		  <!-- LATENT_INFINITY_POS --><a href="#">3378</a>
 	  </td>
-	  <td class="icon_class"><img src="icons/low_icon.svg" alt="" width="45"/></td>
+	  <td><img src="icons/low_icon.svg" alt="" width="45"/></td>
     </tr>
-    <tr>
-      <td class="icon_class"><img src="icons/latent_infinity_pos.svg" alt="" width="50"/></td>
+    <tr class="tr_class">
+      <td class="icon_class"><img src="icons_3/warning.svg" alt="" width="50"/></td>
       <td><div class="tooltip">Latent Infinity (-)
 		  <span class="tooltiptext">This is detected when an operation produces a normal number that is large, 
 			  and it is in close proximity to negative infinity.</span></div>
@@ -115,10 +115,10 @@
       <td>
 		  <!-- LATENT_INFINITY_NEG --><a href="#">0</a>
 	  </td>
-	  <td class="icon_class"><img src="icons/low_icon.svg" alt="" width="45"/></td>
+	  <td><img src="icons/low_icon.svg" alt="" width="45"/></td>
     </tr>
-    <tr>
-      <td class="icon_class"><img src="icons/latent_underflow.svg" alt="" width="40"/></td>
+    <tr class="tr_class">
+      <td class="icon_class"><img src="icons_3/warning.svg" alt="" width="50"/></td>
       <td><div class="tooltip">Latent underflow
 		  <span class="tooltiptext">This is detected when an operation produces a normal number that is small 
 			  and it is in close proximity to becoming an underflow (subnormal number).</span></div>
@@ -126,7 +126,7 @@
       <td>
 		  <!-- LATENT_UNDERFLOW --><a href="#">2456</a>
 	  </td>
-	  <td class="icon_class"><img src="icons/low_icon.svg" alt="" width="45"/></td>
+	  <td><img src="icons/low_icon.svg" alt="" width="45"/></td>
     </tr>
   </tbody>
 </table>
