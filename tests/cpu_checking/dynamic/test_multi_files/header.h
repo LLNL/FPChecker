@@ -8,7 +8,6 @@ void compute(double x, double y) {
   double tmp;
   tmp = x * y;
   tmp += 3.0;
-  printf("result = %f\n", tmp);
 }
 
 #endif

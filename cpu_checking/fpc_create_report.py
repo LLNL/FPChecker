@@ -131,8 +131,8 @@ def createRootReport():
 
   # Copy style and other files
   shutil.copy2(ROOT_REPORT_TEMPLATE_DIR+'/sitestyle.css', REPORTS_DIR+'/sitestyle.css')
-  if not os.path.exists(REPORTS_DIR+'/icons'):
-    shutil.copytree(ROOT_REPORT_TEMPLATE_DIR+'/icons', REPORTS_DIR+'/icons')
+  if not os.path.exists(REPORTS_DIR+'/icons_3'):
+    shutil.copytree(ROOT_REPORT_TEMPLATE_DIR+'/icons_3', REPORTS_DIR+'/icons_3')
 
   report_full_name = REPORTS_DIR+'/'+ROOT_REPORT_NAME 
   fd = open(report_full_name, 'w')

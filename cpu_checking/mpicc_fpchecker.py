@@ -47,9 +47,23 @@ class Command:
     self.wrapper_name = wrapper_name
     self.parameters = cmd[1:]
     self.mpi_params = self.getMPICompileParams()
+    self.mpi_link_params = self.getMPILinkParams()
 
   def getMPICompileParams(self):
     cmd = self.wrapper_name + ' --showme:compile'
+    try:
+      cmdOutput = subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True)
+      params = cmdOutput.decode('utf-8')
+      ret = []
+      for i in params.split():
+        if 'rpath' not in i:
+          ret.append(i)
+      return ret
+    except subprocess.CalledProcessError as e:
+      prRed(e)
+
+  def getMPILinkParams(self):
+    cmd = self.wrapper_name + ' --showme:link'
     try:
       cmdOutput = subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True)
       params = cmdOutput.decode('utf-8')
@@ -94,6 +108,14 @@ class Command:
       prRed(e)
       raise CompileException(new_cmd) from e
 
+  def linkMPI(self):
+    new_cmd = [self.name] + self.mpi_link_params + self.parameters
+    try:
+      cmdOutput = subprocess.run(' '.join(new_cmd), shell=True, check=True)
+    except Exception as e:
+      prRed(e)
+      raise CompileException(new_cmd) from e
+
 if __name__ == '__main__':
   cmd = Command(sys.argv)
 
@@ -103,7 +125,8 @@ if __name__ == '__main__':
 
   # Link command
   if cmd.isLinkCommand():
-    cmd.executeOriginalCommand()
+    #cmd.executeOriginalCommand()
+    cmd.linkMPI()
   else:
     # Compilation command
     try:

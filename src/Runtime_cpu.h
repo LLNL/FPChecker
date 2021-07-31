@@ -44,15 +44,39 @@ void _FPC_PRINT_LOCATIONS_()
 /* Checking functions for events (FP32)                                       */
 /*----------------------------------------------------------------------------*/
 
+uint32_t _FPC_FP32_GET_EXPONENT(float x) {
+  uint32_t val;
+  memcpy((void *) &val, (void *) &x, sizeof(val));
+  val = val << 1;   // get rid of sign bit
+  val = val >> 24;  // get rid of the mantissa bits
+  return val;
+}
+
+uint32_t _FPC_FP32_GET_MANTISSA(float x) {
+  uint32_t val;
+  memcpy((void *) &val, (void *) &x, sizeof(val));
+  val = val << 9;   // get rid of sign bit and exponent
+  val = val >> 9;
+  return val;
+}
+
+uint32_t _FPC_FP32_IS_INF(float x) {
+  if  (_FPC_FP32_GET_EXPONENT(x) == (uint32_t)(255) &&
+      _FPC_FP32_GET_MANTISSA(x) == (uint32_t)(0)
+      )
+    return 1;
+  return 0;
+}
+
 int _FPC_FP32_IS_INFINITY_POS(float x) {
-  if (isinf(x))
+  if (_FPC_FP32_IS_INF(x))
     if (x > 0)
       return 1;
   return 0;
 }
 
 int _FPC_FP32_IS_INFINITY_NEG(float x) {
-  if (isinf(x))
+  if (_FPC_FP32_IS_INF(x))
     if (x < 0)
       return 1;
   return 0;
@@ -71,14 +95,6 @@ int _FPC_FP32_IS_DIVISON_ZERO(float x, float y, float z, int op) {
         return 1;
 
   return 0;
-}
-
-uint32_t _FPC_FP32_GET_EXPONENT(float x) {
-  uint32_t val;
-  memcpy((void *) &val, (void *) &x, sizeof(val));
-  val = val << 1;   // get rid of sign bit
-  val = val >> 24;  // get rid of the mantissa bits
-  return val;
 }
 
 // Number of cancelled digits calculated as:
@@ -157,15 +173,39 @@ int _FPC_FP32_IS_LATENT_SUBNORMAL(float x) {
 /* Checking functions for events (FP64)                                       */
 /*----------------------------------------------------------------------------*/
 
+uint64_t _FPC_FP64_GET_EXPONENT(double x) {
+  uint64_t val;
+  memcpy((void *) &val, (void *) &x, sizeof(val));
+  val = val << 1;   // get rid of sign bit
+  val = val >> 53;  // get rid of the mantissa bits
+  return val;
+}
+
+uint32_t _FPC_FP64_GET_MANTISSA(double x) {
+  uint32_t val;
+  memcpy((void *) &val, (void *) &x, sizeof(val));
+  val = val << 12;   // get rid of sign bit and exponent
+  val = val >> 12;
+  return val;
+}
+
+uint32_t _FPC_FP64_IS_INF(double x) {
+  if  (_FPC_FP64_GET_EXPONENT(x) == (uint32_t)(2047) &&
+      _FPC_FP64_GET_MANTISSA(x) == (uint32_t)(0)
+      )
+    return 1;
+  return 0;
+}
+
 int _FPC_FP64_IS_INFINITY_POS(double x) {
-  if (isinf(x))
+  if (_FPC_FP64_IS_INF(x))
     if (x > 0)
       return 1;
   return 0;
 }
 
 int _FPC_FP64_IS_INFINITY_NEG(double x) {
-  if (isinf(x))
+  if (_FPC_FP64_IS_INF(x))
     if (x < 0)
       return 1;
   return 0;
@@ -184,14 +224,6 @@ int _FPC_FP64_IS_DIVISON_ZERO(double x, double y, double z, int op) {
         return 1;
 
   return 0;
-}
-
-uint64_t _FPC_FP64_GET_EXPONENT(double x) {
-  uint64_t val;
-  memcpy((void *) &val, (void *) &x, sizeof(val));
-  val = val << 1;   // get rid of sign bit
-  val = val >> 53;  // get rid of the mantissa bits
-  return val;
 }
 
 // Number of cancelled digits calculated as:

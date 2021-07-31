@@ -3,9 +3,9 @@
 import subprocess
 import os
 import sys
-sys.path.append('..')
-sys.path.append('.')
-import report
+#sys.path.append('..')
+#sys.path.append('.')
+from dynamic import report
 
 def setup_module(module):
     THIS_DIR = os.path.dirname(os.path.abspath(__file__))

@@ -1,0 +1,10 @@
+['clang++', '-Xclang', '-load', '-Xclang', '/home/ignacio/fpchecker/install/bin/../lib/libfpchecker_cpu.so', '-include', '/home/ignacio/fpchecker/install/bin/../src/Runtime_cpu.h', '-g', '-emit-llvm', 'main.cpp']
+Failed: /home/ignacio/fpchecker/install/bin/clang++-fpchecker -emit-llvm main.cpp
+['clang++', '-Xclang', '-load', '-Xclang', '/home/ignacio/fpchecker/install/bin/../lib/libfpchecker_cpu.so', '-include', '/home/ignacio/fpchecker/install/bin/../src/Runtime_cpu.h', '-g', '-c', 'main.cpp', '-O0']
+Failed: /home/ignacio/fpchecker/install/bin/clang++-fpchecker -c main.cpp -O0
+['clang++', '-Xclang', '-load', '-Xclang', '/home/ignacio/fpchecker/install/bin/../lib/libfpchecker_cpu.so', '-include', '/home/ignacio/fpchecker/install/bin/../src/Runtime_cpu.h', '-g', '-c', 'main.cpp', '-O0']
+Failed: /home/ignacio/fpchecker/install/bin/clang++-fpchecker -c main.cpp -O0
+['clang++', '-Xclang', '-load', '-Xclang', '/home/ignacio/fpchecker/install/bin/../lib/libfpchecker_cpu.so', '-include', '/home/ignacio/fpchecker/install/bin/../src/Runtime_cpu.h', '-g', '-c', 'main.cpp', '-O0']
+Failed: /home/ignacio/fpchecker/install/bin/clang++-fpchecker -c main.cpp -O0
+['clang++', '-Xclang', '-load', '-Xclang', '/home/ignacio/fpchecker/install/bin/../lib/libfpchecker_cpu.so', '-include', '/home/ignacio/fpchecker/install/bin/../src/Runtime_cpu.h', '-g', '-c', 'main.cpp', '-O0']
+Failed: /home/ignacio/fpchecker/install/bin/clang++-fpchecker -c main.cpp -O0
