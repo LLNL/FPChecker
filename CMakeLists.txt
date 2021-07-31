@@ -21,13 +21,17 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -O3 -g -std=c++14 -DFPC_DEBUG")
 
 include(GNUInstallDirs)
 
-#enable_testing()
-#include(CTest)
-#find_package(Python3 COMPONENTS Interpreter)
-#if(Python3_Interpreter_FOUND)
-#  add_test(NAME fpchecker-tests COMMAND Python3::Interpreter -m pytest 
-#            WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/tests/cpu_checking/static)
-#endif()
+###### Enable testing ##########
+#set(ENV{PATH} "${CMAKE_INSTALL_PREFIX}/bin:$ENV{PATH}")
+enable_testing()
+include(CTest)
+find_package(Python3 COMPONENTS Interpreter)
+if(Python3_Interpreter_FOUND)
+  add_test(NAME fpchecker-tests COMMAND Python3::Interpreter -m pytest
+            WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/tests/cpu_checking)
+  set_tests_properties(fpchecker-tests PROPERTIES ENVIRONMENT "PATH=${CMAKE_INSTALL_PREFIX}/bin:$ENV{PATH}")
+endif()
+###############################
 
 set(NVCC_WRAPPER "${CMAKE_INSTALL_PREFIX}/bin/nvcc-fpc")
 configure_file(interception_tool/intercept.h.in intercept.h)
