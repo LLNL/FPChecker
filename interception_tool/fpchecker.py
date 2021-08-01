@@ -10,7 +10,7 @@ INTERCEPT_LIB = os.path.dirname(os.path.abspath(__file__))+"/../lib/libfpchecker
 
 def runBuildCommand(params):
   prGreen('*** FPChecker ***')
-  prGreen('Intercepting NVCC in: ' + ' '.join(params))
+  prGreen('Intercepting commands in: ' + ' '.join(params))
   params.insert(0, 'FPC_INSTRUMENT=1')
   params.insert(0,'LD_PRELOAD='+INTERCEPT_LIB)  
 

@@ -12,6 +12,8 @@ typedef ssize_t (*execve_func_t)(const char* filename, char* const argv[], char*
 static execve_func_t old_execve = NULL;
 //static const char *nvcc_fpc = "/usr/workspace/wsa/laguna/fpchecker/FPChecker/bin/nvcc-fpc";
 static const char *nvcc_fpc = NVCC_WRAPPER;
+static const char *clang_fpc = CLANG_WRAPPER;
+static const char *mpi_fpc = MPI_WRAPPER;
 
 /** Return: one if the string t occurs at the end of the string s, and zero otherwise **/
 int str_end(const char *s, const char *t)
@@ -22,6 +24,20 @@ int str_end(const char *s, const char *t)
 
 int isNVCC(const char* filename) {
   return str_end(filename, "/nvcc");
+}
+
+int isClang(const char* filename) {
+  printf("Checking clang..........\n");
+  return (str_end(filename, "/clang") || 
+          str_end(filename, "/clang++")
+          );
+}
+
+int isMPI(const char* filename) {
+  return (str_end(filename, "/mpicc") || 
+          str_end(filename, "/mpicxx") ||
+          str_end(filename, "/mpic++")
+          );
 }
 
 void printEnvironment(char* const envp[]) {
@@ -62,16 +78,25 @@ void copy_env_variables(char* const envp[], char *** new_envp) {
 
 /** Wrapper for execve **/
 int execve(const char* filename, char* const argv[], char* const envp[]) {
+    printf("In  execve... %s\n", filename);
+    fflush(stdout);
+    exit(-1);
     // Copy env variables
-    char ** new_envp;
-    copy_env_variables(envp, &new_envp);
+    //char ** new_envp;
+    //copy_env_variables(envp, &new_envp);
     //printEnvironment(envp);
 
     old_execve = dlsym(RTLD_NEXT, "execve");
 
     if (isNVCC(filename)) {
-      //printf("Intercepting NVCC...\n");
-      return old_execve(nvcc_fpc, argv, new_envp);
+      //return old_execve(nvcc_fpc, argv, new_envp);
+    } else if (isClang(filename)) {
+      printf("Got clang!\n");
+      char ** new_envp;
+      copy_env_variables(envp, &new_envp);
+      return old_execve(clang_fpc, argv, new_envp);
+    } else if (isMPI(filename)) {
+      //return old_execve(mpi_fpc, argv, new_envp);
     }
 
     return old_execve(filename, argv, envp);

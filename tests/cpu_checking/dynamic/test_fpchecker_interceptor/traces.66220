@@ -1,0 +1,118 @@
+execve("/usr/bin/make", ["make"], 0x7ffdf8cfb718 /* 25 vars */) = 0
+brk(NULL)                               = 0x55c9eaef7000
+arch_prctl(0x3001 /* ARCH_??? */, 0x7ffed5c75060) = -1 EINVAL (Invalid argument)
+access("/etc/ld.so.preload", R_OK)      = -1 ENOENT (No such file or directory)
+openat(AT_FDCWD, "/etc/ld.so.cache", O_RDONLY|O_CLOEXEC) = 3
+fstat(3, {st_mode=S_IFREG|0644, st_size=76031, ...}) = 0
+mmap(NULL, 76031, PROT_READ, MAP_PRIVATE, 3, 0) = 0x7f03e04d6000
+close(3)                                = 0
+openat(AT_FDCWD, "/lib/x86_64-linux-gnu/libdl.so.2", O_RDONLY|O_CLOEXEC) = 3
+read(3, "\177ELF\2\1\1\0\0\0\0\0\0\0\0\0\3\0>\0\1\0\0\0 \22\0\0\0\0\0\0@\0\0\0\0\0\0\0\300A\0\0\0\0\0\0\0\0\0\0@\08\0\v\0@\0\37\0\36\0\1\0\0\0\4\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\20\0\0\0\0\0\0\0\20\0\0\0\0\0\0\0\20\0\0\0\0\0\0\1\0\0\0\5\0\0\0\0\20\0\0\0\0\0\0\0\20\0\0\0\0\0\0\0\20\0\0\0\0\0\0\211\21\0\0\0\0\0\0\211\21\0\0\0\0\0\0\0\20\0\0\0\0\0\0\1\0\0\0\4\0\0\0\0000\0\0\0\0\0\0\0000\0\0\0\0\0\0\0000\0\0\0\0\0\0\10\5\0\0\0\0\0\0\10\5\0\0\0\0\0\0\0\20\0\0\0\0\0\0\1\0\0\0\6\0\0\0p=\0\0\0\0\0\0pM\0\0\0\0\0\0pM\0\0\0\0\0\0\30\3\0\0\0\0\0\0\240\3\0\0\0\0\0\0\0\20\0\0\0\0\0\0\2\0\0\0\6\0\0\0\220=\0\0\0\0\0\0\220M\0\0\0\0\0\0\220M\0\0\0\0\0\0\20\2\0\0\0\0\0\0\20\2\0\0\0\0\0\0\10\0\0\0\0\0\0\0\4\0\0\0\4\0\0\0\250\2\0\0\0\0\0\0\250\2\0\0\0\0\0\0\250\2\0\0\0\0\0\0 \0\0\0\0\0\0\0 \0\0\0\0\0\0\0\10\0\0\0\0\0\0\0\4\0\0\0\4\0\0\0\310\2\0\0\0\0\0\0\310\2\0\0\0\0\0\0\310\2\0\0\0\0\0\0D\0\0\0\0\0\0\0D\0\0\0\0\0\0\0\4\0\0\0\0\0\0\0S\345td\4\0\0\0\250\2\0\0\0\0\0\0\250\2\0\0\0\0\0\0\250\2\0\0\0\0\0\0 \0\0\0\0\0\0\0 \0\0\0\0\0\0\0\10\0\0\0\0\0\0\0P\345td\4\0\0\0\2440\0\0\0\0\0\0\2440\0\0\0\0\0\0\2440\0\0\0\0\0\0\334\0\0\0\0\0\0\0\334\0\0\0\0\0\0\0\4\0\0\0\0\0\0\0Q\345td\6\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\20\0\0\0\0\0\0\0R\345td\4\0\0\0p=\0\0\0\0\0\0pM\0\0\0\0\0\0pM\0\0\0\0\0\0\220\2\0\0\0\0\0\0\220\2\0\0\0\0\0\0\1\0\0\0\0\0\0\0\4\0\0\0\20\0\0\0\5\0\0\0GNU\0\2\0\0\300\4\0\0\0\3\0\0\0\0\0\0\0\4\0\0\0\24\0\0\0\3\0\0\0GNU\0\243\367\200(\"\34\363\267\204\335^\20\320Z\327\245Zj\205\325\4\0\0\0\20\0\0\0\1\0\0\0GNU\0\0\0\0\0\3\0\0\0\2\0\0\0\0\0\0\0\0\0\0\0A\0\0\0+\0\0\0\36\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\30\0\0\0\35\0\0\0&\0\0\0\22\0\0\0!\0\0\0", 832) = 832
+fstat(3, {st_mode=S_IFREG|0644, st_size=18816, ...}) = 0
+mmap(NULL, 8192, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x7f03e04d4000
+mmap(NULL, 20752, PROT_READ, MAP_PRIVATE|MAP_DENYWRITE, 3, 0) = 0x7f03e04ce000
+mmap(0x7f03e04cf000, 8192, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x1000) = 0x7f03e04cf000
+mmap(0x7f03e04d1000, 4096, PROT_READ, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x3000) = 0x7f03e04d1000
+mmap(0x7f03e04d2000, 8192, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x3000) = 0x7f03e04d2000
+close(3)                                = 0
+openat(AT_FDCWD, "/lib/x86_64-linux-gnu/libc.so.6", O_RDONLY|O_CLOEXEC) = 3
+read(3, "\177ELF\2\1\1\3\0\0\0\0\0\0\0\0\3\0>\0\1\0\0\0\360q\2\0\0\0\0\0@\0\0\0\0\0\0\0h\345\36\0\0\0\0\0\0\0\0\0@\08\0\16\0@\0E\0D\0\6\0\0\0\4\0\0\0@\0\0\0\0\0\0\0@\0\0\0\0\0\0\0@\0\0\0\0\0\0\0\20\3\0\0\0\0\0\0\20\3\0\0\0\0\0\0\10\0\0\0\0\0\0\0\3\0\0\0\4\0\0\0\240\26\34\0\0\0\0\0\240\26\34\0\0\0\0\0\240\26\34\0\0\0\0\0\34\0\0\0\0\0\0\0\34\0\0\0\0\0\0\0\20\0\0\0\0\0\0\0\1\0\0\0\4\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0@I\2\0\0\0\0\0@I\2\0\0\0\0\0\0\20\0\0\0\0\0\0\1\0\0\0\5\0\0\0\0P\2\0\0\0\0\0\0P\2\0\0\0\0\0\0P\2\0\0\0\0\0\264u\27\0\0\0\0\0\264u\27\0\0\0\0\0\0\20\0\0\0\0\0\0\1\0\0\0\4\0\0\0\0\320\31\0\0\0\0\0\0\320\31\0\0\0\0\0\0\320\31\0\0\0\0\0e\235\4\0\0\0\0\0e\235\4\0\0\0\0\0\0\20\0\0\0\0\0\0\1\0\0\0\6\0\0\0\0v\36\0\0\0\0\0\0\206\36\0\0\0\0\0\0\206\36\0\0\0\0\0\20P\0\0\0\0\0\0\330\216\0\0\0\0\0\0\0\20\0\0\0\0\0\0\2\0\0\0\6\0\0\0\200\233\36\0\0\0\0\0\200\253\36\0\0\0\0\0\200\253\36\0\0\0\0\0\340\1\0\0\0\0\0\0\340\1\0\0\0\0\0\0\10\0\0\0\0\0\0\0\4\0\0\0\4\0\0\0P\3\0\0\0\0\0\0P\3\0\0\0\0\0\0P\3\0\0\0\0\0\0 \0\0\0\0\0\0\0 \0\0\0\0\0\0\0\10\0\0\0\0\0\0\0\4\0\0\0\4\0\0\0p\3\0\0\0\0\0\0p\3\0\0\0\0\0\0p\3\0\0\0\0\0\0D\0\0\0\0\0\0\0D\0\0\0\0\0\0\0\4\0\0\0\0\0\0\0\7\0\0\0\4\0\0\0\0v\36\0\0\0\0\0\0\206\36\0\0\0\0\0\0\206\36\0\0\0\0\0\20\0\0\0\0\0\0\0\220\0\0\0\0\0\0\0\10\0\0\0\0\0\0\0S\345td\4\0\0\0P\3\0\0\0\0\0\0P\3\0\0\0\0\0\0P\3\0\0\0\0\0\0 \0\0\0\0\0\0\0 \0\0\0\0\0\0\0\10\0\0\0\0\0\0\0P\345td\4\0\0\0\274\26\34\0\0\0\0\0\274\26\34\0\0\0\0\0\274\26\34\0\0\0\0\0\304^\0\0\0\0\0\0\304^\0\0\0\0\0\0\4\0\0\0\0\0\0\0Q\345td\6\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\20\0\0\0\0\0\0\0R\345td\4\0\0\0\0v\36\0\0\0\0\0\0\206\36\0\0\0\0\0\0\206\36\0\0\0\0\0\0*\0\0\0\0\0\0", 832) = 832
+pread64(3, "\6\0\0\0\4\0\0\0@\0\0\0\0\0\0\0@\0\0\0\0\0\0\0@\0\0\0\0\0\0\0\20\3\0\0\0\0\0\0\20\3\0\0\0\0\0\0\10\0\0\0\0\0\0\0\3\0\0\0\4\0\0\0\240\26\34\0\0\0\0\0\240\26\34\0\0\0\0\0\240\26\34\0\0\0\0\0\34\0\0\0\0\0\0\0\34\0\0\0\0\0\0\0\20\0\0\0\0\0\0\0\1\0\0\0\4\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0@I\2\0\0\0\0\0@I\2\0\0\0\0\0\0\20\0\0\0\0\0\0\1\0\0\0\5\0\0\0\0P\2\0\0\0\0\0\0P\2\0\0\0\0\0\0P\2\0\0\0\0\0\264u\27\0\0\0\0\0\264u\27\0\0\0\0\0\0\20\0\0\0\0\0\0\1\0\0\0\4\0\0\0\0\320\31\0\0\0\0\0\0\320\31\0\0\0\0\0\0\320\31\0\0\0\0\0e\235\4\0\0\0\0\0e\235\4\0\0\0\0\0\0\20\0\0\0\0\0\0\1\0\0\0\6\0\0\0\0v\36\0\0\0\0\0\0\206\36\0\0\0\0\0\0\206\36\0\0\0\0\0\20P\0\0\0\0\0\0\330\216\0\0\0\0\0\0\0\20\0\0\0\0\0\0\2\0\0\0\6\0\0\0\200\233\36\0\0\0\0\0\200\253\36\0\0\0\0\0\200\253\36\0\0\0\0\0\340\1\0\0\0\0\0\0\340\1\0\0\0\0\0\0\10\0\0\0\0\0\0\0\4\0\0\0\4\0\0\0P\3\0\0\0\0\0\0P\3\0\0\0\0\0\0P\3\0\0\0\0\0\0 \0\0\0\0\0\0\0 \0\0\0\0\0\0\0\10\0\0\0\0\0\0\0\4\0\0\0\4\0\0\0p\3\0\0\0\0\0\0p\3\0\0\0\0\0\0p\3\0\0\0\0\0\0D\0\0\0\0\0\0\0D\0\0\0\0\0\0\0\4\0\0\0\0\0\0\0\7\0\0\0\4\0\0\0\0v\36\0\0\0\0\0\0\206\36\0\0\0\0\0\0\206\36\0\0\0\0\0\20\0\0\0\0\0\0\0\220\0\0\0\0\0\0\0\10\0\0\0\0\0\0\0S\345td\4\0\0\0P\3\0\0\0\0\0\0P\3\0\0\0\0\0\0P\3\0\0\0\0\0\0 \0\0\0\0\0\0\0 \0\0\0\0\0\0\0\10\0\0\0\0\0\0\0P\345td\4\0\0\0\274\26\34\0\0\0\0\0\274\26\34\0\0\0\0\0\274\26\34\0\0\0\0\0\304^\0\0\0\0\0\0\304^\0\0\0\0\0\0\4\0\0\0\0\0\0\0Q\345td\6\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\20\0\0\0\0\0\0\0R\345td\4\0\0\0\0v\36\0\0\0\0\0\0\206\36\0\0\0\0\0\0\206\36\0\0\0\0\0\0*\0\0\0\0\0\0\0*\0\0\0\0\0\0\1\0\0\0\0\0\0\0", 784, 64) = 784
+pread64(3, "\4\0\0\0\20\0\0\0\5\0\0\0GNU\0\2\0\0\300\4\0\0\0\3\0\0\0\0\0\0\0", 32, 848) = 32
+pread64(3, "\4\0\0\0\24\0\0\0\3\0\0\0GNU\0\t\233\222%\274\260\320\31\331\326\10\204\276X>\263\33\265\364N\4\0\0\0\20\0\0\0\1\0\0\0GNU\0\0\0\0\0\3\0\0\0\2\0\0\0\0\0\0\0", 68, 880) = 68
+fstat(3, {st_mode=S_IFREG|0755, st_size=2029224, ...}) = 0
+pread64(3, "\6\0\0\0\4\0\0\0@\0\0\0\0\0\0\0@\0\0\0\0\0\0\0@\0\0\0\0\0\0\0\20\3\0\0\0\0\0\0\20\3\0\0\0\0\0\0\10\0\0\0\0\0\0\0\3\0\0\0\4\0\0\0\240\26\34\0\0\0\0\0\240\26\34\0\0\0\0\0\240\26\34\0\0\0\0\0\34\0\0\0\0\0\0\0\34\0\0\0\0\0\0\0\20\0\0\0\0\0\0\0\1\0\0\0\4\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0@I\2\0\0\0\0\0@I\2\0\0\0\0\0\0\20\0\0\0\0\0\0\1\0\0\0\5\0\0\0\0P\2\0\0\0\0\0\0P\2\0\0\0\0\0\0P\2\0\0\0\0\0\264u\27\0\0\0\0\0\264u\27\0\0\0\0\0\0\20\0\0\0\0\0\0\1\0\0\0\4\0\0\0\0\320\31\0\0\0\0\0\0\320\31\0\0\0\0\0\0\320\31\0\0\0\0\0e\235\4\0\0\0\0\0e\235\4\0\0\0\0\0\0\20\0\0\0\0\0\0\1\0\0\0\6\0\0\0\0v\36\0\0\0\0\0\0\206\36\0\0\0\0\0\0\206\36\0\0\0\0\0\20P\0\0\0\0\0\0\330\216\0\0\0\0\0\0\0\20\0\0\0\0\0\0\2\0\0\0\6\0\0\0\200\233\36\0\0\0\0\0\200\253\36\0\0\0\0\0\200\253\36\0\0\0\0\0\340\1\0\0\0\0\0\0\340\1\0\0\0\0\0\0\10\0\0\0\0\0\0\0\4\0\0\0\4\0\0\0P\3\0\0\0\0\0\0P\3\0\0\0\0\0\0P\3\0\0\0\0\0\0 \0\0\0\0\0\0\0 \0\0\0\0\0\0\0\10\0\0\0\0\0\0\0\4\0\0\0\4\0\0\0p\3\0\0\0\0\0\0p\3\0\0\0\0\0\0p\3\0\0\0\0\0\0D\0\0\0\0\0\0\0D\0\0\0\0\0\0\0\4\0\0\0\0\0\0\0\7\0\0\0\4\0\0\0\0v\36\0\0\0\0\0\0\206\36\0\0\0\0\0\0\206\36\0\0\0\0\0\20\0\0\0\0\0\0\0\220\0\0\0\0\0\0\0\10\0\0\0\0\0\0\0S\345td\4\0\0\0P\3\0\0\0\0\0\0P\3\0\0\0\0\0\0P\3\0\0\0\0\0\0 \0\0\0\0\0\0\0 \0\0\0\0\0\0\0\10\0\0\0\0\0\0\0P\345td\4\0\0\0\274\26\34\0\0\0\0\0\274\26\34\0\0\0\0\0\274\26\34\0\0\0\0\0\304^\0\0\0\0\0\0\304^\0\0\0\0\0\0\4\0\0\0\0\0\0\0Q\345td\6\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\20\0\0\0\0\0\0\0R\345td\4\0\0\0\0v\36\0\0\0\0\0\0\206\36\0\0\0\0\0\0\206\36\0\0\0\0\0\0*\0\0\0\0\0\0\0*\0\0\0\0\0\0\1\0\0\0\0\0\0\0", 784, 64) = 784
+pread64(3, "\4\0\0\0\20\0\0\0\5\0\0\0GNU\0\2\0\0\300\4\0\0\0\3\0\0\0\0\0\0\0", 32, 848) = 32
+pread64(3, "\4\0\0\0\24\0\0\0\3\0\0\0GNU\0\t\233\222%\274\260\320\31\331\326\10\204\276X>\263\33\265\364N\4\0\0\0\20\0\0\0\1\0\0\0GNU\0\0\0\0\0\3\0\0\0\2\0\0\0\0\0\0\0", 68, 880) = 68
+mmap(NULL, 2036952, PROT_READ, MAP_PRIVATE|MAP_DENYWRITE, 3, 0) = 0x7f03e02dc000
+mprotect(0x7f03e0301000, 1847296, PROT_NONE) = 0
+mmap(0x7f03e0301000, 1540096, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x25000) = 0x7f03e0301000
+mmap(0x7f03e0479000, 303104, PROT_READ, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x19d000) = 0x7f03e0479000
+mmap(0x7f03e04c4000, 24576, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x1e7000) = 0x7f03e04c4000
+mmap(0x7f03e04ca000, 13528, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_ANONYMOUS, -1, 0) = 0x7f03e04ca000
+close(3)                                = 0
+mmap(NULL, 12288, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x7f03e02d9000
+arch_prctl(ARCH_SET_FS, 0x7f03e02d9740) = 0
+mprotect(0x7f03e04c4000, 12288, PROT_READ) = 0
+mprotect(0x7f03e04d2000, 4096, PROT_READ) = 0
+mprotect(0x55c9e95f4000, 4096, PROT_READ) = 0
+mprotect(0x7f03e0516000, 4096, PROT_READ) = 0
+munmap(0x7f03e04d6000, 76031)           = 0
+prlimit64(0, RLIMIT_STACK, NULL, {rlim_cur=8192*1024, rlim_max=RLIM64_INFINITY}) = 0
+prlimit64(0, RLIMIT_STACK, {rlim_cur=RLIM64_INFINITY, rlim_max=RLIM64_INFINITY}, NULL) = 0
+brk(NULL)                               = 0x55c9eaef7000
+brk(0x55c9eaf18000)                     = 0x55c9eaf18000
+openat(AT_FDCWD, "/usr/lib/locale/locale-archive", O_RDONLY|O_CLOEXEC) = 3
+fstat(3, {st_mode=S_IFREG|0644, st_size=14537584, ...}) = 0
+mmap(NULL, 14537584, PROT_READ, MAP_PRIVATE, 3, 0) = 0x7f03df4fb000
+close(3)                                = 0
+rt_sigaction(SIGHUP, {sa_handler=0x55c9e95ca810, sa_mask=[HUP], sa_flags=SA_RESTORER|SA_RESTART, sa_restorer=0x7f03e0322210}, {sa_handler=SIG_DFL, sa_mask=[], sa_flags=0}, 8) = 0
+rt_sigaction(SIGQUIT, {sa_handler=0x55c9e95ca810, sa_mask=[QUIT], sa_flags=SA_RESTORER|SA_RESTART, sa_restorer=0x7f03e0322210}, {sa_handler=SIG_DFL, sa_mask=[], sa_flags=0}, 8) = 0
+rt_sigaction(SIGINT, {sa_handler=0x55c9e95ca810, sa_mask=[INT], sa_flags=SA_RESTORER|SA_RESTART, sa_restorer=0x7f03e0322210}, {sa_handler=SIG_DFL, sa_mask=[], sa_flags=0}, 8) = 0
+rt_sigaction(SIGTERM, {sa_handler=0x55c9e95ca810, sa_mask=[TERM], sa_flags=SA_RESTORER|SA_RESTART, sa_restorer=0x7f03e0322210}, {sa_handler=SIG_DFL, sa_mask=[], sa_flags=0}, 8) = 0
+rt_sigaction(SIGXCPU, {sa_handler=0x55c9e95ca810, sa_mask=[XCPU], sa_flags=SA_RESTORER|SA_RESTART, sa_restorer=0x7f03e0322210}, {sa_handler=SIG_DFL, sa_mask=[], sa_flags=0}, 8) = 0
+rt_sigaction(SIGXFSZ, {sa_handler=0x55c9e95ca810, sa_mask=[XFSZ], sa_flags=SA_RESTORER|SA_RESTART, sa_restorer=0x7f03e0322210}, {sa_handler=SIG_DFL, sa_mask=[], sa_flags=0}, 8) = 0
+rt_sigaction(SIGCHLD, {sa_handler=SIG_DFL, sa_mask=[CHLD], sa_flags=SA_RESTORER|SA_RESTART, sa_restorer=0x7f03e0322210}, {sa_handler=SIG_DFL, sa_mask=[], sa_flags=0}, 8) = 0
+fcntl(1, F_GETFL)                       = 0x402 (flags O_RDWR|O_APPEND)
+fcntl(1, F_SETFL, O_RDWR|O_APPEND)      = 0
+fcntl(2, F_GETFL)                       = 0x402 (flags O_RDWR|O_APPEND)
+fcntl(2, F_SETFL, O_RDWR|O_APPEND)      = 0
+fcntl(1, F_GETFD)                       = 0
+getcwd("/home/ignacio/fpchecker/FPChecker/tests/cpu_checking/dynamic/test_fpchecker_interceptor", 4096) = 88
+ioctl(1, TCGETS, {B9600 opost isig icanon echo ...}) = 0
+ioctl(1, TCGETS, {B9600 opost isig icanon echo ...}) = 0
+fstat(1, {st_mode=S_IFCHR|0620, st_rdev=makedev(0x88, 0x2), ...}) = 0
+readlink("/proc/self/fd/1", "/dev/pts/2", 4095) = 10
+stat("/dev/pts/2", {st_mode=S_IFCHR|0620, st_rdev=makedev(0x88, 0x2), ...}) = 0
+ioctl(2, TCGETS, {B9600 opost isig icanon echo ...}) = 0
+ioctl(2, TCGETS, {B9600 opost isig icanon echo ...}) = 0
+fstat(2, {st_mode=S_IFCHR|0620, st_rdev=makedev(0x88, 0x2), ...}) = 0
+readlink("/proc/self/fd/2", "/dev/pts/2", 4095) = 10
+stat("/dev/pts/2", {st_mode=S_IFCHR|0620, st_rdev=makedev(0x88, 0x2), ...}) = 0
+stat("/usr/include", {st_mode=S_IFDIR|0755, st_size=4096, ...}) = 0
+stat("/usr/gnu/include", 0x7ffed5c73650) = -1 ENOENT (No such file or directory)
+stat("/usr/local/include", {st_mode=S_IFDIR|0755, st_size=4096, ...}) = 0
+stat("/usr/include", {st_mode=S_IFDIR|0755, st_size=4096, ...}) = 0
+rt_sigaction(SIGCHLD, {sa_handler=0x55c9e95d54c0, sa_mask=[CHLD], sa_flags=SA_RESTORER|SA_RESTART, sa_restorer=0x7f03e0322210}, {sa_handler=SIG_DFL, sa_mask=[CHLD], sa_flags=SA_RESTORER|SA_RESTART, sa_restorer=0x7f03e0322210}, 8) = 0
+rt_sigprocmask(SIG_SETMASK, [CHLD], NULL, 8) = 0
+rt_sigaction(SIGUSR1, {sa_handler=0x55c9e95d7990, sa_mask=[USR1], sa_flags=SA_RESTORER|SA_RESTART, sa_restorer=0x7f03e0322210}, {sa_handler=SIG_DFL, sa_mask=[], sa_flags=0}, 8) = 0
+brk(0x55c9eaf39000)                     = 0x55c9eaf39000
+stat(".", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0
+openat(AT_FDCWD, ".", O_RDONLY|O_NONBLOCK|O_CLOEXEC|O_DIRECTORY) = 3
+fstat(3, {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0
+getdents64(3, /* 16 entries */, 32768)  = 512
+getdents64(3, /* 0 entries */, 32768)   = 0
+close(3)                                = 0
+openat(AT_FDCWD, "Makefile", O_RDONLY)  = 3
+fcntl(3, F_SETFD, FD_CLOEXEC)           = 0
+fstat(3, {st_mode=S_IFREG|0664, st_size=179, ...}) = 0
+read(3, "\nOP = \t-O2\nCXX = clang++\n\nall:\n\t$(CXX) -c main.cpp $(OP)\n\t$(CXX) -c compute.cpp $(OP)\n\t$(CXX) -o main compute.o main.o\n\nclean:\n\trm -rf *.o main __pycache__ .fpc_logs .fpc_log.txt\n", 4096) = 179
+read(3, "", 4096)                       = 0
+close(3)                                = 0
+stat("RCS", 0x7ffed5c735f0)             = -1 ENOENT (No such file or directory)
+stat("SCCS", 0x7ffed5c735f0)            = -1 ENOENT (No such file or directory)
+stat("Makefile", {st_mode=S_IFREG|0664, st_size=179, ...}) = 0
+stat("all", 0x7ffed5c713d0)             = -1 ENOENT (No such file or directory)
+fstat(1, {st_mode=S_IFCHR|0620, st_rdev=makedev(0x88, 0x2), ...}) = 0
+write(1, "clang++ -c main.cpp -O2\n", 24) = 24
+rt_sigprocmask(SIG_BLOCK, [HUP INT QUIT TERM XCPU XFSZ], NULL, 8) = 0
+vfork()                                 = 66221
+rt_sigprocmask(SIG_UNBLOCK, [HUP INT QUIT TERM XCPU XFSZ], NULL, 8) = 0
+wait4(-1, [{WIFEXITED(s) && WEXITSTATUS(s) == 0}], 0, NULL) = 66221
+write(1, "clang++ -c compute.cpp -O2\n", 27) = 27
+rt_sigprocmask(SIG_BLOCK, [HUP INT QUIT TERM XCPU XFSZ], NULL, 8) = 0
+vfork()                                 = 66222
+rt_sigprocmask(SIG_UNBLOCK, [HUP INT QUIT TERM XCPU XFSZ], NULL, 8) = 0
+wait4(-1, [{WIFEXITED(s) && WEXITSTATUS(s) == 0}], 0, NULL) = 66222
+write(1, "clang++ -o main compute.o main.o\n", 33) = 33
+rt_sigprocmask(SIG_BLOCK, [HUP INT QUIT TERM XCPU XFSZ], NULL, 8) = 0
+vfork()                                 = 66223
+rt_sigprocmask(SIG_UNBLOCK, [HUP INT QUIT TERM XCPU XFSZ], NULL, 8) = 0
+wait4(-1, [{WIFEXITED(s) && WEXITSTATUS(s) == 0}], 0, NULL) = 66223
+rt_sigprocmask(SIG_BLOCK, [HUP INT QUIT TERM XCPU XFSZ], NULL, 8) = 0
+rt_sigprocmask(SIG_UNBLOCK, [HUP INT QUIT TERM XCPU XFSZ], NULL, 8) = 0
+stat("all", 0x7ffed5c714b0)             = -1 ENOENT (No such file or directory)
+chdir("/home/ignacio/fpchecker/FPChecker/tests/cpu_checking/dynamic/test_fpchecker_interceptor") = 0
+close(1)                                = 0
+exit_group(0)                           = ?
++++ exited with 0 +++

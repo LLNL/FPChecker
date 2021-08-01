@@ -4,6 +4,8 @@
 #define INTERCEPT_H
 
 #cmakedefine NVCC_WRAPPER "@NVCC_WRAPPER@"
+#cmakedefine CLANG_WRAPPER "@CLANG_WRAPPER@"
+#cmakedefine MPI_WRAPPER "@MPI_WRAPPER@"
 
 #endif /* INTERCEPT_H */
 

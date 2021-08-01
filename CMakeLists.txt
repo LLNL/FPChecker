@@ -33,7 +33,10 @@ if(Python3_Interpreter_FOUND)
 endif()
 ###############################
 
+# Set Path pf wrappers in config file
 set(NVCC_WRAPPER "${CMAKE_INSTALL_PREFIX}/bin/nvcc-fpc")
+set(CLANG_WRAPPER "${CMAKE_INSTALL_PREFIX}/bin/clang-fpchecker")
+set(MPI_WRAPPER "${CMAKE_INSTALL_PREFIX}/bin/mpi-fpchecker")
 configure_file(interception_tool/intercept.h.in intercept.h)
 
 add_library(fpchecker SHARED 
