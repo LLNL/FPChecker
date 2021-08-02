@@ -36,7 +36,9 @@ endif()
 # Set Path pf wrappers in config file
 set(NVCC_WRAPPER "${CMAKE_INSTALL_PREFIX}/bin/nvcc-fpc")
 set(CLANG_WRAPPER "${CMAKE_INSTALL_PREFIX}/bin/clang-fpchecker")
-set(MPI_WRAPPER "${CMAKE_INSTALL_PREFIX}/bin/mpi-fpchecker")
+set(CLANGPP_WRAPPER "${CMAKE_INSTALL_PREFIX}/bin/clang++-fpchecker")
+set(MPI_WRAPPER "${CMAKE_INSTALL_PREFIX}/bin/mpicc-fpchecker")
+set(MPIPP_WRAPPER "${CMAKE_INSTALL_PREFIX}/bin/mpicxx-fpchecker")
 configure_file(interception_tool/intercept.h.in intercept.h)
 
 add_library(fpchecker SHARED 
@@ -71,6 +73,8 @@ if(APPLE)
 	TARGET_LINK_LIBRARIES(fpchecker_cpu "-undefined dynamic_lookup")
 	TARGET_LINK_LIBRARIES(fpchecker_plugin "-Wl,-flat_namespace -Wl,-undefined -Wl,suppress")
 endif()
+
+TARGET_LINK_LIBRARIES(fpchecker_intercept_lib "-ldl")
 
 set_target_properties(fpchecker PROPERTIES
     VERSION ${PROJECT_VERSION}

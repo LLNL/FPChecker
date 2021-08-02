@@ -5,6 +5,7 @@ import os
 import sys
 #sys.path.append('..')
 #sys.path.append('.')
+#import report
 from dynamic import report
 
 def setup_module(module):
@@ -17,7 +18,7 @@ def teardown_module(module):
 
 def test_1():
     # --- compile code ---
-    cmd = ["make"]
+    cmd = ["fpchecker make"]
     try:
         cmdOutput = subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True)
     except subprocess.CalledProcessError as e:
@@ -25,12 +26,14 @@ def test_1():
         exit()
 
     # --- run code ---
-    cmd = ["./main"]
+    cmd = ["mpirun -H localhost -np 4 --oversubscribe ./main"]
     try:
         cmdOutput = subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True)
     except subprocess.CalledProcessError as e:
         print(e.output)
         exit()
+
+    assert report.numberReportFiles('.fpc_logs') == 4
 
     found = False
     fileName = report.findReportFile('.fpc_logs')
