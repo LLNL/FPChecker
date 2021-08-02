@@ -15,7 +15,7 @@
 /*----------------------------------------------------------------------------*/
 
 /** This structure defines different events and the location **/
-struct _FPC_ITEM_S_ {
+typedef struct _FPC_ITEM_S_ {
   char *file_name;
   uint64_t line;
   uint64_t infinity_pos;
@@ -29,21 +29,21 @@ struct _FPC_ITEM_S_ {
   uint64_t latent_infinity_neg;
   uint64_t latent_underflow;
   struct _FPC_ITEM_S_ *next;
-};
+} _FPC_ITEM_T_;
 
-typedef struct _FPC_ITEM_S_ _FPC_ITEM_T_;
+//typedef struct _FPC_ITEM_S_ _FPC_ITEM_T_;
 
 /*----------------------------------------------------------------------------*/
 /* Hash table type                                                            */
 /*----------------------------------------------------------------------------*/
 
-struct _FPC_HTABLE_S {
+typedef struct _FPC_HTABLE_S {
   uint64_t size;
   uint64_t n; // number of items
   struct _FPC_ITEM_S_ **table;
-};
+} _FPC_HTABLE_T;
 
-typedef struct _FPC_HTABLE_S _FPC_HTABLE_T;
+//typedef struct _FPC_HTABLE_S _FPC_HTABLE_T;
 
 /*----------------------------------------------------------------------------*/
 /* Initialization                                                             */
@@ -65,7 +65,8 @@ _FPC_HTABLE_T *_FPC_HT_CREATE_(int64_t size)
 
   // Allocate pointers to the head nodes
   if( (hashtable->table =
-      (struct _FPC_ITEM_S_ **)malloc(sizeof(_FPC_ITEM_S_ *) * size)) == NULL) {
+      (struct _FPC_ITEM_S_ **)malloc(sizeof(_FPC_ITEM_T_ *) * size)) == NULL) {
+      //(struct _FPC_ITEM_T_ **)malloc(sizeof(_FPC_ITEM_T_ *) * size)) == NULL) {
     printf("#FPCHECKER: hash table out of memory error!");
     exit(EXIT_FAILURE);
   }
