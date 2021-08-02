@@ -159,7 +159,8 @@ int execve(const char* filename, char* const argv[], char* const envp[]) {
 
 int execv(const char *path, char *const argv[]) {
     //printf("In execv: %s\n", path);
-    remove_ld_preload();
+    if (isNVCC(path) || isClang(path) || isClangPP(path) || isMPI(path) || isMPIPP(path))
+      remove_ld_preload();
     old_execv = dlsym(RTLD_NEXT, "execv");
 
     if (isNVCC(path))         return old_execv(nvcc_fpc, argv);
@@ -172,7 +173,8 @@ int execv(const char *path, char *const argv[]) {
 
 int execvp (const char *file, char *const argv[]) {
     //printf("In execvp: %s\n", file);
-    remove_ld_preload();
+    if (isNVCC(file) || isClang(file) || isClangPP(file) || isMPI(file) || isMPIPP(file))
+      remove_ld_preload();
     old_execvp = dlsym(RTLD_NEXT, "execvp");
 
     if (isNVCC(file))         return old_execvp(nvcc_fpc, argv);
