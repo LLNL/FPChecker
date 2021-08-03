@@ -10,6 +10,7 @@ import json
 from collections import defaultdict
 import shutil 
 from line_highlighting import createHTMLCode
+from colors import prGreen, prCyan, prRed
 
 # -------------------------------------------------------- #
 # Insertion points
@@ -121,8 +122,10 @@ def getLinesAffected():
   return len(lines)
 
 def createRootReport():
-  if not os.path.exists(REPORTS_DIR):
-    os.mkdir(REPORTS_DIR)
+  if os.path.exists(REPORTS_DIR):
+    prRed('Overwriting report dir...')
+    shutil.rmtree(REPORTS_DIR)
+  os.mkdir(REPORTS_DIR)
 
   # Load template
   fd = open(ROOT_REPORT_TEMPLATE, 'r')
@@ -221,7 +224,7 @@ def createRootReport():
 
   fd.close()
 
-  print('Report created:', report_full_name)
+  prGreen('Report created: ' + report_full_name)
 
 def createEventReport(event_name):
   report_name = (' '.join(event_name.split('_'))).title()
@@ -287,7 +290,7 @@ def createCodeReport(event_name, file_full_path, id):
   
 if __name__ == '__main__':
   reports_path = sys.argv[1]
-  print('Generating FPChecker report...')
+  prCyan('Generating FPChecker report...')
   fileList = getEventFilePaths(reports_path)
   print('Trace files found:', len(fileList))
   loadEvents(fileList)

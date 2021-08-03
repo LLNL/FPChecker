@@ -17,7 +17,8 @@ execute_process(COMMAND llvm-config --cppflags
 OUTPUT_VARIABLE CMAKE_CPP_FLAGS 
 OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -O3 -g -std=c++14 -DFPC_DEBUG")
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -O3 -g -std=c++14 -DFPC_DEBUG")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -O3 -g -std=c++14")
 
 include(GNUInstallDirs)
 

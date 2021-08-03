@@ -137,7 +137,7 @@ CPUFPInstrumentation::CPUFPInstrumentation(Module *M) :
   //table->setLinkage(GlobalValue::LinkageTypes::LinkOnceAnyLinkage);
 }
 
-void CPUFPInstrumentation::instrumentFunction(Function *f)
+void CPUFPInstrumentation::instrumentFunction(Function *f, long int *c)
 {
 	if (CUDAAnalysis::CodeMatching::isUnwantedFunction(f))
 		return;
@@ -149,7 +149,7 @@ void CPUFPInstrumentation::instrumentFunction(Function *f)
   CUDAAnalysis::Logging::info("Entering main loop in instrumentFunction");
 #endif
 
-	int instrumentedOps = 0;
+	long int instrumentedOps = 0;
 	for (auto bb=f->begin(), end=f->end(); bb != end; ++bb) {
 		for (auto i=bb->begin(), bend=bb->end(); i != bend; ++i) {
 			Instruction *inst = &(*i);
@@ -254,6 +254,7 @@ void CPUFPInstrumentation::instrumentFunction(Function *f)
 	CUDAAnalysis::Logging::info(out.str().c_str());
 	CUDAAnalysis::Logging::info("Leaving main loop in instrumentFunction");
 #endif
+  *c = instrumentedOps;
 }
 
 bool CPUFPInstrumentation::isCmpEqual(const Instruction *inst) {

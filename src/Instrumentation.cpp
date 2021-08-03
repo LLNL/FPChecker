@@ -471,7 +471,8 @@ void FPInstrumentation::createReadFunctionForGlobalArray(GlobalVariable *arr, Ar
 			ArrayRef<Value *> indexList(args);
 			auto gep = builder.CreateInBoundsGEP(arrType, arr, indexList, "my");
 			auto addCast = new AddrSpaceCastInst(gep, Type::getInt64PtrTy(mod->getContext(), 0), "my", retInst);
-			auto loadInst = builder.CreateAlignedLoad (addCast, 4, "my");
+			//auto loadInst = builder.CreateAlignedLoad (addCast, 4, "my");
+      auto loadInst = builder.CreateAlignedLoad(addCast, MaybeAlign(), "my");
 			retInst->setOperand(0, loadInst);
 
 			// Now we remove old (unused) instructions
@@ -534,7 +535,8 @@ void FPInstrumentation::createWriteFunctionForGlobalArray(GlobalVariable *arr, A
 			auto addCast = new AddrSpaceCastInst(gep, Type::getInt64PtrTy(mod->getContext(), 0), "my", retInst);
 			arg++;
 			Value *val = &(*arg);
-			builder.CreateAlignedStore(val, addCast, 8, false);
+			//builder.CreateAlignedStore(val, addCast, 8, false);
+			builder.CreateAlignedStore(val, addCast, MaybeAlign());
 			//auto loadInst = builder.CreateAlignedLoad (addCast, 4, "my");
 
 			// Now we remove old (unused) instructions
@@ -604,17 +606,18 @@ void FPInstrumentation::instrumentErrorArray()
 	auto ext = builder.CreateSExt(errType, Type::getInt64Ty(mod->getContext()), "my");
 	Value *subInst = builder.CreateSub (ext, ConstantInt::get(Type::getInt64Ty(mod->getContext()), 3), "my", false, false);
 
-	AtomicCmpXchgInst *cmpXchg = builder.CreateAtomicCmpXchg(
+	//AtomicCmpXchgInst *cmpXchg = 
+  builder.CreateAtomicCmpXchg(
 			addCast,
 			ConstantInt::get(Type::getInt64Ty(mod->getContext()), 0),
 			subInst,
 			AtomicOrdering::SequentiallyConsistent,
 			AtomicOrdering::SequentiallyConsistent,
 			SyncScope::System);
-#ifdef FPC_DEBUG
-	std::string out = "cmpxchg " + inst2str(cmpXchg) + " created";
-	Logging::info(out.c_str());
-#endif
+//#ifdef FPC_DEBUG
+//	std::string out = "cmpxchg " + inst2str(cmpXchg) + " created";
+//	Logging::info(out.c_str());
+//#endif
 
 	/* ----------- Instrument _FPC_READ_GLOBAL_ERRORS_ARRAY -------------*/
 	createReadFunctionForGlobalArray(newGv, arrType, "_FPC_READ_GLOBAL_ERRORS_ARRAY_");
@@ -646,17 +649,18 @@ void FPInstrumentation::instrumentErrorArray()
 	auto gepTmp = builderTmp.CreateInBoundsGEP(arrType, newWarningsGv, indexTmp, "my");
 	auto addCastTmp = new AddrSpaceCastInst(gepTmp, Type::getInt64PtrTy(mod->getContext(), 0), "my", firstInst);
 
-	AtomicCmpXchgInst *cmpX = builderTmp.CreateAtomicCmpXchg(
+	//AtomicCmpXchgInst *cmpX = 
+  builderTmp.CreateAtomicCmpXchg(
 			addCastTmp,
 			ConstantInt::get(Type::getInt64Ty(mod->getContext()), 0),
 			bitcastTmp,
 			AtomicOrdering::SequentiallyConsistent,
 			AtomicOrdering::SequentiallyConsistent,
 			SyncScope::System);
-#ifdef FPC_DEBUG
-	std::string out2 = "cmpxchg " + inst2str(cmpX) + " created";
-	Logging::info(out2.c_str());
-#endif
+//#ifdef FPC_DEBUG
+//	std::string out2 = "cmpxchg " + inst2str(cmpX) + " created";
+//	Logging::info(out2.c_str());
+//#endif
 
 	/* ----------- Instrument _Z28_FPC_READ_FP64_GLOBAL_ARRAY_Pyi -------------*/
 	createReadFunctionForGlobalArray(newWarningsGv, arrType, "_FPC_READ_FP64_GLOBAL_ARRAY_");
