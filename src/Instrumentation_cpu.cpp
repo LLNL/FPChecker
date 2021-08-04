@@ -309,6 +309,9 @@ void CPUFPInstrumentation::setFakeDebugLocation(Instruction *old_inst, Instructi
         }
       }
     } 
+  } else {
+    new_inst->setDebugLoc(di);
+    return;
   }
   // IF we reach it, it means we couldn't find debug information
   //new_inst->eraseFromParent();
