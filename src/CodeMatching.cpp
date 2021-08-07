@@ -23,7 +23,7 @@ typedef std::map<std::string, std::vector<unsigned> > key_val_pair_t;
 typedef std::map<const GlobalValue *, key_val_pair_t> global_val_annot_t;
 typedef std::map<const Module *, global_val_annot_t> per_module_annot_t;
 } // anonymous namespace
-static ManagedStatic<per_module_annot_t> annotationCache;
+//static ManagedStatic<per_module_annot_t> annotationCache;
 //static sys::Mutex Lock;
 
 bool CodeMatching::isUnwantedFunction(Function *f) {

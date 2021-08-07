@@ -139,12 +139,14 @@ public:
 
       if (const CallExpr *call = dyn_cast<CallExpr>(child)) {
         std::string str = getStmtString(call);
-        if (str.find("_FPC_CHECK_") != std::string::npos)
+        if (str.find("_FPC_CHECK_") != std::string::npos) {
           return true;
-        else
+        } else {
           ret = hasBeenInstrumented(child);
-          if (ret)
+          if (ret) {
             break;
+          }
+        }
       } else {
         ret = hasBeenInstrumented(child);
         if (ret)

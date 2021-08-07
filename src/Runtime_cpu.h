@@ -6,7 +6,11 @@
 #include <stdio.h>
 #include <math.h>
 
-#define MAX(a,b) (((a)>(b))?(a):(b))
+#ifdef FPC_MULTI_THREADED
+#include <pthread.h>
+#endif
+
+#define FPC_MAX(a,b) (((a)>(b))?(a):(b))
 
 /*----------------------------------------------------------------------------*/
 /* Global data                                                                */
@@ -24,19 +28,30 @@ _FPC_HTABLE_T *_FPC_HTABLE_;
 #define DANGER_ZONE_PERCENTAGE 0.05
 #endif
 
+#ifdef FPC_MULTI_THREADED
+pthread_mutex_t fpc_lock;
+#endif
+
 
 /*----------------------------------------------------------------------------*/
 /* Initialize                                                                 */
 /*----------------------------------------------------------------------------*/
 
 void _FPC_INIT_HASH_TABLE_() {
+  printf("#FPCHECKER: Initializing...\n");
   int64_t size = 1000;
   _FPC_HTABLE_ = _FPC_HT_CREATE_(size);
-  printf("#FPCHECKER: Initializing...\n");
+
+#ifdef FPC_MULTI_THREADED
+  if (pthread_mutex_init(&fpc_lock, NULL) != 0) {
+    printf("#FPCHECKER: Mutex init failed for multi-threading\n");
+  }
+#endif
 }
 
 void _FPC_PRINT_LOCATIONS_()
 {
+  printf("#FPCHECKER: Finalizing and writing traces...\n");
   _FPC_PRINT_HASH_TABLE_(_FPC_HTABLE_);
 }
 
@@ -60,7 +75,7 @@ uint32_t _FPC_FP32_GET_MANTISSA(float x) {
   return val;
 }
 
-uint32_t _FPC_FP32_IS_INF(float x) {
+int _FPC_FP32_IS_INF(float x) {
   if  (_FPC_FP32_GET_EXPONENT(x) == (uint32_t)(255) &&
       _FPC_FP32_GET_MANTISSA(x) == (uint32_t)(0)
       )
@@ -88,7 +103,7 @@ int _FPC_FP32_IS_NAN(float x) {
   return 0;
 }
 
-int _FPC_FP32_IS_DIVISON_ZERO(float x, float y, float z, int op) {
+int _FPC_FP32_IS_DIVISON_ZERO(float y, float z, int op) {
   if (op == 3)
     if (y!=0)
       if (z==0)
@@ -107,14 +122,14 @@ int _FPC_FP32_IS_CANCELLATION(float x, float y, float z, int op) {
     uint32_t e1 = _FPC_FP32_GET_EXPONENT(y);
     uint32_t e2 = _FPC_FP32_GET_EXPONENT(z);
     uint32_t re = _FPC_FP32_GET_EXPONENT(x);
-    if ((MAX((int)e1,(int)e2) - (int)re) > 30)
+    if ((FPC_MAX((int)e1,(int)e2) - (int)re) > 30)
       return 1;
   }
 
   return 0;
 }
 
-int _FPC_FP32_IS_COMPARISON(float x, float y, float z, int op) {
+int _FPC_FP32_IS_COMPARISON(int op) {
   if (op == 4)
     return 1;
 
@@ -181,17 +196,17 @@ uint64_t _FPC_FP64_GET_EXPONENT(double x) {
   return val;
 }
 
-uint32_t _FPC_FP64_GET_MANTISSA(double x) {
-  uint32_t val;
+uint64_t _FPC_FP64_GET_MANTISSA(double x) {
+  uint64_t val;
   memcpy((void *) &val, (void *) &x, sizeof(val));
   val = val << 12;   // get rid of sign bit and exponent
   val = val >> 12;
   return val;
 }
 
-uint32_t _FPC_FP64_IS_INF(double x) {
-  if  (_FPC_FP64_GET_EXPONENT(x) == (uint32_t)(2047) &&
-      _FPC_FP64_GET_MANTISSA(x) == (uint32_t)(0)
+int _FPC_FP64_IS_INF(double x) {
+  if  (_FPC_FP64_GET_EXPONENT(x) == (uint64_t)(2047) &&
+      _FPC_FP64_GET_MANTISSA(x) == (uint64_t)(0)
       )
     return 1;
   return 0;
@@ -217,7 +232,7 @@ int _FPC_FP64_IS_NAN(double x) {
   return 0;
 }
 
-int _FPC_FP64_IS_DIVISON_ZERO(double x, double y, double z, int op) {
+int _FPC_FP64_IS_DIVISON_ZERO(double y, double z, int op) {
   if (op == 3)
     if (y!=0)
       if (z==0)
@@ -234,10 +249,10 @@ int _FPC_FP64_IS_DIVISON_ZERO(double x, double y, double z, int op) {
 // Threshold: 10^9 or 2^30, i.e., 9 decimal digits or 30 binary digits
 int _FPC_FP64_IS_CANCELLATION(double x, double y, double z, int op) {
   if (op==0 || op==1) {
-    uint32_t e1 = _FPC_FP64_GET_EXPONENT(y);
-    uint32_t e2 = _FPC_FP64_GET_EXPONENT(z);
-    uint32_t re = _FPC_FP64_GET_EXPONENT(x);
-    if ((MAX((int)e1,(int)e2) - (int)re) > 30) {
+    uint64_t e1 = _FPC_FP64_GET_EXPONENT(y);
+    uint64_t e2 = _FPC_FP64_GET_EXPONENT(z);
+    uint64_t re = _FPC_FP64_GET_EXPONENT(x);
+    if ((FPC_MAX((int)e1,(int)e2) - (int)re) > 30) {
       return 1;
     }
   }
@@ -245,7 +260,7 @@ int _FPC_FP64_IS_CANCELLATION(double x, double y, double z, int op) {
   return 0;
 }
 
-int _FPC_FP64_IS_COMPARISON(double x, double y, double z, int op) {
+int _FPC_FP64_IS_COMPARISON(int op) {
   if (op == 4)
     return 1;
 
@@ -344,22 +359,29 @@ void _FPC_FP32_CHECK_(
   _FPC_ITEM_T_ item;
   // Set file name and line
   item.file_name = file_name;
-  item.line = loc;
+  item.line = (uint64_t)loc;
 
   // Set events
-  item.infinity_pos         = _FPC_FP32_IS_INFINITY_POS(x);
-  item.infinity_neg         = _FPC_FP32_IS_INFINITY_NEG(x);
-  item.nan                  = _FPC_FP32_IS_NAN(x);
-  item.division_zero        = _FPC_FP32_IS_DIVISON_ZERO(x, y, z, op);
-  item.cancellation         = _FPC_FP32_IS_CANCELLATION(x, y, z, op);
-  item.comparison           = _FPC_FP32_IS_COMPARISON(x, y, z, op);
-  item.underflow            = _FPC_FP32_IS_SUBNORMAL(x);
-  item.latent_infinity_pos  = _FPC_FP32_IS_LATENT_INFINITY_POS(x);
-  item.latent_infinity_neg  = _FPC_FP32_IS_LATENT_INFINITY_NEG(x);
-  item.latent_underflow     = _FPC_FP32_IS_LATENT_SUBNORMAL(x);
+  item.infinity_pos         = (uint64_t)_FPC_FP32_IS_INFINITY_POS(x);
+  item.infinity_neg         = (uint64_t)_FPC_FP32_IS_INFINITY_NEG(x);
+  item.nan                  = (uint64_t)_FPC_FP32_IS_NAN(x);
+  item.division_zero        = (uint64_t)_FPC_FP32_IS_DIVISON_ZERO(y, z, op);
+  item.cancellation         = (uint64_t)_FPC_FP32_IS_CANCELLATION(x, y, z, op);
+  item.comparison           = (uint64_t)_FPC_FP32_IS_COMPARISON(op);
+  item.underflow            = (uint64_t)_FPC_FP32_IS_SUBNORMAL(x);
+  item.latent_infinity_pos  = (uint64_t)_FPC_FP32_IS_LATENT_INFINITY_POS(x);
+  item.latent_infinity_neg  = (uint64_t)_FPC_FP32_IS_LATENT_INFINITY_NEG(x);
+  item.latent_underflow     = (uint64_t)_FPC_FP32_IS_LATENT_SUBNORMAL(x);
 
-  if (_FPC_EVENT_OCURRED(&item))
+ if (_FPC_EVENT_OCURRED(&item)) {
+#ifdef FPC_MULTI_THREADED
+    pthread_mutex_lock(&fpc_lock);
+#endif
     _FPC_HT_SET_(_FPC_HTABLE_, &item);
+#ifdef FPC_MULTI_THREADED
+    pthread_mutex_unlock(&fpc_lock);
+#endif
+  }
 }
 
 void _FPC_FP64_CHECK_(
@@ -367,22 +389,29 @@ void _FPC_FP64_CHECK_(
   _FPC_ITEM_T_ item;
   // Set file name and line
   item.file_name = file_name;
-  item.line = loc;
+  item.line = (uint64_t)loc;
 
   // Set events
-  item.infinity_pos         = _FPC_FP64_IS_INFINITY_POS(x);
-  item.infinity_neg         = _FPC_FP64_IS_INFINITY_NEG(x);
-  item.nan                  = _FPC_FP64_IS_NAN(x);
-  item.division_zero        = _FPC_FP64_IS_DIVISON_ZERO(x, y, z, op);
-  item.cancellation         = _FPC_FP64_IS_CANCELLATION(x, y, z, op);
-  item.comparison           = _FPC_FP64_IS_COMPARISON(x, y, z, op);
-  item.underflow            = _FPC_FP64_IS_SUBNORMAL(x);
-  item.latent_infinity_pos  = _FPC_FP64_IS_LATENT_INFINITY_POS(x);
-  item.latent_infinity_neg  = _FPC_FP64_IS_LATENT_INFINITY_NEG(x);
-  item.latent_underflow     = _FPC_FP64_IS_LATENT_SUBNORMAL(x);
+  item.infinity_pos         = (uint64_t)_FPC_FP64_IS_INFINITY_POS(x);
+  item.infinity_neg         = (uint64_t)_FPC_FP64_IS_INFINITY_NEG(x);
+  item.nan                  = (uint64_t)_FPC_FP64_IS_NAN(x);
+  item.division_zero        = (uint64_t)_FPC_FP64_IS_DIVISON_ZERO(y, z, op);
+  item.cancellation         = (uint64_t)_FPC_FP64_IS_CANCELLATION(x, y, z, op);
+  item.comparison           = (uint64_t)_FPC_FP64_IS_COMPARISON(op);
+  item.underflow            = (uint64_t)_FPC_FP64_IS_SUBNORMAL(x);
+  item.latent_infinity_pos  = (uint64_t)_FPC_FP64_IS_LATENT_INFINITY_POS(x);
+  item.latent_infinity_neg  = (uint64_t)_FPC_FP64_IS_LATENT_INFINITY_NEG(x);
+  item.latent_underflow     = (uint64_t)_FPC_FP64_IS_LATENT_SUBNORMAL(x);
 
-  if (_FPC_EVENT_OCURRED(&item))
+   if (_FPC_EVENT_OCURRED(&item)) {
+#ifdef FPC_MULTI_THREADED
+    pthread_mutex_lock(&fpc_lock);
+#endif
     _FPC_HT_SET_(_FPC_HTABLE_, &item);
+#ifdef FPC_MULTI_THREADED
+    pthread_mutex_unlock(&fpc_lock);
+#endif
+  }
 }
 
 

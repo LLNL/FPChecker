@@ -23,10 +23,10 @@ private:
   Function *fpc_print_locations;
 
   // maximum number for a code line
-  int maxNumLocations = 0;
+  //int maxNumLocations = 0;
 
   /* Host */
-  Function *print_at_main = nullptr;
+  //Function *print_at_main = nullptr;
 
   //IRBuilder<> createBuilderAfter(Instruction *inst);
   //IRBuilder<> createBuilderBefore(Instruction *inst);
@@ -39,7 +39,7 @@ private:
 
 public:
   CPUFPInstrumentation(Module *M);
-  void instrumentFunction(Function *f);
+  void instrumentFunction(Function *f, long int *c);
   void instrumentMainFunction(Function *f);
   //void generateCodeForInterruption();
   //void instrumentErrorArray();

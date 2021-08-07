@@ -5,7 +5,9 @@
 
 #cmakedefine NVCC_WRAPPER "@NVCC_WRAPPER@"
 #cmakedefine CLANG_WRAPPER "@CLANG_WRAPPER@"
+#cmakedefine CLANGPP_WRAPPER "@CLANGPP_WRAPPER@"
 #cmakedefine MPI_WRAPPER "@MPI_WRAPPER@"
+#cmakedefine MPIPP_WRAPPER "@MPIPP_WRAPPER@"
 
 #endif /* INTERCEPT_H */
 

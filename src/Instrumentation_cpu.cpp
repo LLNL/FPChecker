@@ -137,7 +137,7 @@ CPUFPInstrumentation::CPUFPInstrumentation(Module *M) :
   //table->setLinkage(GlobalValue::LinkageTypes::LinkOnceAnyLinkage);
 }
 
-void CPUFPInstrumentation::instrumentFunction(Function *f)
+void CPUFPInstrumentation::instrumentFunction(Function *f, long int *c)
 {
 	if (CUDAAnalysis::CodeMatching::isUnwantedFunction(f))
 		return;
@@ -149,7 +149,7 @@ void CPUFPInstrumentation::instrumentFunction(Function *f)
   CUDAAnalysis::Logging::info("Entering main loop in instrumentFunction");
 #endif
 
-	int instrumentedOps = 0;
+	long int instrumentedOps = 0;
 	for (auto bb=f->begin(), end=f->end(); bb != end; ++bb) {
 		for (auto i=bb->begin(), bend=bb->end(); i != bend; ++i) {
 			Instruction *inst = &(*i);
@@ -189,8 +189,10 @@ void CPUFPInstrumentation::instrumentFunction(Function *f)
 				// Push file name
 				// Get global fileName pointer
         GlobalVariable *fName = nullptr;
-        fName = mod->getGlobalVariable("_ZL15_FPC_FILE_NAME_", true);
-        assert((fName!=nullptr) && "Global array not found");
+        fName = mod->getGlobalVariable("_ZL15_FPC_FILE_NAME_", true); // C++ binding
+        if (fName==nullptr)
+          fName = mod->getGlobalVariable("_FPC_FILE_NAME_", true); // try C binding
+        assert((fName!=nullptr) && "Global filename var not found");
         auto loadInst = builder.CreateAlignedLoad(fName, MaybeAlign(), "my");
 
         //std::string fileName = getFileNameFromModule(mod);
@@ -252,6 +254,7 @@ void CPUFPInstrumentation::instrumentFunction(Function *f)
 	CUDAAnalysis::Logging::info(out.str().c_str());
 	CUDAAnalysis::Logging::info("Leaving main loop in instrumentFunction");
 #endif
+  *c = instrumentedOps;
 }
 
 bool CPUFPInstrumentation::isCmpEqual(const Instruction *inst) {
@@ -306,6 +309,9 @@ void CPUFPInstrumentation::setFakeDebugLocation(Instruction *old_inst, Instructi
         }
       }
     } 
+  } else {
+    new_inst->setDebugLoc(di);
+    return;
   }
   // IF we reach it, it means we couldn't find debug information
   //new_inst->eraseFromParent();

@@ -39,7 +39,7 @@ def test_1():
       print('i', i, data[i])
       if data[i]['file'].endswith('compute.cpp'):
         if data[i]['nan'] > 0:
-          if data[i]['line'] == 10:
+          if data[i]['line'] == 9:
             found = True
             break
 

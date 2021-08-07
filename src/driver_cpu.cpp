@@ -40,6 +40,7 @@ public:
 	{
 		Module *m = &M;
 		CPUFPInstrumentation *fpInstrumentation = new CPUFPInstrumentation(m);
+    long int instrumented = 0;
 
 #ifdef FPC_DEBUG
 		std::string out = "Running Module pass on: " + m->getName().str();
@@ -60,7 +61,9 @@ public:
       std::string fname = "Instrumenting function: " + F->getName().str();
       CUDAAnalysis::Logging::info(fname.c_str());
 #endif
-      fpInstrumentation->instrumentFunction(F);
+      long int c = 0;
+      fpInstrumentation->instrumentFunction(F, &c);
+      instrumented += c;
 
       if (CUDAAnalysis::CodeMatching::isMainFunction(F)) {
 #ifdef FPC_DEBUG
@@ -69,6 +72,9 @@ public:
         fpInstrumentation->instrumentMainFunction(F);
       }
 		}
+
+  std::string out_tmp = "Instrumented " + std::to_string(instrumented) + " @ " + m->getName().str();
+  CUDAAnalysis::Logging::info(out_tmp.c_str());
 
   // This emulates a failure in the pass
   if (getenv("FPC_INJECT_FAULT") != NULL)

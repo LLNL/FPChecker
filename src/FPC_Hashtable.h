@@ -1,6 +1,8 @@
 #ifndef SRC_FPC_HASHTABLE_H_
 #define SRC_FPC_HASHTABLE_H_
 
+#define _BSD_SOURCE
+#define _DEFAULT_SOURCE
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -15,7 +17,7 @@
 /*----------------------------------------------------------------------------*/
 
 /** This structure defines different events and the location **/
-struct _FPC_ITEM_S_ {
+typedef struct _FPC_ITEM_S_ {
   char *file_name;
   uint64_t line;
   uint64_t infinity_pos;
@@ -29,21 +31,21 @@ struct _FPC_ITEM_S_ {
   uint64_t latent_infinity_neg;
   uint64_t latent_underflow;
   struct _FPC_ITEM_S_ *next;
-};
+} _FPC_ITEM_T_;
 
-typedef struct _FPC_ITEM_S_ _FPC_ITEM_T_;
+//typedef struct _FPC_ITEM_S_ _FPC_ITEM_T_;
 
 /*----------------------------------------------------------------------------*/
 /* Hash table type                                                            */
 /*----------------------------------------------------------------------------*/
 
-struct _FPC_HTABLE_S {
+typedef struct _FPC_HTABLE_S {
   uint64_t size;
   uint64_t n; // number of items
   struct _FPC_ITEM_S_ **table;
-};
+} _FPC_HTABLE_T;
 
-typedef struct _FPC_HTABLE_S _FPC_HTABLE_T;
+//typedef struct _FPC_HTABLE_S _FPC_HTABLE_T;
 
 /*----------------------------------------------------------------------------*/
 /* Initialization                                                             */
@@ -65,7 +67,8 @@ _FPC_HTABLE_T *_FPC_HT_CREATE_(int64_t size)
 
   // Allocate pointers to the head nodes
   if( (hashtable->table =
-      (struct _FPC_ITEM_S_ **)malloc(sizeof(_FPC_ITEM_S_ *) * size)) == NULL) {
+      (struct _FPC_ITEM_S_ **)malloc((size_t)((int64_t)sizeof(_FPC_ITEM_T_ *) * size))) == NULL) {
+      //(struct _FPC_ITEM_T_ **)malloc(sizeof(_FPC_ITEM_T_ *) * size)) == NULL) {
     printf("#FPCHECKER: hash table out of memory error!");
     exit(EXIT_FAILURE);
   }
@@ -74,7 +77,7 @@ _FPC_HTABLE_T *_FPC_HT_CREATE_(int64_t size)
     hashtable->table[i] = NULL;
   }
 
-  hashtable->size = size;
+  hashtable->size = (uint64_t)size;
   hashtable->n = 0;
 
   return hashtable;
@@ -88,7 +91,7 @@ int _FPC_HT_HASH_( _FPC_HTABLE_T *hashtable, _FPC_ITEM_T_ *val)
 {
   uint64_t key = (uint64_t)(val->file_name);
   key += val->line;
-  return key % hashtable->size;
+  return (int)(key % hashtable->size);
 }
 
 /*----------------------------------------------------------------------------*/
@@ -192,9 +195,16 @@ void _FPC_HT_SET_(_FPC_HTABLE_T *hashtable, _FPC_ITEM_T_ *newVal)
 void _FPC_PRINT_HASH_TABLE_(_FPC_HTABLE_T *hashtable)
 {
   // Create directory
-  struct stat st = {0};
-  if (stat(".fpc_logs", &st) == -1) {
-      mkdir(".fpc_logs", 0775);
+  //struct stat st = {0};
+  struct stat st;
+  char dir_name[] = ".fpc_logs";
+  if (stat(dir_name, &st) == -1) { // dir doesn't exists
+    //printf("#FPCHECKER: overwriting traces...\n");
+    //char p[64];
+    //p[0] = '\0';
+    //sprintf(p, "rm -rf %s", dir_name);
+    //system(p);
+    mkdir(dir_name, 0775);
   }
 
   // Set filename
@@ -218,15 +228,15 @@ void _FPC_PRINT_HASH_TABLE_(_FPC_HTABLE_T *hashtable)
   strcat(fileName, pidStr);
   strcat(fileName, ".json");
 
-  int n = hashtable->n;
-  int printed = 0;
+  uint64_t n = hashtable->n;
+  uint64_t printed = 0;
 
   FILE *fp;
   fp = fopen(fileName, "w");
 
   fprintf(fp, "[\n");
 
-  for (int i=0; i < hashtable->size; ++i) {
+  for (int i=0; (uint64_t)i < hashtable->size; ++i) {
     _FPC_ITEM_T_ *next;
     next = hashtable->table[i];
 
