@@ -28,14 +28,17 @@ enable_testing()
 include(CTest)
 find_package(Python3 COMPONENTS Interpreter)
 if(Python3_Interpreter_FOUND)
-  add_test(NAME fpchecker-tests COMMAND Python3::Interpreter -m pytest
+  add_test(NAME cpu-tests COMMAND Python3::Interpreter -m pytest --tb=no
             WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/tests/cpu_checking)
-  set_tests_properties(fpchecker-tests PROPERTIES ENVIRONMENT "PATH=${CMAKE_INSTALL_PREFIX}/bin:$ENV{PATH}")
+  add_test(NAME nvcc-tests COMMAND Python3::Interpreter -m pytest --tb=no
+            WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/tests/parser)
+  set_tests_properties(cpu-tests PROPERTIES ENVIRONMENT "PATH=${CMAKE_INSTALL_PREFIX}/bin:$ENV{PATH}")
+  set_tests_properties(nvcc-tests PROPERTIES ENVIRONMENT "PATH=${CMAKE_INSTALL_PREFIX}/bin:$ENV{PATH}")
 endif()
 ###############################
 
 # Set Path pf wrappers in config file
-set(NVCC_WRAPPER "${CMAKE_INSTALL_PREFIX}/bin/nvcc-fpc")
+set(NVCC_WRAPPER "${CMAKE_INSTALL_PREFIX}/bin/nvcc-fpchecker")
 set(CLANG_WRAPPER "${CMAKE_INSTALL_PREFIX}/bin/clang-fpchecker")
 set(CLANGPP_WRAPPER "${CMAKE_INSTALL_PREFIX}/bin/clang++-fpchecker")
 set(MPI_WRAPPER "${CMAKE_INSTALL_PREFIX}/bin/mpicc-fpchecker")
@@ -152,6 +155,12 @@ install(CODE "execute_process( \
         COMMAND ${CMAKE_COMMAND} -E create_symlink \
         ${CMAKE_INSTALL_PREFIX}/front-end/nvcc_fpchecker.py ${CMAKE_INSTALL_PREFIX}/bin/nvcc-fpc )"
         COMMENT "Creating link: nvcc-fpc -> nvcc_fpchecker.py"
+)
+
+install(CODE "execute_process( \
+        COMMAND ${CMAKE_COMMAND} -E create_symlink \
+        ${CMAKE_INSTALL_PREFIX}/front-end/nvcc_fpchecker.py ${CMAKE_INSTALL_PREFIX}/bin/nvcc-fpchecker )"
+        COMMENT "Creating link: nvcc-fpchecker -> nvcc_fpchecker.py"
 )
 
 # Install link for fpchecker reports tool

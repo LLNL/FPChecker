@@ -9,5 +9,5 @@ all:
 	$(NVCC) -o main dot_product.o main.o
 
 clean:
-	rm -rf *.cu *.o main __pycache__ *.ii
+	rm -rf *.cu *.o main __pycache__ *.ii .fpc_log.txt
 

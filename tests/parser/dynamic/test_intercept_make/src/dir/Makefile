@@ -6,4 +6,4 @@ all:
 	nvcc -o main dot_product.o main.o
 
 clean:
-	rm -rf *.o main __pycache__ *_copy.* main_fpc *_inst.* *.ii
+	rm -rf *.o main __pycache__ *_copy.* main_fpc *_inst.* *.ii .fpc_log.txt
