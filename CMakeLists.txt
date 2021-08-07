@@ -21,6 +21,7 @@ OUTPUT_STRIP_TRAILING_WHITESPACE)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -O3 -g -std=c++14")
 
 include(GNUInstallDirs)
+include(CheckLanguage)
 
 ###### Enable testing ##########
 #set(ENV{PATH} "${CMAKE_INSTALL_PREFIX}/bin:$ENV{PATH}")
@@ -30,10 +31,15 @@ find_package(Python3 COMPONENTS Interpreter)
 if(Python3_Interpreter_FOUND)
   add_test(NAME cpu-tests COMMAND Python3::Interpreter -m pytest --tb=no
             WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/tests/cpu_checking)
+  set_tests_properties(cpu-tests PROPERTIES ENVIRONMENT "PATH=${CMAKE_INSTALL_PREFIX}/bin:$ENV{PATH}")
+
+check_language(CUDA)
+if(CMAKE_CUDA_COMPILER)
   add_test(NAME nvcc-tests COMMAND Python3::Interpreter -m pytest --tb=no
             WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/tests/parser)
-  set_tests_properties(cpu-tests PROPERTIES ENVIRONMENT "PATH=${CMAKE_INSTALL_PREFIX}/bin:$ENV{PATH}")
   set_tests_properties(nvcc-tests PROPERTIES ENVIRONMENT "PATH=${CMAKE_INSTALL_PREFIX}/bin:$ENV{PATH}")
+
+endif()
 endif()
 ###############################
 
