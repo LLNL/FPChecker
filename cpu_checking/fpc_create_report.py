@@ -289,7 +289,10 @@ def createCodeReport(event_name, file_full_path, id):
   fd.close()
   
 if __name__ == '__main__':
-  reports_path = sys.argv[1]
+  if len(sys.argv) > 1:
+    reports_path = sys.argv[1]
+  else:
+    reports_path = os.getcwd()
   prCyan('Generating FPChecker report...')
   fileList = getEventFilePaths(reports_path)
   print('Trace files found:', len(fileList))

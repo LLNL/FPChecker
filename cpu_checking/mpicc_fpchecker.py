@@ -102,6 +102,9 @@ class Command:
 
   def instrumentIR(self):
     new_cmd = [self.name] + self.mpi_params + LLVM_PASS.split() + self.parameters
+    for p in self.parameters:
+      if '-fopenmp' in p:
+        new_cmd += ['-DFPC_FPC_MULTI_THREADED']
     try:
       cmdOutput = subprocess.run(' '.join(new_cmd), shell=True, check=True)
     except Exception as e:

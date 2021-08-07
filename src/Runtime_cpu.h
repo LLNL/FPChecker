@@ -6,6 +6,10 @@
 #include <stdio.h>
 #include <math.h>
 
+#ifdef FPC_MULTI_THREADED
+#include <pthread.h>
+#endif
+
 #define FPC_MAX(a,b) (((a)>(b))?(a):(b))
 
 /*----------------------------------------------------------------------------*/
@@ -24,15 +28,25 @@ _FPC_HTABLE_T *_FPC_HTABLE_;
 #define DANGER_ZONE_PERCENTAGE 0.05
 #endif
 
+#ifdef FPC_MULTI_THREADED
+pthread_mutex_t fpc_lock;
+#endif
+
 
 /*----------------------------------------------------------------------------*/
 /* Initialize                                                                 */
 /*----------------------------------------------------------------------------*/
 
 void _FPC_INIT_HASH_TABLE_() {
+  printf("#FPCHECKER: Initializing...\n");
   int64_t size = 1000;
   _FPC_HTABLE_ = _FPC_HT_CREATE_(size);
-  printf("#FPCHECKER: Initializing...\n");
+
+#ifdef FPC_MULTI_THREADED
+  if (pthread_mutex_init(&fpc_lock, NULL) != 0) {
+    printf("#FPCHECKER: Mutex init failed for multi-threading\n");
+  }
+#endif
 }
 
 void _FPC_PRINT_LOCATIONS_()
@@ -359,8 +373,15 @@ void _FPC_FP32_CHECK_(
   item.latent_infinity_neg  = (uint64_t)_FPC_FP32_IS_LATENT_INFINITY_NEG(x);
   item.latent_underflow     = (uint64_t)_FPC_FP32_IS_LATENT_SUBNORMAL(x);
 
-  if (_FPC_EVENT_OCURRED(&item))
+ if (_FPC_EVENT_OCURRED(&item)) {
+#ifdef FPC_MULTI_THREADED
+    pthread_mutex_lock(&fpc_lock);
+#endif
     _FPC_HT_SET_(_FPC_HTABLE_, &item);
+#ifdef FPC_MULTI_THREADED
+    pthread_mutex_unlock(&fpc_lock);
+#endif
+  }
 }
 
 void _FPC_FP64_CHECK_(
@@ -382,8 +403,15 @@ void _FPC_FP64_CHECK_(
   item.latent_infinity_neg  = (uint64_t)_FPC_FP64_IS_LATENT_INFINITY_NEG(x);
   item.latent_underflow     = (uint64_t)_FPC_FP64_IS_LATENT_SUBNORMAL(x);
 
-  if (_FPC_EVENT_OCURRED(&item))
+   if (_FPC_EVENT_OCURRED(&item)) {
+#ifdef FPC_MULTI_THREADED
+    pthread_mutex_lock(&fpc_lock);
+#endif
     _FPC_HT_SET_(_FPC_HTABLE_, &item);
+#ifdef FPC_MULTI_THREADED
+    pthread_mutex_unlock(&fpc_lock);
+#endif
+  }
 }
 
 
