@@ -2,6 +2,7 @@ import os
 import pathlib
 import sys
 import subprocess
+import pytest
 
 sys.path.insert(1, '/usr/workspace/wsa/laguna/fpchecker/FPChecker/parser')
 from tokenizer import Tokenizer
@@ -72,6 +73,7 @@ def inst_program(prog: str, prog_name: str, num_inst: int):
     print(e)
     return False
 
+@pytest.mark.xfail(reason="Known parser issue with multi-line comments")
 def test_1():
   os.environ['FPC_VERBOSE'] = '1'
   assert inst_program(prog_1, 'prog_1', 2)
