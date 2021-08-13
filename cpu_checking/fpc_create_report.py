@@ -5,6 +5,7 @@
 #              MPI process indepdently. 
 
 import os
+import argparse
 import sys
 import json
 from collections import defaultdict
@@ -28,6 +29,7 @@ P_LATENT_UNDERFLOW = '<!-- LATENT_UNDERFLOW -->'
 P_CODE_PATHS = '<!-- CODE_PATHS -->'
 P_FILES_AFFECTED = '<!-- FILES_AFFECTED -->'
 P_LINES_AFFECTED = '<!-- LINES_AFFECTED -->'
+P_REPORT_TITLE = '<!-- REPORT_TITLE -->' 
 
 # -------------------------------------------------------- #
 # PATHS
@@ -44,7 +46,7 @@ SOURCE_REPORT_TEMPLATE = ROOT_REPORT_TEMPLATE_DIR+'/source_report_template.html'
 # -------------------------------------------------------- #
 # Globals
 # -------------------------------------------------------- #
-
+report_title = ""
 events = defaultdict(lambda: defaultdict(list) )
 
 def getEventFilePaths(p):
@@ -218,6 +220,9 @@ def createRootReport():
 
     elif P_FILES_AFFECTED in templateLines[i]:
       fd.write(str(getFilesAffected())+'\n')
+    
+    elif P_REPORT_TITLE in templateLines[i]:
+      fd.write(report_title+'\n')
      
     else:
         fd.write(templateLines[i])
@@ -254,10 +259,11 @@ def createEventReport(event_name):
         fd.write('<td class="files_class"><a href="./source_'+str(source_id)+'.html">')
         fd.write(str(len(lines))+'</a></td></tr>')
         createCodeReport(event_name, file, source_id)
+    elif P_REPORT_TITLE in templateLines[i]:
+      fd.write(report_title+'\n')
     else:
       fd.write(templateLines[i])
   fd.close()
-
 
 def createCodeReport(event_name, file_full_path, id):
   report_name = (' '.join(event_name.split('_'))).title()
@@ -284,15 +290,39 @@ def createCodeReport(event_name, file_full_path, id):
       htmlCode = createHTMLCode(file_full_path, highligth_set)
       for l in htmlCode:
         fd.write(l+'\n')
+    elif P_REPORT_TITLE in templateLines[i]:
+      fd.write(report_title+'\n')
     else:
       fd.write(templateLines[i])
   fd.close()
-  
-if __name__ == '__main__':
-  if len(sys.argv) > 1:
-    reports_path = sys.argv[1]
+
+def removeReportDir():
+  if os.path.exists(REPORTS_DIR):
+    prRed('Removing report dir...')
+    shutil.rmtree(REPORTS_DIR)
   else:
-    reports_path = os.getcwd()
+    prGreen('There is no report directory to remove.')
+      
+if __name__ == '__main__':
+  parser = argparse.ArgumentParser(description='FPChecker report generator')
+  parser.add_argument('-r', '--remove', action='store_true', help='Remove report dir.')
+  parser.add_argument('-t', '--title', nargs=1, type=str, help='Title of report.')
+  parser.add_argument('dir', nargs='?', default=os.getcwd())
+  args = parser.parse_args()
+  #print(args)
+  
+  if (args.remove):
+    removeReportDir()
+    exit()
+    
+  if (args.title):
+    report_title = args.title[0]
+    
+  #if len(sys.argv) > 1:
+  #  reports_path = sys.argv[1]
+  #else:
+  #  reports_path = os.getcwd()
+  reports_path = args.dir  
   prCyan('Generating FPChecker report...')
   fileList = getEventFilePaths(reports_path)
   print('Trace files found:', len(fileList))

@@ -174,3 +174,13 @@ code {
 .tr_class {
     border-bottom: thin solid #E5E5E5;
 }
+.report_title {
+    height: 40px;
+    line-height: 40px;
+    background-color: #FFFFFF;
+    padding-left: 10px;
+    -webkit-box-shadow: 3px 3px 3px #D5D5D5;
+    box-shadow: 3px 3px 3px #D5D5D5;
+    font-family: Consolas, "Andale Mono", "Lucida Console", "Lucida Sans Typewriter", Monaco, "Courier New", monospace;
+    color: #1234DF;
+}
