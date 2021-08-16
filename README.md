@@ -1,7 +1,7 @@
 <!--
 # FPChecker
 -->
-<img src="figures/logo_fpchecker.png" alt="Markdown Monster icon"style="float: left; margin-right: 10px;" />
+<img src="figures/logo_fpchecker.png" />
 
 [![Build Status](https://travis-ci.org/LLNL/FPChecker.svg?branch=master)](https://travis-ci.org/LLNL/FPChecker)
 
