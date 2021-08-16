@@ -1,7 +1,8 @@
 import pathlib
 import sys
 
-sys.path.insert(1, '/usr/workspace/wsa/laguna/fpchecker/FPChecker/parser')
+sys.path.insert(1, str(pathlib.Path(__file__).parent.absolute())+"/../../../../parser")
+#sys.path.insert(1, '/usr/workspace/wsa/laguna/fpchecker/FPChecker/parser')
 from deprocess import Deprocess
 from instrument import Instrument
 from exceptions import EmptyFileException

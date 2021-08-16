@@ -1,6 +1,9 @@
 
 import sys
-sys.path.insert(1, '/usr/workspace/wsa/laguna/fpchecker/FPChecker/parser')
+import pathlib
+
+sys.path.insert(1, str(pathlib.Path(__file__).parent.absolute())+"/../../../../parser")
+#sys.path.insert(1, '/usr/workspace/wsa/laguna/fpchecker/FPChecker/parser')
 from tokenizer import KeywordToken, SymbolToken, WhiteSpaceToken, IdentifierToken
 from match import Match
 

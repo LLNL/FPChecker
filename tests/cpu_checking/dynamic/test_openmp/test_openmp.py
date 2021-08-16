@@ -24,8 +24,15 @@ def test_1():
         print(e.output)
         exit()
 
+    cmd = ['./get_omp_lib_path.sh']
+    try:
+        cmdOutput = subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True)
+    except subprocess.CalledProcessError as e:
+        print(e.output)
+        exit()
+
     # --- run code ---
-    cmd = ["./main"]
+    cmd = ["LD_LIBRARY_PATH="+cmdOutput.decode("utf-8")[:-1]+" ./main"]
     try:
         cmdOutput = subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True)
     except subprocess.CalledProcessError as e:
@@ -45,3 +52,5 @@ def test_1():
 
     assert found
 
+if __name__ == '__main__':
+    test_1()
