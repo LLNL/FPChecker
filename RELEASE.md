@@ -1,3 +1,9 @@
+## Release 0.3.0
+- Added support to check in CPU code
+- New documentation available in https://fpchecker.org/
+- HTML reports provided
+- Added warppers for C/C++ and MPI
+
 ## Release 0.2.1
 - Added 'fpchecker' tool that intercepts all calls to nvcc from build script (e..g, make)
 - The interception tool uses the Linux LD_PRELOAD trick to intercept execve system calls
