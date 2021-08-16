@@ -40,7 +40,9 @@ For questions, contact Ignacio Laguna <ilaguna@llnl.gov>.
 To cite FPChecker please use
 
 ```
-Laguna, Ignacio. "FPChecker: Detecting Floating-point Exceptions in GPU Applications." In 2019 34th IEEE/ACM International Conference on Automated Software Engineering (ASE), pp. 1126-1129. IEEE, 2019.
+Laguna, Ignacio. "FPChecker: Detecting Floating-point Exceptions in GPU Applications."
+In 2019 34th IEEE/ACM International Conference on Automated Software Engineering (ASE), 
+pp. 1126-1129. IEEE, 2019.
 ```
 
 ## License
