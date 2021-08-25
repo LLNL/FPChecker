@@ -79,8 +79,9 @@ class Command:
     new_cmd = [self.name] + LLVM_PASS.split() + self.parameters
     for p in self.parameters:
       if '-fopenmp' in p:
-        new_cmd += ['-DFPC_FPC_MULTI_THREADED']
+        new_cmd += ['-DFPC_MULTI_THREADED']
     try:
+      if verbose(): print('Executing:', ' '.join(new_cmd))
       cmdOutput = subprocess.run(' '.join(new_cmd), shell=True, check=True)
     except Exception as e:
       prRed(e)
@@ -88,7 +89,6 @@ class Command:
 
 if __name__ == '__main__':
   cmd = Command(sys.argv)
-
   if 'FPC_INSTRUMENT' not in os.environ:
     cmd.executeOriginalCommand()
     exit()

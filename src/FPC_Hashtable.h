@@ -208,20 +208,27 @@ void _FPC_PRINT_HASH_TABLE_(_FPC_HTABLE_T *hashtable)
   }
 
   // Set filename
-  size_t len=256;
-  char nodeName[len];
+  //size_t len=256;
+  // According to Linux manual:
+  // Each element of the hostname must be from 1 to 63 characters long
+  // and the entire hostname, including the dots, can be at most 253
+  // characters long.
+  char nodeName[256];
   nodeName[0] = '\0';
-  if(gethostname(nodeName, len) != 0)
+  if(gethostname(nodeName, 256) != 0)
     strcpy(nodeName, "node-unknown");
 
-  char fileName[len];
+  // On Linux: The maximum length for a file name is 255 bytes. 
+  // The maximum combined length of both the file name and path name is 4096 bytes.
+  char fileName[5000];
   fileName[0] = '\0';
   strcpy(fileName, ".fpc_logs/fpc_");
   //strcpy(fileName, "fpc_");
   strcat(fileName, nodeName);
 
+  // Maximum size for PID: we assume 2,000,000,000
   int pid = (int)getpid();
-  char pidStr[len];
+  char pidStr[11];
   pidStr[0] = '\0';
   sprintf(pidStr, "%d", pid);
   strcat(fileName, "_");

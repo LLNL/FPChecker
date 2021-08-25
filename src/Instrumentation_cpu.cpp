@@ -135,7 +135,14 @@ CPUFPInstrumentation::CPUFPInstrumentation(Module *M) :
   assert(table && "Invalid table!");
   table->setLinkage(GlobalValue::LinkageTypes::LinkOnceODRLinkage);
   //table->setLinkage(GlobalValue::LinkageTypes::LinkOnceAnyLinkage);
-}
+
+  GlobalVariable *fpc_lock = nullptr;
+  fpc_lock = mod->getGlobalVariable ("fpc_lock", true);
+  if (fpc_lock) {
+    assert(fpc_lock && "Invalid lock!");
+    fpc_lock->setLinkage(GlobalValue::LinkageTypes::LinkOnceODRLinkage);
+  }
+ }
 
 void CPUFPInstrumentation::instrumentFunction(Function *f, long int *c)
 {
