@@ -10,8 +10,15 @@ from nvcc_fpchecker import Command
 PATH = str(pathlib.Path(__file__).parent.absolute())
 
 def teardown_module(module):
-  cmd = ["rm -f *.o *.ii"]
-  cmdOutput = subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True)
+  try:
+    print('In teardown_module...')
+    #cmd = ["cd "+PATH]
+    #cmdOutput = subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True)
+    cmd = ["cd " + PATH + " && rm -f *.o *.ii"]
+    cmdOutput = subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True)
+  except subprocess.CalledProcessError as e:
+    print(e.output)
+    exit()
 
 def test_1():
   passed = True
@@ -25,6 +32,3 @@ def test_1():
     passed = False
 
   assert passed
-
-if __name__ == '__main__':
-  test_1()

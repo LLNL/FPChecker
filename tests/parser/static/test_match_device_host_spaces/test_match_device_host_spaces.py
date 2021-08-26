@@ -8,9 +8,18 @@ sys.path.insert(1, str(pathlib.Path(__file__).parent.absolute())+"/../../../../p
 from tokenizer import KeywordToken, SymbolToken, WhiteSpaceToken, IdentifierToken
 from match import Match
 
+PATH = str(pathlib.Path(__file__).parent.absolute())
+
 def teardown_module(module):
-  cmd = ["rm -f *.o *.ii"]
-  cmdOutput = subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True)
+  print("In teardown_module...")
+  try:
+    #cmd = ["cd "+PATH]
+    #cmdOutput = subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True)
+    cmd = ["cd " + PATH + " && rm -f *.o *.ii"]
+    cmdOutput = subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True)
+  except subprocess.CalledProcessError as e:
+    print(e.output)
+    exit()
 
 def test_1():
  
@@ -57,6 +66,3 @@ def test_1():
   h_d = m._match_host_device_decl(buff)
   print(h_d)
   assert d_h == 15
-
-if __name__ == '__main__':
-  test_1()
