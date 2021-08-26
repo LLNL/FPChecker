@@ -1,3 +1,7 @@
+## Release 0.3.1
+- Fixed a number of minor bugs
+- New tests added
+
 ## Release 0.3.0
 - Added support to check in CPU code
 - New documentation available in https://fpchecker.org/
