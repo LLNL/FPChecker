@@ -35,6 +35,7 @@ P_REPORT_TITLE = '<!-- REPORT_TITLE -->'
 # PATHS
 # -------------------------------------------------------- #
 
+TRACES_DIR = '.fpc_logs'
 REPORTS_DIR = './fpc-report'
 ROOT_REPORT_NAME = 'index.html'
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -302,17 +303,28 @@ def removeReportDir():
     shutil.rmtree(REPORTS_DIR)
   else:
     prGreen('There is no report directory to remove.')
+
+def removeTraces():
+  if os.path.exists(TRACES_DIR):
+    prRed('Removing traces...')
+    shutil.rmtree(TRACES_DIR)
+  else:
+    prGreen('There are no traces to remove.')
       
 if __name__ == '__main__':
   parser = argparse.ArgumentParser(description='FPChecker report generator')
   parser.add_argument('-r', '--remove', action='store_true', help='Remove report dir.')
+  parser.add_argument('-c', '--clean', action='store_true', help='Remove traces. A report cannot be generated without traces.')
   parser.add_argument('-t', '--title', nargs=1, type=str, help='Title of report.')
   parser.add_argument('dir', nargs='?', default=os.getcwd())
   args = parser.parse_args()
   #print(args)
   
-  if (args.remove):
-    removeReportDir()
+  if (args.remove or args.clean):
+    if (args.remove):
+      removeReportDir()
+    if (args.clean):
+      removeTraces()
     exit()
     
   if (args.title):
