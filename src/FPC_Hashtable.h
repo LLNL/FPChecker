@@ -35,6 +35,11 @@ typedef struct _FPC_ITEM_S_ {
 
 //typedef struct _FPC_ITEM_S_ _FPC_ITEM_T_;
 
+/** Program name and input **/
+extern int _FPC_PROG_INPUTS;
+extern char ** _FPC_PROG_ARGS;
+
+
 /*----------------------------------------------------------------------------*/
 /* Hash table type                                                            */
 /*----------------------------------------------------------------------------*/
@@ -235,6 +240,18 @@ void _FPC_PRINT_HASH_TABLE_(_FPC_HTABLE_T *hashtable)
   strcat(fileName, pidStr);
   strcat(fileName, ".json");
 
+  // Get program name and input
+  int str_size = 0;
+  for (int i=0; i < _FPC_PROG_INPUTS; ++i)
+    str_size += strlen(_FPC_PROG_ARGS[i]) + 1;
+  char *prog_input = (char *)malloc((sizeof(char) * str_size) + 1);
+  prog_input[0] = '\0';
+  for (int i=0; i < _FPC_PROG_INPUTS; ++i) {
+    strcat(prog_input, _FPC_PROG_ARGS[i]);
+    strcat(prog_input, " ");
+  }
+
+  // Prepare to print table
   uint64_t n = hashtable->n;
   uint64_t printed = 0;
 
@@ -249,6 +266,7 @@ void _FPC_PRINT_HASH_TABLE_(_FPC_HTABLE_T *hashtable)
 
     while(next != NULL) {
       fprintf(fp, "  {\n");
+      fprintf(fp, "\t\"input\": \"%s\",\n", prog_input);
       fprintf(fp, "\t\"file\": \"%s\",\n", next->file_name);
       fprintf(fp, "\t\"line\": %lu,\n", next->line);
 

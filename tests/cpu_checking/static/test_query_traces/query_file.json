@@ -1,0 +1,16 @@
+[
+  {
+	"file": "test.cpp",
+	"line": "any",
+	"infinity_pos": 1,
+	"infinity_neg": 0,
+	"nan": 1,
+	"division_zero": 0,
+	"cancellation": 0,
+	"comparison": 0,
+	"underflow": 0,
+	"latent_infinity_pos": 0,
+	"latent_infinity_neg": 0,
+	"latent_underflow": 0
+  }
+]

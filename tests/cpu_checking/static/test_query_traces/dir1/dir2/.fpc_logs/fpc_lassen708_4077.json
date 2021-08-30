@@ -1,0 +1,30 @@
+[
+  {
+	"file": "./test.cpp",
+	"line": 1,
+	"infinity_pos": 1,
+	"infinity_neg": 0,
+	"nan": 10,
+	"division_zero": 0,
+	"cancellation": 0,
+	"comparison": 13,
+	"underflow": 0,
+	"latent_infinity_pos": 0,
+	"latent_infinity_neg": 0,
+	"latent_underflow": 0
+  },
+  {
+	"file": "./test.cpp",
+	"line": 2,
+	"infinity_pos": 0,
+	"infinity_neg": 0,
+	"nan": 7,
+	"division_zero": 0,
+	"cancellation": 0,
+	"comparison": 0,
+	"underflow": 0,
+	"latent_infinity_pos": 0,
+	"latent_infinity_neg": 1,
+	"latent_underflow": 1
+  }
+]

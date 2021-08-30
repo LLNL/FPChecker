@@ -56,7 +56,9 @@ CPUFPInstrumentation::CPUFPInstrumentation(Module *M) :
 		mod(M),
 		fp32_check_function(nullptr),
 		fp64_check_function(nullptr),
-		fpc_init_htable(nullptr),
+		//fpc_init_htable(nullptr),
+		fpc_init(nullptr),
+		fpc_init_args(nullptr),
 		fpc_print_locations(nullptr) {
 
 #ifdef FPC_DEBUG
@@ -77,10 +79,15 @@ CPUFPInstrumentation::CPUFPInstrumentation(Module *M) :
       confFunction(f, &fp64_check_function,
       GlobalValue::LinkageTypes::LinkOnceODRLinkage, "_FPC_FP64_CHECK_");
     }
-    if (f->getName().str().find("_FPC_INIT_HASH_TABLE_") != std::string::npos)
+    if (f->getName().str().find("_FPC_INIT_FPCHECKER") != std::string::npos)
     {
-      confFunction(f, &fpc_init_htable,
-      GlobalValue::LinkageTypes::LinkOnceODRLinkage, "_FPC_INIT_HASH_TABLE_");
+      confFunction(f, &fpc_init,
+      GlobalValue::LinkageTypes::LinkOnceODRLinkage, "_FPC_INIT_FPCHECKER");
+    }
+    if (f->getName().str().find("_FPC_INIT_ARGS_FPCHECKER") != std::string::npos)
+    {
+      confFunction(f, &fpc_init_args,
+      GlobalValue::LinkageTypes::LinkOnceODRLinkage, "_FPC_INIT_ARGS_FPCHECKER");
     }
     if (f->getName().str().find("_FPC_PRINT_LOCATIONS_") != std::string::npos)
     {
@@ -126,7 +133,7 @@ CPUFPInstrumentation::CPUFPInstrumentation(Module *M) :
     SET_ODR_LIKAGE("_FPC_ITEMS_EQUAL_")
     SET_ODR_LIKAGE("_FPC_HT_SET_")
     SET_ODR_LIKAGE("_FPC_PRINT_HASH_TABLE_")
-
+    SET_ODR_LIKAGE("_FPC_INIT_HASH_TABLE_")
   }
 
   // Globals initialization
@@ -135,6 +142,16 @@ CPUFPInstrumentation::CPUFPInstrumentation(Module *M) :
   assert(table && "Invalid table!");
   table->setLinkage(GlobalValue::LinkageTypes::LinkOnceODRLinkage);
   //table->setLinkage(GlobalValue::LinkageTypes::LinkOnceAnyLinkage);
+  
+  GlobalVariable *prog_inputs = nullptr;
+  prog_inputs = mod->getGlobalVariable ("_FPC_PROG_INPUTS", true);
+  assert(prog_inputs && "Invalid table!");
+  prog_inputs->setLinkage(GlobalValue::LinkageTypes::LinkOnceODRLinkage);
+
+  GlobalVariable *prog_args = nullptr;
+  prog_args = mod->getGlobalVariable ("_FPC_PROG_ARGS", true);
+  assert(prog_args && "Invalid table!");
+  prog_args->setLinkage(GlobalValue::LinkageTypes::LinkOnceODRLinkage);
 
   GlobalVariable *fpc_lock = nullptr;
   fpc_lock = mod->getGlobalVariable ("fpc_lock", true);
@@ -381,7 +398,19 @@ void CPUFPInstrumentation::instrumentMainFunction(Function *f)
   std::vector<Value *> args;
 
   CallInst *callInst = nullptr;
-  callInst = builder.CreateCall(fpc_init_htable, args);
+  // Check if function has argumments or not
+  if (f->arg_size() == 2) {
+    // Push parameters
+    for (auto i = f->arg_begin(); i != f->arg_end(); ++i) {
+      Value *v = &(*i);
+      args.push_back(v);
+    }
+    ArrayRef<Value *> args_ref(args);
+    callInst = builder.CreateCall(fpc_init_args, args_ref);
+  } else {
+    //ArrayRef<Value *> args_ref(args);
+    callInst = builder.CreateCall(fpc_init, args);
+  }
   assert(callInst && "Invalid call instruction!");
  
   // Set debug location 

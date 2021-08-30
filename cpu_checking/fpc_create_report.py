@@ -58,7 +58,6 @@ def getEventFilePaths(p):
       if fileName.startswith('fpc_') and fileName.endswith(".json"):
         f = str(os.path.join(root, file))
         fileList.append(f)
-        #print(f)
   return fileList
 
 def loadReport(fileName):
@@ -304,22 +303,79 @@ def removeReportDir():
   else:
     prGreen('There is no report directory to remove.')
 
+# Sample query file
+#[
+#  {
+#  "file": "test.cpp",
+#  "line": "any",
+#  "infinity_pos": 0,
+#  "infinity_neg": 1,
+#  "nan": 0,
+#  "division_zero": 0,
+#  "cancellation": 1,
+#  "comparison": 0,
+#  "underflow": 0,
+#  "latent_infinity_pos": 0,
+#  "latent_infinity_neg": 0,
+#  "latent_underflow": 0
+#  }
+#]
+def executeQuery(fileName):
+  prGreen('Loading: ' + fileName)
+  fd = open(fileName, 'r')
+  data = json.load(fd)
+  fd.close()
+
+  # Walk on the dir to find trace files
+  current_path = './'
+  for root, dirs, files in os.walk(current_path):
+    for file in files:
+      fname = os.path.split(file)[1]
+      if fname.startswith('fpc_') and fname.endswith(".json"):
+        f = str(os.path.join(root, file))
+        with open(f, 'r') as trace_file:
+          trace_data = json.load(trace_file)
+          for i in trace_data:
+            if i["file"].endswith(data[0]["file"]):
+                if (data[0]['infinity_pos'] <= i['infinity_pos'] and
+                    data[0]['infinity_neg'] <= i['infinity_neg'] and
+                    data[0]['nan'] <= i['nan'] and
+                    data[0]['division_zero'] <= i['division_zero'] and
+                    data[0]['cancellation'] <= i['cancellation'] and
+                    data[0]['comparison'] <= i['comparison'] and
+                    data[0]['underflow'] <= i['underflow'] and
+                    data[0]['latent_infinity_pos'] <= i['latent_infinity_pos'] and
+                    data[0]['latent_infinity_neg'] <= i['latent_infinity_neg'] and
+                    data[0]['latent_underflow'] <= i['latent_underflow']
+                    ): 
+                  print('Trace:', f)
+
 def removeTraces():
-  if os.path.exists(TRACES_DIR):
-    prRed('Removing traces...')
-    shutil.rmtree(TRACES_DIR)
-  else:
-    prGreen('There are no traces to remove.')
-      
+  p = './'
+  for root, dirs, files in os.walk(p):
+    for d in dirs:
+      if d.endswith(TRACES_DIR):
+        full_path = str(os.path.join(root, d))
+        prGreen('Removing: ' + full_path)
+        try:
+          shutil.rmtree(full_path)
+        except Exception as e:
+          prRed(e)
+ 
 if __name__ == '__main__':
   parser = argparse.ArgumentParser(description='FPChecker report generator')
   parser.add_argument('-r', '--remove', action='store_true', help='Remove report dir.')
   parser.add_argument('-c', '--clean', action='store_true', help='Remove traces. A report cannot be generated without traces.')
   parser.add_argument('-t', '--title', nargs=1, type=str, help='Title of report.')
+  parser.add_argument('-q', '--query', nargs=1, type=str, action='store', help='Query file.')
   parser.add_argument('dir', nargs='?', default=os.getcwd())
   args = parser.parse_args()
-  #print(args)
-  
+
+  if (args.query):
+    fileName = args.query[0]
+    executeQuery(fileName)
+    exit()
+ 
   if (args.remove or args.clean):
     if (args.remove):
       removeReportDir()
@@ -330,10 +386,6 @@ if __name__ == '__main__':
   if (args.title):
     report_title = args.title[0]
     
-  #if len(sys.argv) > 1:
-  #  reports_path = sys.argv[1]
-  #else:
-  #  reports_path = os.getcwd()
   reports_path = args.dir  
   prCyan('Generating FPChecker report...')
   fileList = getEventFilePaths(reports_path)

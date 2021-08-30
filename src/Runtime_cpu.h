@@ -32,6 +32,9 @@ _FPC_HTABLE_T *_FPC_HTABLE_;
 pthread_mutex_t fpc_lock;
 #endif
 
+/** Program name and input **/
+int _FPC_PROG_INPUTS;
+char ** _FPC_PROG_ARGS;
 
 /*----------------------------------------------------------------------------*/
 /* Initialize                                                                 */
@@ -47,6 +50,17 @@ void _FPC_INIT_HASH_TABLE_() {
     printf("#FPCHECKER: Mutex init failed for multi-threading\n");
   }
 #endif
+}
+
+void _FPC_INIT_FPCHECKER() {
+  _FPC_PROG_INPUTS = 0;
+  _FPC_INIT_HASH_TABLE_();
+}
+
+void _FPC_INIT_ARGS_FPCHECKER(int argc, char **argv) {
+  _FPC_PROG_INPUTS = argc;
+  _FPC_PROG_ARGS = argv;
+  _FPC_INIT_HASH_TABLE_();
 }
 
 void _FPC_PRINT_LOCATIONS_()

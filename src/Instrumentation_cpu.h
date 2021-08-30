@@ -19,7 +19,9 @@ private:
 
   Function *fp32_check_function;
   Function *fp64_check_function;
-  Function *fpc_init_htable;
+  //Function *fpc_init_htable;
+  Function *fpc_init;
+  Function *fpc_init_args;
   Function *fpc_print_locations;
 
   // maximum number for a code line
