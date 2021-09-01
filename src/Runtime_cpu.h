@@ -336,6 +336,82 @@ int _FPC_FP64_IS_LATENT_SUBNORMAL(double x) {
 }
 
 /*----------------------------------------------------------------------------*/
+/* Trap functions                                                             */
+/*----------------------------------------------------------------------------*/
+
+/**
+ * Trap options and id
+ * --------------------
+ *  FPC_TRAP_INFINITY_POS     1
+ *  FPC_TRAP_INFINITY_NEG     2
+ *  FPC_TRAP_NAN              3
+ *  FPC_TRAP_DIVISION_ZERO    4
+ *  FPC_TRAP_CANCELLATION     5
+ *  FPC_TRAP_COMPARISON       6
+ *  FPC_TRAP_UNDERFLOW        7
+ *  FPC_TRAP_LATENT_INF_POS   8
+ *  FPC_TRAP_LATENT_INF_NEG   9
+ *  FPC_TRAP_LATENT_UNDERFLOW 10
+ *  FPC_TRAP_FILE
+ *  FPC_TRAP_LINE
+ **/
+
+void _FPC_TRAP_HERE(const char *trap_name, int loc, char *file_name) {
+  printf("#FPCHECKER: Interrupting execution...\n");
+  printf("#FPCHECKER: %s\n", trap_name);
+  printf("#FPCHECKER: %s:%d\n", file_name, loc);
+  fflush(stdout);
+  __asm__("trap;");
+}
+
+int _FPC_STRING_ENDS_WITH(const char *str, const char *substr) {
+  int len_str = strlen(str);
+  int len_substr = strlen(substr);
+  if (len_str < len_substr)
+    return 0;
+  
+  int index = len_str - len_substr;
+  if (strcmp(&(str[index]), substr) == 0)
+    return 1;
+
+  return 0;
+}
+
+void _FPC_CHECK_AND_TRAP(_FPC_ITEM_T_ *item, int loc, char *file_name) {
+  int check = 0;
+  if (getenv("FPC_TRAP_FILE") != NULL) {
+    if (_FPC_STRING_ENDS_WITH(item->file_name, getenv("FPC_TRAP_FILE"))) {
+      check = 1;
+    }
+  } else {
+    check = 1;
+  }
+
+  if (getenv("FPC_TRAP_LINE") != NULL) {
+    uint64_t line = (uint64_t)atoi(getenv("FPC_TRAP_LINE"));
+    if (item->line == line)
+      check &= 1;
+    else
+      check &= 0;
+  } else {
+    check &= 1;
+  }
+
+  if (check) {
+    if (getenv("FPC_TRAP_INFINITY_POS")     != NULL && item->infinity_pos)        _FPC_TRAP_HERE("infinity(+)", loc, file_name);
+    if (getenv("FPC_TRAP_INFINITY_NEG")     != NULL && item->infinity_neg)        _FPC_TRAP_HERE("infinity(-)", loc, file_name);
+    if (getenv("FPC_TRAP_NAN")              != NULL && item->nan)                 _FPC_TRAP_HERE("nan", loc, file_name);
+    if (getenv("FPC_TRAP_DIVISION_ZERO")    != NULL && item->division_zero)       _FPC_TRAP_HERE("division by zero", loc, file_name);
+    if (getenv("FPC_TRAP_CANCELLATION")     != NULL && item->cancellation)        _FPC_TRAP_HERE("cancellation", loc, file_name);
+    if (getenv("FPC_TRAP_COMPARISON")       != NULL && item->comparison)          _FPC_TRAP_HERE("comparison", loc, file_name);
+    if (getenv("FPC_TRAP_UNDERFLOW")        != NULL && item->underflow)           _FPC_TRAP_HERE("underflow", loc, file_name);
+    if (getenv("FPC_TRAP_LATENT_INF_POS")   != NULL && item->latent_infinity_pos) _FPC_TRAP_HERE("latent infinity(+)", loc, file_name);
+    if (getenv("FPC_TRAP_LATENT_INF_NEG")   != NULL && item->latent_infinity_neg) _FPC_TRAP_HERE("latent infinity(-)", loc, file_name);
+    if (getenv("FPC_TRAP_LATENT_UNDERFLOW") != NULL && item->latent_underflow)    _FPC_TRAP_HERE("latent underflow", loc, file_name);
+  }
+}
+
+/*----------------------------------------------------------------------------*/
 /* Generic checking functions                                                 */
 /*----------------------------------------------------------------------------*/
 
@@ -353,7 +429,6 @@ int _FPC_EVENT_OCURRED(_FPC_ITEM_T_ *item) {
       item->latent_underflow
       );
 }
-
 
 /**
  * Operations table
@@ -395,6 +470,7 @@ void _FPC_FP32_CHECK_(
 #ifdef FPC_MULTI_THREADED
     pthread_mutex_unlock(&fpc_lock);
 #endif
+    _FPC_CHECK_AND_TRAP(&item, loc, file_name);
   }
 }
 
@@ -425,6 +501,7 @@ void _FPC_FP64_CHECK_(
 #ifdef FPC_MULTI_THREADED
     pthread_mutex_unlock(&fpc_lock);
 #endif
+    _FPC_CHECK_AND_TRAP(&item, loc, file_name);
   }
 }
 
