@@ -1,0 +1,32 @@
+[
+  {
+  "input": "./main",
+	"file": "./test.cpp",
+	"line": 1,
+	"infinity_pos": 0,
+	"infinity_neg": 1,
+	"nan": 1,
+	"division_zero": 0,
+	"cancellation": 0,
+	"comparison": 0,
+	"underflow": 0,
+	"latent_infinity_pos": 0,
+	"latent_infinity_neg": 0,
+	"latent_underflow": 1
+  },
+  {
+  "input": "./main",
+	"file": "./test.cpp",
+	"line": 3,
+	"infinity_pos": 0,
+	"infinity_neg": 0,
+	"nan": 7,
+	"division_zero": 4,
+	"cancellation": 0,
+	"comparison": 0,
+	"underflow": 0,
+	"latent_infinity_pos": 0,
+	"latent_infinity_neg": 0,
+	"latent_underflow": 0
+  }
+]

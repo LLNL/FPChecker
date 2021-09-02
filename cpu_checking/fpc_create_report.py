@@ -145,6 +145,43 @@ def getLinesAffected():
         lines.add((f, t[0]))
   return len(lines)
 
+#------------------------------------------------------------------------------
+#------------------------- Text Reports ---------------------------------------
+#------------------------------------------------------------------------------
+
+def createRootReport_Text():
+  print('\n')
+  print('{:=^50}'.format(' Main Report '))
+  print('{:<30}'.format('positive_infinity'), getEvents('positive_infinity'))
+  print('{:<30}'.format('negative_infinity'), getEvents('negative_infinity'))
+  print('{:<30}'.format('nan'), getEvents('nan'))
+  print('{:<30}'.format('division_by_zero'), getEvents('division_by_zero'))
+  print('{:<30}'.format('cancellation'), getEvents('cancellation'))
+  print('{:<30}'.format('comparison'), getEvents('comparison'))
+  print('{:<30}'.format('underflow'), getEvents('underflow'))
+  print('{:<30}'.format('latent_positive_infinity'), getEvents('latent_positive_infinity'))
+  print('{:<30}'.format('latent_negative_infinity'), getEvents('latent_negative_infinity'))
+  print('{:<30}'.format('latent_underflow'), getEvents('latent_underflow'))
+
+def createEventReport_Text(event_name):
+  report_name = (' '.join(event_name.split('_'))).title()
+  print("\n===== " + report_name + " Report =====")
+  locations = set([])
+  for file_name in events[event_name]:
+    for t in events[event_name][file_name]:
+      line = t[0]
+      locations.add(file_name+':'+str(line))
+  for l in locations:
+    print(l)
+
+  print("\n===== Inputs =====")
+  for i in program_inputs[event_name]:
+    print(i)
+
+#------------------------------------------------------------------------------
+#------------------------- HTML Reports ---------------------------------------
+#------------------------------------------------------------------------------
+
 def createRootReport():
   if os.path.exists(REPORTS_DIR):
     prRed('Overwriting report dir...')
@@ -395,8 +432,22 @@ if __name__ == '__main__':
   parser.add_argument('-c', '--clean', action='store_true', help='Remove traces. A report cannot be generated without traces.')
   parser.add_argument('-t', '--title', nargs=1, type=str, help='Title of report.')
   parser.add_argument('-q', '--query', nargs=1, type=str, action='store', help='Query file.')
+  parser.add_argument('-s', '--show', action='store', nargs='?', default=0, type=str, help='Show report on screen.')
   parser.add_argument('dir', nargs='?', default=os.getcwd())
   args = parser.parse_args()
+
+  if (args.show != 0):
+    prCyan('Generating FPChecker report...')
+    reports_path = args.dir  
+    fileList = getEventFilePaths(reports_path)
+    print('Trace files found:', len(fileList))
+    loadEvents(fileList)
+    if (args.show == None ):
+      createRootReport_Text()
+    else:
+      event_name = args.show
+      createEventReport_Text(event_name)
+    exit()
 
   if (args.query):
     fileName = args.query[0]

@@ -1,3 +1,7 @@
+## Release 0.3.2
+- Added support for printing text report
+- Saves program inputs in .json trace files
+
 ## Release 0.3.1
 - Fixed a number of minor bugs
 - New tests added
