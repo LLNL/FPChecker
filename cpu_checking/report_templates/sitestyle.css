@@ -24,7 +24,7 @@
     border-collapse: collapse;
 }
 .report_box_files {
-    width: 600px;
+    width: 700px;
     color: #5D5D5D;
     border-style: solid;
     -webkit-box-shadow: 4px 4px 5px #D5D5D5;
@@ -36,7 +36,7 @@
     border-collapse: collapse;
 }
 .report_box_source {
-    width: 600px;
+    width: 700px;
     color: #000000;
     border-style: solid;
     background-color: #FFFFFF;

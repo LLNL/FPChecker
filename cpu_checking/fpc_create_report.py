@@ -49,6 +49,7 @@ SOURCE_REPORT_TEMPLATE = ROOT_REPORT_TEMPLATE_DIR+'/source_report_template.html'
 # -------------------------------------------------------- #
 report_title = ""
 events = defaultdict(lambda: defaultdict(list) )
+program_inputs = defaultdict(set)
 
 def getEventFilePaths(p):
   fileList = []
@@ -70,6 +71,7 @@ def loadEvents(files):
   for f in files:
     data = loadReport(f)
     for i in range(len(data)):
+      p_input         = data[i]['input']
       fileName        = data[i]['file']
       line            = data[i]['line']
       positive_infinity    = data[i]['infinity_pos']
@@ -83,16 +85,36 @@ def loadEvents(files):
       latent_negative_infinity = data[i]['latent_infinity_neg']
       latent_underflow    = data[i]['latent_underflow']
 
-      if positive_infinity != int(0): events['positive_infinity'][fileName].append((line,positive_infinity))
-      if negative_infinity != int(0): events['negative_infinity'][fileName].append((line,negative_infinity))
-      if nan != int(0): events['nan'][fileName].append((line,nan))
-      if division_by_zero != int(0): events['division_by_zero'][fileName].append((line,division_by_zero))
-      if cancellation != int(0): events['cancellation'][fileName].append((line,cancellation))
-      if comparison != int(0): events['comparison'][fileName].append((line,comparison))
-      if underflow != int(0): events['underflow'][fileName].append((line,underflow))
-      if latent_positive_infinity != int(0): events['latent_positive_infinity'][fileName].append((line,latent_positive_infinity))
-      if latent_negative_infinity != int(0): events['latent_negative_infinity'][fileName].append((line,latent_negative_infinity))
-      if latent_underflow != int(0): events['latent_underflow'][fileName].append((line,latent_underflow))
+      if positive_infinity != int(0):
+        events['positive_infinity'][fileName].append((line,positive_infinity))
+        program_inputs['positive_infinity'].add(p_input)
+      if negative_infinity != int(0):
+        events['negative_infinity'][fileName].append((line,negative_infinity))
+        program_inputs['negative_infinity'].add(p_input)
+      if nan != int(0): 
+        events['nan'][fileName].append((line,nan))
+        program_inputs['nan'].add(p_input)
+      if division_by_zero != int(0): 
+        events['division_by_zero'][fileName].append((line,division_by_zero))
+        program_inputs['division_by_zero'].add(p_input)
+      if cancellation != int(0):
+        events['cancellation'][fileName].append((line,cancellation))
+        program_inputs['cancellation'].add(p_input)
+      if comparison != int(0): 
+        events['comparison'][fileName].append((line,comparison))
+        program_inputs['comparison'].add(p_input)
+      if underflow != int(0): 
+        events['underflow'][fileName].append((line,underflow))
+        program_inputs['underflow'].add(p_input)
+      if latent_positive_infinity != int(0): 
+        events['latent_positive_infinity'][fileName].append((line,latent_positive_infinity))
+        program_inputs['latent_positive_infinity'].add(p_input)
+      if latent_negative_infinity != int(0): 
+        events['latent_negative_infinity'][fileName].append((line,latent_negative_infinity))
+        program_inputs['latent_negative_infinity'].add(p_input)
+      if latent_underflow != int(0): 
+        events['latent_underflow'][fileName].append((line,latent_underflow))
+        program_inputs['latent_underflow'].add(p_input)
 
 def getEvents(event_type):
   n = 0
@@ -259,6 +281,11 @@ def createEventReport(event_name):
         fd.write('<td class="files_class"><a href="./source_'+str(source_id)+'.html">')
         fd.write(str(len(lines))+'</a></td></tr>')
         createCodeReport(event_name, file, source_id)
+    elif '<!-- INPUT_ENTRIES -->' in templateLines[i]:
+      for i in program_inputs[event_name]:
+        fd.write('<tr>\n')
+        fd.write('<td class="files_class">'+i+'</td>\n')
+        fd.write('</tr>\n')
     elif P_REPORT_TITLE in templateLines[i]:
       fd.write(report_title+'\n')
     else:
