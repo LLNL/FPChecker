@@ -1,6 +1,8 @@
 ## Release 0.3.2
+- Added support to exit on events
 - Added support for printing text report
 - Saves program inputs in .json trace files
+- Fixed minor bugs
 
 ## Release 0.3.1
 - Fixed a number of minor bugs
