@@ -5,6 +5,7 @@
 #include "FPC_Hashtable.h"
 #include <stdio.h>
 #include <math.h>
+#include <signal.h>
 
 #ifdef FPC_MULTI_THREADED
 #include <pthread.h>
@@ -361,7 +362,8 @@ void _FPC_TRAP_HERE(const char *trap_name, int loc, char *file_name) {
   printf("#FPCHECKER: %s\n", trap_name);
   printf("#FPCHECKER: %s:%d\n", file_name, loc);
   fflush(stdout);
-  __asm__("trap;");
+  //__asm__("trap;");
+  raise(SIGABRT);
 }
 
 int _FPC_STRING_ENDS_WITH(const char *str, const char *substr) {

@@ -42,20 +42,21 @@ def test_1():
     cmd = ["FPC_TRAP_CANCELLATION=1 FPC_TRAP_LINE=14 ./main"]
     assert run_command(cmd) == 0
 
+    SIGABRT_ID = 128 + 6
 
     ### Failure Cases ###
     cmd = ["FPC_TRAP_NAN=1 ./main"]
-    assert run_command(cmd) == -5
+    assert run_command(cmd) == SIGABRT_ID
 
     cmd = ["FPC_TRAP_INFINITY_POS=1 ./main"]
-    assert run_command(cmd) == -5
+    assert run_command(cmd) == SIGABRT_ID
 
     cmd = ["FPC_TRAP_FILE=compute.cpp FPC_TRAP_NAN=1 ./main"]
-    assert run_command(cmd) == -5
+    assert run_command(cmd) == SIGABRT_ID
 
     cmd = ["FPC_TRAP_FILE=compute.cpp FPC_TRAP_INFINITY_POS=1 ./main"]
-    assert run_command(cmd) == -5
+    assert run_command(cmd) == SIGABRT_ID
 
     cmd = ["FPC_TRAP_CANCELLATION=1 FPC_TRAP_LINE=15 ./main"]
-    assert run_command(cmd) == -5
+    assert run_command(cmd) == SIGABRT_ID
 
