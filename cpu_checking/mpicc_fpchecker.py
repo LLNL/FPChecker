@@ -69,8 +69,7 @@ class Command:
       params = cmdOutput.decode('utf-8')
       ret = []
       for i in params.split():
-        if 'rpath' not in i:
-          ret.append(i)
+        ret.append(i)
       return ret
     except subprocess.CalledProcessError as e:
       prRed(e)
