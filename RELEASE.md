@@ -1,3 +1,6 @@
+## Release 0.3.3
+- Fixed some bugs
+
 ## Release 0.3.2
 - Added support to exit on events
 - Added support for printing text report
