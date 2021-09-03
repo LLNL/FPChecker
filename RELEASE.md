@@ -1,3 +1,6 @@
+## Release 0.3.4
+- Fixed some bugs
+
 ## Release 0.3.3
 - Fixed some bugs
 
