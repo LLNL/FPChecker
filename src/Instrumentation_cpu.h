@@ -34,6 +34,7 @@ private:
   //IRBuilder<> createBuilderBefore(Instruction *inst);
   void setFakeDebugLocation(Instruction *old_inst, Instruction *new_inst, Function *f);
   Instruction* firstInstrution();
+  bool selectedBasedOnCondition(Instruction *inst, Function *f, Instruction **select_inst, Value **condition, int *inv);
 
   //GlobalVariable* generateIntArrayGlobalVariable(ArrayType *arrType);
   //void createReadFunctionForGlobalArray(GlobalVariable *arr, ArrayType *arrType, std::string funcName);

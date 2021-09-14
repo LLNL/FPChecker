@@ -34,10 +34,11 @@ CXX_WRAPPER_NAMES = ['mpiCC', 'mpic++', 'mpicxx', 'mpiclang++', 'mpig++']
 # --------------------------------------------------------------------------- #
 
 class Command:
-  def __init__(self, cmd):
+  def __init__(self, compiler_name, params):
     # We assume the command is NAME-fpchecker, where NAME is one of the
     # supported C or CXX wrapper names
-    wrapper_name = os.path.split(cmd[0])[1].split('-')[0]
+    #wrapper_name = os.path.split(cmd[0])[1].split('-')[0]
+    wrapper_name = compiler_name
     if (wrapper_name in C_WRAPPER_NAMES):
       self.name = "clang"
     elif (wrapper_name in CXX_WRAPPER_NAMES):
@@ -45,7 +46,8 @@ class Command:
     else:
       raise CompileException("Invalid MPI wrapper name")
     self.wrapper_name = wrapper_name
-    self.parameters = cmd[1:]
+    #self.parameters = cmd[1:]
+    self.parameters = params
     self.mpi_params = self.getMPICompileParams()
     self.mpi_link_params = self.getMPILinkParams()
 
@@ -119,7 +121,9 @@ class Command:
       raise CompileException(new_cmd) from e
 
 if __name__ == '__main__':
-  cmd = Command(sys.argv)
+  compiler_name = os.environ['FPC_COMPILER']
+  params = os.environ['FPC_COMPILER_PARAMS']
+  cmd = Command(compiler_name, params.split())
 
   if 'FPC_INSTRUMENT' not in os.environ:
     cmd.executeOriginalCommand()

@@ -137,6 +137,10 @@ install(FILES
 )
 
 install(FILES
+        "cpu_checking/cc_mpi_frontend.sh"
+        "cpu_checking/cc_frontend.sh"
+        "cpu_checking/cxx_mpi_frontend.sh"
+        "cpu_checking/cxx_frontend.sh"
         "cpu_checking/clang_fpchecker.py"
         "cpu_checking/colors.py"
         "cpu_checking/exceptions.py"
@@ -184,28 +188,48 @@ install(CODE "execute_process( \
 )
 
 # Clang wrappers
+#install(CODE "execute_process( COMMAND ${CMAKE_COMMAND} -E create_symlink \
+#        ${CMAKE_INSTALL_PREFIX}/cpu_checking/clang_fpchecker.py ${CMAKE_INSTALL_PREFIX}/bin/clang-fpchecker )"
+#)
+
+#install(CODE "execute_process( COMMAND ${CMAKE_COMMAND} -E create_symlink \
+#        ${CMAKE_INSTALL_PREFIX}/cpu_checking/clang_fpchecker.py ${CMAKE_INSTALL_PREFIX}/bin/clang++-fpchecker )"
+#)
+
 install(CODE "execute_process( COMMAND ${CMAKE_COMMAND} -E create_symlink \
-        ${CMAKE_INSTALL_PREFIX}/cpu_checking/clang_fpchecker.py ${CMAKE_INSTALL_PREFIX}/bin/clang-fpchecker )"
+        ${CMAKE_INSTALL_PREFIX}/cpu_checking/cc_frontend.sh ${CMAKE_INSTALL_PREFIX}/bin/clang-fpchecker )"
 )
 
 install(CODE "execute_process( COMMAND ${CMAKE_COMMAND} -E create_symlink \
-        ${CMAKE_INSTALL_PREFIX}/cpu_checking/clang_fpchecker.py ${CMAKE_INSTALL_PREFIX}/bin/clang++-fpchecker )"
+        ${CMAKE_INSTALL_PREFIX}/cpu_checking/cxx_frontend.sh ${CMAKE_INSTALL_PREFIX}/bin/clang++-fpchecker )"
 )
 
 install(CODE "execute_process( COMMAND ${CMAKE_COMMAND} -E create_symlink \
         ${CMAKE_INSTALL_PREFIX}/cpu_checking/fpc_create_report.py ${CMAKE_INSTALL_PREFIX}/bin/fpc-create-report )"
 )
 
+#install(CODE "execute_process( COMMAND ${CMAKE_COMMAND} -E create_symlink \
+#        ${CMAKE_INSTALL_PREFIX}/cpu_checking/mpicc_fpchecker.py ${CMAKE_INSTALL_PREFIX}/bin/mpic++-fpchecker )"
+#)
+
+#install(CODE "execute_process( COMMAND ${CMAKE_COMMAND} -E create_symlink \
+#        ${CMAKE_INSTALL_PREFIX}/cpu_checking/mpicc_fpchecker.py ${CMAKE_INSTALL_PREFIX}/bin/mpicxx-fpchecker )"
+#)
+
+#install(CODE "execute_process( COMMAND ${CMAKE_COMMAND} -E create_symlink \
+#        ${CMAKE_INSTALL_PREFIX}/cpu_checking/mpicc_fpchecker.py ${CMAKE_INSTALL_PREFIX}/bin/mpicc-fpchecker )"
+#)
+
 install(CODE "execute_process( COMMAND ${CMAKE_COMMAND} -E create_symlink \
-        ${CMAKE_INSTALL_PREFIX}/cpu_checking/mpicc_fpchecker.py ${CMAKE_INSTALL_PREFIX}/bin/mpic++-fpchecker )"
+        ${CMAKE_INSTALL_PREFIX}/cpu_checking/cxx_mpi_frontend.sh ${CMAKE_INSTALL_PREFIX}/bin/mpic++-fpchecker )"
 )
 
 install(CODE "execute_process( COMMAND ${CMAKE_COMMAND} -E create_symlink \
-        ${CMAKE_INSTALL_PREFIX}/cpu_checking/mpicc_fpchecker.py ${CMAKE_INSTALL_PREFIX}/bin/mpicxx-fpchecker )"
+        ${CMAKE_INSTALL_PREFIX}/cpu_checking/cxx_mpi_frontend.sh ${CMAKE_INSTALL_PREFIX}/bin/mpicxx-fpchecker )"
 )
 
 install(CODE "execute_process( COMMAND ${CMAKE_COMMAND} -E create_symlink \
-        ${CMAKE_INSTALL_PREFIX}/cpu_checking/mpicc_fpchecker.py ${CMAKE_INSTALL_PREFIX}/bin/mpicc-fpchecker )"
+        ${CMAKE_INSTALL_PREFIX}/cpu_checking/cc_mpi_frontend.sh ${CMAKE_INSTALL_PREFIX}/bin/mpicc-fpchecker )"
 )
 
 # Tests

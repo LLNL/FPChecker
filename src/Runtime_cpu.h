@@ -6,6 +6,8 @@
 #include <stdio.h>
 #include <math.h>
 #include <signal.h>
+#include <unistd.h>
+#include <sys/types.h>
 
 #ifdef FPC_MULTI_THREADED
 #include <pthread.h>
@@ -362,8 +364,20 @@ void _FPC_TRAP_HERE(const char *trap_name, int loc, char *file_name) {
   printf("#FPCHECKER: %s\n", trap_name);
   printf("#FPCHECKER: %s:%d\n", file_name, loc);
   fflush(stdout);
-  //__asm__("trap;");
-  raise(SIGABRT);
+
+  if (getenv("FPC_PRINT_HOSTNAME")) {
+    char host_name[256];
+    host_name[0] = '\0';
+    gethostname(host_name, 256);
+    pid_t pid = getpid();
+    printf("HOST: %s, PID: %d\n", host_name, pid);
+  }
+  
+  if (getenv("FPC_TRAPS_HANG")) {
+    sleep(3600);
+  } else {
+    raise(SIGABRT);
+  }
 }
 
 int _FPC_STRING_ENDS_WITH(const char *str, const char *substr) {
@@ -446,7 +460,15 @@ int _FPC_EVENT_OCURRED(_FPC_ITEM_T_ *item) {
  **/
 
 void _FPC_FP32_CHECK_(
-    float x, float y, float z, int loc, char *file_name, int op) {
+    float x, float y, float z, int loc, char *file_name, int op, int cond) {
+  /*if (!inv) {
+    if (!cond) return;
+  } else {
+    if (cond) return;
+  }*/
+  if (!cond)
+    return;
+
   _FPC_ITEM_T_ item;
   // Set file name and line
   item.file_name = file_name;
@@ -477,7 +499,15 @@ void _FPC_FP32_CHECK_(
 }
 
 void _FPC_FP64_CHECK_(
-    double x, double y, double z, int loc, char *file_name, int op) {
+    double x, double y, double z, int loc, char *file_name, int op, int cond) {
+  /*if (!inv) {
+    if (!cond) return;
+  } else {
+    if (cond) return;
+  }*/
+  if (!cond)
+    return;
+
   _FPC_ITEM_T_ item;
   // Set file name and line
   item.file_name = file_name;

@@ -1,6 +1,5 @@
 
-#OP = 	-O2 -DCOMPILE_STRING=\\\"fpchecker\\\"
-OP = 	-O2 -DCOMPILE_STRING=\"fpchecker\"
+OP = 	-O3 -DINVERSE
 CXX = FPC_INSTRUMENT=1 clang++-fpchecker 
 
 all:
@@ -9,4 +8,4 @@ all:
 	$(CXX) -o main compute.o main.o
 
 clean:
-	rm -rf *.o main __pycache__ .fpc_logs .fpc_log.txt
+	rm -rf *.o main __pycache__ .fpc_logs

@@ -31,13 +31,15 @@ LLVM_PASS           = "-Xclang -load -Xclang " + FPCHECKER_LIB + " -include " + 
 # --------------------------------------------------------------------------- #
 
 class Command:
-  def __init__(self, cmd):
+  def __init__(self, compiler_name, params):
     # We assume the command is clang-fpchecker or clang++-fpchecker
-    if os.path.split(cmd[0])[1].split('-')[0].endswith('clang++'):
-      self.name = 'clang++'
-    else:
-      self.name = 'clang'
-    self.parameters = cmd[1:]
+    #if os.path.split(cmd[0])[1].split('-')[0].endswith('clang++'):
+    #  self.name = 'clang++'
+    #else:
+    #  self.name = 'clang'
+    self.name = compiler_name
+    #self.parameters = cmd[1:]
+    self.parameters = params
     self.preprocessedFile = None
     self.instrumentedFile = None
     self.outputFile = None
@@ -88,7 +90,10 @@ class Command:
       raise CompileException(new_cmd) from e
 
 if __name__ == '__main__':
-  cmd = Command(sys.argv)
+  compiler_name = os.environ['FPC_COMPILER']
+  params = os.environ['FPC_COMPILER_PARAMS']
+  cmd = Command(compiler_name, params.split())
+
   if 'FPC_INSTRUMENT' not in os.environ:
     cmd.executeOriginalCommand()
     exit()

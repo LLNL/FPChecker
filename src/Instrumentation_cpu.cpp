@@ -202,7 +202,6 @@ void CPUFPInstrumentation::instrumentFunction(Function *f, long int *c)
 			  }
 				args.push_back(inst->getOperand(0));
 				args.push_back(inst->getOperand(1));
-				//args.push_back(ConstantFP::get(builder.getDoubleTy(), 999.0));
 
 				// Push location parameter (line number)
 				int lineNumber = CUDAAnalysis::getLineOfCode(inst);
@@ -222,8 +221,6 @@ void CPUFPInstrumentation::instrumentFunction(Function *f, long int *c)
         assert((fName!=nullptr) && "Global filename var not found");
         auto loadInst = builder.CreateAlignedLoad(fName, MaybeAlign(), "my");
 
-        //std::string fileName = getFileNameFromModule(mod);
-        //std::string fileName = mod->getSourceFileName();
         std::string fileName = CUDAAnalysis::getFileNameFromInstruction(inst);
         Constant *c = builder.CreateGlobalStringPtr(fileName);
         fName->setInitializer(NULL);
@@ -241,38 +238,75 @@ void CPUFPInstrumentation::instrumentFunction(Function *f, long int *c)
         else operationType=-1;
         assert(operationType >=0 && "Unknown operation");
 
-
         ConstantInt* opType = ConstantInt::get(mod->getContext(),
             APInt(32, operationType, true));
         args.push_back(opType);
 
-				ArrayRef<Value *> args_ref(args);
+        // Check if instruction is selected based on a condition
+        Instruction *select_inst = nullptr;
+        Value *condition = nullptr; // condition value
+        Value *cond_instr = nullptr; // condition instruction
+        int inverse; // inverse the semantics of the condition?
+        if (selectedBasedOnCondition(inst, f, &select_inst, &condition, &inverse)) {
+          // Set insertion point after the select instruction
+          assert(select_inst && "Invalid select instruction");
+          BasicBlock::iterator nextOne(select_inst);
+          nextOne++;
+          builder.SetInsertPoint(&(*nextOne));
+          // Inverse semantics of condition if needed
+          if (inverse) {
+            // Add XOR to negate the condition
+            auto neg_inst = builder.CreateXor(condition, 1, "my");
+            cond_instr = builder.CreateZExt(neg_inst, builder.getInt32Ty(), "my");
+            assert(cond_instr && "Invalid extension instruction");
+            args.push_back(cond_instr);
+          } else {
+            // Add extension of condition (from i1 to i32 integer)
+            cond_instr = builder.CreateZExt(condition, builder.getInt32Ty(), "my");
+            assert(cond_instr && "Invalid extension instruction");
+            args.push_back(cond_instr);
+          }
+
+          // Add extension of condition (from i1 to i32 integer)
+          /*cond_instr = builder.CreateZExt(condition, builder.getInt32Ty(), "my");
+          assert(cond_instr && "Invalid extension instruction");
+          args.push_back(cond_instr);
+          // Inverse semantics of condition if needed
+          if (inverse) {
+            // Add XOR to negate the condition
+            //auto neg_inst = builder.CreateXor(condition, 1, "my");
+            //args.push_back(neg_inst);
+            ConstantInt* inv = ConstantInt::get(mod->getContext(),
+              APInt(32, 1, true));
+            args.push_back(inv);
+           } else {
+            ConstantInt* inv = ConstantInt::get(mod->getContext(),
+              APInt(32, 0, true));
+            args.push_back(inv);
+          }*/
+        } else {
+          ConstantInt* cond = ConstantInt::get(mod->getContext(),
+            APInt(32, 1, true));
+          args.push_back(cond);
+          //ConstantInt* inv = ConstantInt::get(mod->getContext(),
+          //  APInt(32, 0, true));
+          //args.push_back(inv);
+        }
+				
+        ArrayRef<Value *> args_ref(args);
 
 				CallInst *callInst = nullptr;
-
         if (isSingleFPOperation(inst)) {
           callInst = builder.CreateCall(fp32_check_function, args_ref);
-          instrumentedOps++;
         } else if (isDoubleFPOperation(inst)) {
           callInst = builder.CreateCall(fp64_check_function, args_ref);
-          instrumentedOps++;
         }
-
+        instrumentedOps++;
+      
 				assert(callInst && "Invalid call instruction!");
         setFakeDebugLocation(inst, callInst, f);
-				//setFakeDebugLocation(inst, inst);
-        //callInst->setDebugLoc(inst->getDebugLoc());
-        //assert(callInst->getDebugLoc() && "Invalid debug loc! Please use -g");
 			}
 		}
-
-    /*errs() << "*** Function ***\n";
-	  for (auto bb=f->begin(), end=f->end(); bb != end; ++bb) {
-		  for (auto i=bb->begin(), bend=bb->end(); i != bend; ++i) {
-			  Instruction *inst = &(*i);
-        errs() << CUDAAnalysis::inst2str(inst) << "\n";
-      }
-    }*/
 	}
 
 #ifdef FPC_DEBUG
@@ -282,6 +316,38 @@ void CPUFPInstrumentation::instrumentFunction(Function *f, long int *c)
 	CUDAAnalysis::Logging::info("Leaving main loop in instrumentFunction");
 #endif
   *c = instrumentedOps;
+}
+
+
+// We check if the instruction inst is used only by a select instruction.
+// If that is the case, we set the condition value and select instruction.
+// Logic: the function returns true if:
+//    - The inst is used only by one select instruction
+//    - The inst is not used by any other instruction 
+bool CPUFPInstrumentation::selectedBasedOnCondition(Instruction *inst, 
+      Function *f, Instruction **select_inst, Value **condition,
+      int *inverse) {
+  bool ret = false;
+  int numSelect = 0;
+  int others = 0;
+  for (User *U : inst->users()) {
+    if (Instruction *use_inst = dyn_cast<Instruction>(U)) {
+      if (SelectInst *s_inst = dyn_cast<SelectInst>(use_inst)) {
+        numSelect++;
+        *select_inst = s_inst;
+        *condition = s_inst->getOperand(0);
+        if ( dyn_cast<Instruction>(s_inst->getOperand(1)) == inst) *inverse = 0;
+        else *inverse = 1;
+      } else {
+        others++;
+      }
+    }
+  }
+  
+  if (numSelect==1 && others==0)
+    ret = true;
+
+  return ret;
 }
 
 bool CPUFPInstrumentation::isCmpEqual(const Instruction *inst) {

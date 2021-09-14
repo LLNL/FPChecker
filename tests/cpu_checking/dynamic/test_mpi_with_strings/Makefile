@@ -1,7 +1,6 @@
 
-#OP = 	-O2 -DCOMPILE_STRING=\\\"fpchecker\\\"
 OP = 	-O2 -DCOMPILE_STRING=\"fpchecker\"
-CXX = FPC_INSTRUMENT=1 clang++-fpchecker 
+CXX = mpicxx
 
 all:
 	$(CXX) -c main.cpp $(OP)
