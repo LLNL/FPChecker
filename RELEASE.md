@@ -1,3 +1,7 @@
+## Release 0.3.5
+- Fixed various bugs
+- Better supporort for strings in compilation commands (e.g., -D\"string\")
+
 ## Release 0.3.4
 - Fixed some bugs
 
