@@ -2,6 +2,7 @@
 import os
 import tempfile
 import sys
+import linecache
 from collections import defaultdict
 from tokenizer import Tokenizer
 from match import Match, FunctionType
@@ -42,7 +43,15 @@ class Instrument:
     dp = Deprocess(self.preFileName, tmpFname)
     if verbose(): print('Running de-processor...')
     dp.run()
-    if verbose(): print('... de-preprocessor done.')
+    if verbose(): 
+      print('... de-preprocessor done.')
+      print('Deprocessed file:', self.deprocessedFile)
+      with open(self.deprocessedFile, 'r') as fd:
+        i = 1
+        for l in fd:
+          print("{n:3d}: {line}".format(n=i, line=l[:-1]))
+          i += 1  
+
     #os.close(tmpFd)
     #if 'FPC_LEAVE_TEMP_FILES' not in os.environ:
     #  os.remove(tmpFname)
@@ -154,6 +163,34 @@ class Instrument:
   def is_omitted_line(self, file_name: str, line: int):
     return self.conf.is_line_omitted(file_name, line)
 
+  def isLineInDeviceCode(self, line: int):
+    for i in self.deviceDclLines:
+      line_begin  = i[0]
+      line_end    = i[1]
+      if line >= line_begin and line <= line_end:
+        return True
+    return False
+
+# Old version ----------------
+#  def instrument(self):
+#    fileName, ext = os.path.splitext(self.sourceFileName)
+#    self.instrumentedFileName = fileName+'_inst'+ext
+#    with open(self.sourceFileName, 'r') as fd:
+#      with open(self.instrumentedFileName, 'w') as outFile:
+#        l = 0
+#        for line in fd:
+#          l += 1
+#          if l in self.transformedLines.keys():
+#            if not self.is_omitted_line(self.sourceFileName, l):
+#              newLine = self.transformedLines[l]
+#              if verbose(): print(newLine[:-1])
+#              outFile.write(newLine[:-1]+'\n')
+#            else:
+#              outFile.write(line[:-1]+'\n')
+#          else:
+#            if verbose(): print(line[:-1])
+#            outFile.write(line[:-1]+'\n')
+
   def instrument(self):
     fileName, ext = os.path.splitext(self.sourceFileName)
     self.instrumentedFileName = fileName+'_inst'+ext
@@ -170,8 +207,13 @@ class Instrument:
             else:
               outFile.write(line[:-1]+'\n')
           else:
-            if verbose(): print(line[:-1])
-            outFile.write(line[:-1]+'\n')
+            if self.isLineInDeviceCode(l):
+              newLine = linecache.getline(self.deprocessedFile, l)
+              outFile.write(newLine[:-1]+'\n')
+              if verbose(): print(newLine[:-1])
+            else:
+              if verbose(): print(line[:-1])
+              outFile.write(line[:-1]+'\n')
 
   def getInstrumentedFileName(self):
     return self.instrumentedFileName

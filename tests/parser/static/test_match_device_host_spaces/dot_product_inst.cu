@@ -1,10 +1,10 @@
 
 #include <stdio.h>
 
-__device__ void mul(double a, double b, double *res)
+__attribute__((device)) void mul(double a, double b, double *res)
 {
   *res = _FPC_CHECK_D_(a * b, 6, "/usr/WS1/laguna/fpchecker/FPChecker/tests/parser/static/test_match_device_host_spaces/dot_product.cu");
-  // NaN
+
   *res = _FPC_CHECK_D_((*res)-(*res) / (*res)-(*res), 8, "/usr/WS1/laguna/fpchecker/FPChecker/tests/parser/static/test_match_device_host_spaces/dot_product.cu");
 }
 
@@ -31,16 +31,16 @@ void calc(double *x, int s) {
   }
 }*/
 
-    __device__     __host__     void   comp(double *x, int s) {
+    __attribute__((device)) __attribute__((host)) void comp(double *x, int s) {
   for (int i=0; i < s; ++i) {
     x[i] = _FPC_CHECK_HD_(x[i] + 3.1, 36, "/usr/WS1/laguna/fpchecker/FPChecker/tests/parser/static/test_match_device_host_spaces/dot_product.cu");
   }
 }
 
-  __device__    
+  __attribute__((device))
 
 
- __host__     void   comp2(double *x, int s) {
+ __attribute__((host)) void comp2(double *x, int s) {
   for (int i=0; i < s; ++i) {
     x[i] = _FPC_CHECK_HD_(x[i] + 3.1, 45, "/usr/WS1/laguna/fpchecker/FPChecker/tests/parser/static/test_match_device_host_spaces/dot_product.cu");
   }

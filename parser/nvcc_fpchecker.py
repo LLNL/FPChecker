@@ -25,7 +25,7 @@ FPCHECKER_RUNTIME   = FPCHECKER_PATH+'/../src/Runtime_parser.h'
 # --------------------------------------------------------------------------- #
 
 # File extensions that can have CUDA code
-CUDA_EXTENSION = ['.cu', '.cuda'] + ['.C', '.cc', '.cpp', '.CPP', '.c++', '.cp', '.cxx']
+CUDA_EXTENSION = ['.cu', '.cuda'] + ['.C', '.cc', '.cpp', '.CPP', '.c++', '.cp', '.cxx', '.c']
 
 # --------------------------------------------------------------------------- #
 # --- Classes --------------------------------------------------------------- #
@@ -191,6 +191,7 @@ if __name__ == '__main__':
       cmd.instrumentSource()
       cmd.compileInstrumentedFile()
       logMessage('Instrumented: ' + cmd.instrumentedFile)
+      print("#FPCHECKER: Instrumented:", cmd.instrumentedFile)
     except Exception as e: # Fall back to original command
       if verbose():
         logMessage(str(e))

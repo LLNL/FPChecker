@@ -13,37 +13,28 @@ RUNTIME='../../../../src/Runtime_parser.h'
 
 prog_1 = """
 
-__device__ void comp() {
+#define MULTI_LINE_MACRO(a, b, c, d, e) { a = b + c; }
 
-  double cross1, cross2, cross0;
-  struct facet_coords0 {
-    double x,y,z;
-  };
-  struct facet_coords1 {
-    double x,y,z;
-  };
-  struct facet_coords2 {
-    double x,y,z;
-  };
-  struct intersection_pt {
-    double x,y,z;
-  };
+__device__ void comp(double *a, double b, double c) {
+  double tmp1 = 0.0;
+  double tmp2 = 0.1;
 
-
-#define AB_CROSS_AC(ax,ay,bx,by,cx,cy) ( (bx-ax)*(cy-ay) - (by-ay)*(cx-ax) )
-
-       cross1 = AB_CROSS_AC(facet_coords0.x, facet_coords0.y,
-                            facet_coords1.x, facet_coords1.y,
-                            intersection_pt.x,  intersection_pt.y);
-       cross2 = AB_CROSS_AC(facet_coords1.x, facet_coords1.y,
-                            facet_coords2.x, facet_coords2.y,
-                            intersection_pt.x,  intersection_pt.y);
-       cross0 = AB_CROSS_AC(facet_coords2.x, facet_coords2.y,
-                            facet_coords0.x, facet_coords0.y,
-                            intersection_pt.x,  intersection_pt.y);
-
- 
+  MULTI_LINE_MACRO( a[0],
+                    b, c,
+                    tmp1,
+                    tmp2 ); tmp1 = tmp2;
 }
+
+__host__ void comp2(int N) {
+
+#pragma omp parallel
+#pragma omp for
+for (int i=0; i<N; i++) {
+  // do something with i
+}
+
+}
+
 """
 
 def setup_module(module):
@@ -104,7 +95,7 @@ def inst_program(prog: str, prog_name: str, num_inst: int):
     print(e)
     return False
 
-@pytest.mark.xfail(reason="Known parser issue with macros")
+#@pytest.mark.xfail(reason="Known parser issue with macros")
 def test_1():
   os.environ['FPC_VERBOSE'] = '1'
   inst_program(prog_1, 'prog_1', 1)
