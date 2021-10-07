@@ -16,6 +16,8 @@
 /* Hash table item                                                            */
 /*----------------------------------------------------------------------------*/
 
+#define FPC_HISTOGRAM_LEN 3000
+
 /** This structure defines different events and the location **/
 typedef struct _FPC_ITEM_S_ {
   char *file_name;
@@ -30,6 +32,9 @@ typedef struct _FPC_ITEM_S_ {
   uint64_t latent_infinity_pos;
   uint64_t latent_infinity_neg;
   uint64_t latent_underflow;
+  /* Number of times an exponent ocurred */
+  uint64_t fp32_exponent_count[FPC_HISTOGRAM_LEN];
+  uint64_t fp64_exponent_count[FPC_HISTOGRAM_LEN];
   struct _FPC_ITEM_S_ *next;
 } _FPC_ITEM_T_;
 
@@ -125,6 +130,10 @@ _FPC_ITEM_T_ *_FPC_HT_NEWPAIR_(_FPC_ITEM_T_ *val)
   newpair->latent_infinity_neg  = val->latent_infinity_neg;
   newpair->latent_underflow     = val->latent_underflow;
 
+  /* Copy array of bins for histogram */
+  memcpy(newpair->fp32_exponent_count, val->fp32_exponent_count, sizeof(uint64_t)*FPC_HISTOGRAM_LEN);
+  memcpy(newpair->fp64_exponent_count, val->fp64_exponent_count, sizeof(uint64_t)*FPC_HISTOGRAM_LEN);
+
   newpair->next = NULL;
 
   return newpair;
@@ -173,6 +182,11 @@ void _FPC_HT_SET_(_FPC_HTABLE_T *hashtable, _FPC_ITEM_T_ *newVal)
     next->latent_infinity_pos  += newVal->latent_infinity_pos;
     next->latent_infinity_neg  += newVal->latent_infinity_neg;
     next->latent_underflow     += newVal->latent_underflow;
+    /* Update histogram */
+    for (int i=0; i < FPC_HISTOGRAM_LEN; ++i) {
+      next->fp32_exponent_count[i] += newVal->fp32_exponent_count[i];
+      next->fp64_exponent_count[i] += newVal->fp64_exponent_count[i];
+    }
 
   } else  { // Nope, could't find it
     newpair = _FPC_HT_NEWPAIR_(newVal);
