@@ -470,6 +470,11 @@ void _FPC_FP32_CHECK_(
     return;
 
   _FPC_ITEM_T_ item;
+  for (int i = 0; i < FPC_HISTOGRAM_LEN; ++i) {
+    item.fp32_exponent_count[i] = 0;
+    item.fp64_exponent_count[i] = 0;
+  }
+
   // Set file name and line
   item.file_name = file_name;
   item.line = (uint64_t)loc;
@@ -512,6 +517,11 @@ void _FPC_FP64_CHECK_(
     return;
 
   _FPC_ITEM_T_ item;
+  for (int i = 0; i < FPC_HISTOGRAM_LEN; ++i) {
+    item.fp32_exponent_count[i] = 0;
+    item.fp64_exponent_count[i] = 0;
+  }
+
   // Set file name and line
   item.file_name = file_name;
   item.line = (uint64_t)loc;
