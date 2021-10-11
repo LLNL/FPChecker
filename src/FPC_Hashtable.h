@@ -58,6 +58,28 @@ typedef struct _FPC_HTABLE_S {
 //typedef struct _FPC_HTABLE_S _FPC_HTABLE_T;
 
 /*----------------------------------------------------------------------------*/
+/* Generating  file identifier: hostName+processID                            */
+/*----------------------------------------------------------------------------*/
+void get_execution_id(char* executionId) {
+  //size_t len=256;
+  // According to Linux manual:
+  // Each element of the hostname must be from 1 to 63 characters long
+  // and the entire hostname, including the dots, can be at most 253
+  // characters long.
+  executionId[0] = '\0';
+  if(gethostname(executionId, 256) != 0)
+    strcpy(executionId, "node-unknown");
+
+  // Maximum size for PID: we assume 2,000,000,000
+  int pid = (int)getpid();
+  char pidStr[11];
+  pidStr[0] = '\0';
+  sprintf(pidStr, "%d", pid);
+  strcat(executionId, "_");
+  strcat(executionId, pidStr);
+}
+
+/*----------------------------------------------------------------------------*/
 /* Initialization                                                             */
 /*----------------------------------------------------------------------------*/
 
@@ -77,8 +99,8 @@ _FPC_HTABLE_T *_FPC_HT_CREATE_(int64_t size)
 
   // Allocate pointers to the head nodes
   if( (hashtable->table =
-      (struct _FPC_ITEM_S_ **)malloc((size_t)((int64_t)sizeof(_FPC_ITEM_T_ *) * size))) == NULL) {
-      //(struct _FPC_ITEM_T_ **)malloc(sizeof(_FPC_ITEM_T_ *) * size)) == NULL) {
+               (struct _FPC_ITEM_S_ **)malloc((size_t)((int64_t)sizeof(_FPC_ITEM_T_ *) * size))) == NULL) {
+    //(struct _FPC_ITEM_T_ **)malloc(sizeof(_FPC_ITEM_T_ *) * size)) == NULL) {
     printf("#FPCHECKER: hash table out of memory error!");
     exit(EXIT_FAILURE);
   }
@@ -146,7 +168,7 @@ _FPC_ITEM_T_ *_FPC_HT_NEWPAIR_(_FPC_ITEM_T_ *val)
 int _FPC_ITEMS_EQUAL_(_FPC_ITEM_T_ *x, _FPC_ITEM_T_ *y)
 {
   if ((x->file_name == y->file_name) && (x->line == y->line))
-      return 1;
+    return 1;
   return 0;
 }
 
@@ -227,32 +249,23 @@ void _FPC_PRINT_HASH_TABLE_(_FPC_HTABLE_T *hashtable)
   }
 
   // Set filename
-  //size_t len=256;
-  // According to Linux manual:
-  // Each element of the hostname must be from 1 to 63 characters long
-  // and the entire hostname, including the dots, can be at most 253
-  // characters long.
-  char nodeName[256];
-  nodeName[0] = '\0';
-  if(gethostname(nodeName, 256) != 0)
-    strcpy(nodeName, "node-unknown");
-
-  // On Linux: The maximum length for a file name is 255 bytes. 
+  // On Linux: The maximum length for a file name is 255 bytes.
   // The maximum combined length of both the file name and path name is 4096 bytes.
+  char executionId[5000];
   char fileName[5000];
+  char histogramFileName[5000];
   fileName[0] = '\0';
+  histogramFileName[0] = '\0';
   strcpy(fileName, ".fpc_logs/fpc_");
-  //strcpy(fileName, "fpc_");
-  strcat(fileName, nodeName);
+  strcpy(histogramFileName, ".fpc_logs/fpc_histogram_");
 
-  // Maximum size for PID: we assume 2,000,000,000
-  int pid = (int)getpid();
-  char pidStr[11];
-  pidStr[0] = '\0';
-  sprintf(pidStr, "%d", pid);
-  strcat(fileName, "_");
-  strcat(fileName, pidStr);
-  strcat(fileName, ".json");
+
+  get_execution_id(executionId);
+  strcat(executionId, ".json");
+
+  strcat(fileName, executionId);
+  strcat(histogramFileName, executionId);
+
 
   // Get program name and input
   int str_size = 0;
@@ -270,15 +283,19 @@ void _FPC_PRINT_HASH_TABLE_(_FPC_HTABLE_T *hashtable)
   uint64_t printed = 0;
 
   FILE *fp;
+  FILE *fph;
   fp = fopen(fileName, "w");
+  fph = fopen(histogramFileName, "w");
 
   fprintf(fp, "[\n");
+  fprintf(fph, "[\n");
 
   for (int i=0; (uint64_t)i < hashtable->size; ++i) {
     _FPC_ITEM_T_ *next;
     next = hashtable->table[i];
 
     while(next != NULL) {
+      // Writing floating point anomaly data
       fprintf(fp, "  {\n");
       fprintf(fp, "\t\"input\": \"%s\",\n", prog_input);
       fprintf(fp, "\t\"file\": \"%s\",\n", next->file_name);
@@ -295,18 +312,46 @@ void _FPC_PRINT_HASH_TABLE_(_FPC_HTABLE_T *hashtable)
       fprintf(fp, "\t\"latent_infinity_neg\": %lu,\n", next->latent_infinity_neg);
       fprintf(fp, "\t\"latent_underflow\": %lu\n", next->latent_underflow);
 
+      // Writing exponent histogram data
+      fprintf(fph, "  {\n");
+      fprintf(fph, "\t\"input\": \"%s\",\n", prog_input);
+      fprintf(fph, "\t\"file\": \"%s\",\n", next->file_name);
+      fprintf(fph, "\t\"line\": %lu,\n", next->line);
+
+      fprintf(fph, "\t\"fp32\": {\n");
+      for (int j = 0; j < FPC_HISTOGRAM_LEN-1; ++j) {
+        if (next->fp32_exponent_count[j] != 0)
+          fprintf(fph, "\t\t\"%d\": %lu,\n", j, next->fp32_exponent_count[j]);
+      }
+      fprintf(fph, "\t\t\"%d\": %lu\n", FPC_HISTOGRAM_LEN-1, next->fp32_exponent_count[FPC_HISTOGRAM_LEN-1]);
+      fprintf(fph, "\t},\n");
+
+      fprintf(fph, "\t\"fp64\": {\n");
+      for (int j = 0; j < FPC_HISTOGRAM_LEN-1; ++j) {
+        if (next->fp64_exponent_count[j] != 0)
+          fprintf(fph, "\t\t\"%d\": %lu,\n", j, next->fp64_exponent_count[j]);
+      }
+      fprintf(fph, "\t\t\"%d\": %lu\n", FPC_HISTOGRAM_LEN-1, next->fp64_exponent_count[FPC_HISTOGRAM_LEN-1]);
+      fprintf(fph, "\t}\n");
+
+
       next = next->next;
       printed++;
 
-      if (printed == n)
+      if (printed == n) {
         fprintf(fp, "  }\n");
-      else
+        fprintf(fph, "  }\n");
+      } else {
         fprintf(fp, "  },\n");
+        fprintf(fph, "  },\n");
+      }
     }
   }
 
   fprintf(fp, "]\n");
+  fprintf(fph, "]\n");
   fclose(fp);
+  fclose(fph);
 }
 
 #endif /* SRC_FPC_HASHTABLE_H_ */
