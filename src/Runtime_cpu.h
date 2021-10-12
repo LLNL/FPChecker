@@ -494,7 +494,7 @@ void _FPC_FP32_CHECK_(
   // Set histogram count
   item.fp32_exponent_count[ (int)_FPC_FP32_GET_EXPONENT(x) ] = (uint64_t)1;
 
- if (_FPC_EVENT_OCURRED(&item)) {
+// if (_FPC_EVENT_OCURRED(&item)) {
 #ifdef FPC_MULTI_THREADED
     pthread_mutex_lock(&fpc_lock);
 #endif
@@ -503,7 +503,7 @@ void _FPC_FP32_CHECK_(
     pthread_mutex_unlock(&fpc_lock);
 #endif
     _FPC_CHECK_AND_TRAP(&item, loc, file_name);
-  }
+//  }
 }
 
 void _FPC_FP64_CHECK_(
@@ -541,7 +541,7 @@ void _FPC_FP64_CHECK_(
   // Set histogram count
   item.fp64_exponent_count[ (int)_FPC_FP64_GET_EXPONENT(x) ] = (uint64_t)1;
 
-   if (_FPC_EVENT_OCURRED(&item)) {
+//   if (_FPC_EVENT_OCURRED(&item)) {
 #ifdef FPC_MULTI_THREADED
     pthread_mutex_lock(&fpc_lock);
 #endif
@@ -550,7 +550,7 @@ void _FPC_FP64_CHECK_(
     pthread_mutex_unlock(&fpc_lock);
 #endif
     _FPC_CHECK_AND_TRAP(&item, loc, file_name);
-  }
+//  }
 }
 
 

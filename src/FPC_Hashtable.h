@@ -60,7 +60,7 @@ typedef struct _FPC_HTABLE_S {
 /*----------------------------------------------------------------------------*/
 /* Generating  file identifier: hostName+processID                            */
 /*----------------------------------------------------------------------------*/
-void get_execution_id(char* executionId) {
+void _FPC_GET_EXECUTION_ID_(char* executionId) {
   //size_t len=256;
   // According to Linux manual:
   // Each element of the hostname must be from 1 to 63 characters long
@@ -259,8 +259,7 @@ void _FPC_PRINT_HASH_TABLE_(_FPC_HTABLE_T *hashtable)
   strcpy(fileName, ".fpc_logs/fpc_");
   strcpy(histogramFileName, ".fpc_logs/fpc_histogram_");
 
-
-  get_execution_id(executionId);
+  _FPC_GET_EXECUTION_ID_(executionId);
   strcat(executionId, ".json");
 
   strcat(fileName, executionId);

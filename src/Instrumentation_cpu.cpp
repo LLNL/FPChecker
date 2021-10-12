@@ -137,6 +137,7 @@ CPUFPInstrumentation::CPUFPInstrumentation(Module *M) :
     SET_ODR_LIKAGE("_FPC_HT_SET_")
     SET_ODR_LIKAGE("_FPC_PRINT_HASH_TABLE_")
     SET_ODR_LIKAGE("_FPC_INIT_HASH_TABLE_")
+    SET_ODR_LIKAGE("_FPC_GET_EXECUTION_ID_")
   }
 
   // Globals initialization
