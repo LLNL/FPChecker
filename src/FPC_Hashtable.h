@@ -257,7 +257,7 @@ void _FPC_PRINT_HASH_TABLE_(_FPC_HTABLE_T *hashtable)
   fileName[0] = '\0';
   histogramFileName[0] = '\0';
   strcpy(fileName, ".fpc_logs/fpc_");
-  strcpy(histogramFileName, ".fpc_logs/fpc_histogram_");
+  strcpy(histogramFileName, ".fpc_logs/histogram_");
 
   _FPC_GET_EXECUTION_ID_(executionId);
   strcat(executionId, ".json");
@@ -319,16 +319,20 @@ void _FPC_PRINT_HASH_TABLE_(_FPC_HTABLE_T *hashtable)
 
       fprintf(fph, "\t\"fp32\": {\n");
       for (int j = 0; j < FPC_HISTOGRAM_LEN-1; ++j) {
-        if (next->fp32_exponent_count[j] != 0)
-          fprintf(fph, "\t\t\"%d\": %lu,\n", j, next->fp32_exponent_count[j]);
+        if (next->fp32_exponent_count[j] != 0) {
+          int e = j - 127; // remove bias 2^(k-1)-1, where k is # of bits
+          fprintf(fph, "\t\t\"%d\": %lu,\n", e, next->fp32_exponent_count[j]);
+        }
       }
       fprintf(fph, "\t\t\"%d\": %lu\n", FPC_HISTOGRAM_LEN-1, next->fp32_exponent_count[FPC_HISTOGRAM_LEN-1]);
       fprintf(fph, "\t},\n");
 
       fprintf(fph, "\t\"fp64\": {\n");
       for (int j = 0; j < FPC_HISTOGRAM_LEN-1; ++j) {
-        if (next->fp64_exponent_count[j] != 0)
-          fprintf(fph, "\t\t\"%d\": %lu,\n", j, next->fp64_exponent_count[j]);
+        if (next->fp64_exponent_count[j] != 0) {
+          int e = j - 1023; // remove bias 2^(k-1)-1, where k is # of bits
+          fprintf(fph, "\t\t\"%d\": %lu,\n", e, next->fp64_exponent_count[j]);
+        }
       }
       fprintf(fph, "\t\t\"%d\": %lu\n", FPC_HISTOGRAM_LEN-1, next->fp64_exponent_count[FPC_HISTOGRAM_LEN-1]);
       fprintf(fph, "\t}\n");

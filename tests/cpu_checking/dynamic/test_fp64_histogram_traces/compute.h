@@ -1,4 +1,4 @@
 
 
-double compute(double *x, int n);
+double compute(double x, double y);
 
