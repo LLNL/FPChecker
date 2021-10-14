@@ -318,27 +318,27 @@ void _FPC_PRINT_HASH_TABLE_(_FPC_HTABLE_T *hashtable)
       fprintf(fph, "\t\"line\": %lu,\n", next->line);
 
       fprintf(fph, "\t\"fp32\": {\n");
-      bool fp32_present = false;
+      int fp32_present = 0;
       for (int j = 0; j < FPC_HISTOGRAM_LEN; ++j) {
         if (next->fp32_exponent_count[j] != 0) {
           if(fp32_present)
             fprintf(fph, ",\n");
           int e = j - 127; // remove bias 2^(k-1)-1, where k is # of bits
           fprintf(fph, "\t\t\"%d\": %lu", e, next->fp32_exponent_count[j]);
-          fp32_present = true;
+          fp32_present = 1;
         }
       }
       fprintf(fph, "\n\t},\n");
 
       fprintf(fph, "\t\"fp64\": {\n");
-      bool fp64_present = false;
+      int fp64_present = 0;
       for (int j = 0; j < FPC_HISTOGRAM_LEN; ++j) {
         if (next->fp64_exponent_count[j] != 0) {
           if(fp64_present)
             fprintf(fph, ",\n");
           int e = j - 1023; // remove bias 2^(k-1)-1, where k is # of bits
           fprintf(fph, "\t\t\"%d\": %lu", e, next->fp64_exponent_count[j]);
-          fp64_present = true;
+          fp64_present = 1;
         }
       }
       fprintf(fph, "\n\t}\n");

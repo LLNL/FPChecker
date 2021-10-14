@@ -1,6 +1,6 @@
 
 OP = 	-O2
-CXX = FPC_INSTRUMENT=1 clang++-fpchecker -DFPC_POSITIVE_OVERFLOW=1
+CXX = FPC_INSTRUMENT=1 ~/Documents/Tools/FPChecker/build/bin/clang++-fpchecker -DFPC_POSITIVE_OVERFLOW=1
 
 all:
 	$(CXX) -c main.cpp $(OP)
