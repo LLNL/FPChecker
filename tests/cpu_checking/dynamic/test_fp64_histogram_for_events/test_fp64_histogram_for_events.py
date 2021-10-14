@@ -32,13 +32,18 @@ def test_1():
     fileName = report.findHistogramFile('.fpc_logs')
     data = report.loadReport(fileName)
 
-    assert data[0]['fp64']['0'] == 1
-    assert data[0]['fp64']['1024'] == 2
+    for i in range(4):
+        if data[i]['line'] == 7:
+            assert data[i]['fp64']['0'] == 1
+            assert data[i]['fp64']['1024'] == 2
+        
+        if data[i]['line'] == 10:
+            assert data[i]['fp64']['1024'] == 3
+        
+        if data[i]['line'] == 29:
+            assert data[i]['fp64']['0'] == 1
+            assert data[i]['fp64']['1024'] == 2
 
-    assert data[1]['fp64']['-1023'] == 1
-    assert data[1]['fp64']['1024'] == 5
-    
-    assert data[2]['fp64']['0'] == 1
-    assert data[2]['fp64']['1024'] == 2
-
-    assert data[3]['fp64']['1024'] == 3
+        if data[i]['line'] == 32:
+            assert data[i]['fp64']['-1023'] == 1
+            assert data[i]['fp64']['1024'] == 5

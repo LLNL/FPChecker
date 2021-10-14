@@ -1,6 +1,6 @@
 
 OP = 	-O2 
-CXX = FPC_INSTRUMENT=1 ~/Documents/Tools/FPChecker/build/bin/clang++-fpchecker 
+CXX = FPC_INSTRUMENT=1 clang++-fpchecker 
 
 all:
 	$(CXX) -c main.cpp $(OP)
