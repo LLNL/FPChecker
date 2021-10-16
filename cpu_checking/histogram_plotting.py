@@ -182,13 +182,22 @@ def histogram_per_line(plots_root_path, histogram_data):
 
 
 if __name__ == '__main__':
-    fileName = sys.argv[1]
-    plotsRootPath = sys.argv[2] + '/'
-    histogramData = load_report(fileName)
+    # USAGE: python3 <histogram json file> <output directory> <refinement level>
+    # refinement level: 1 - line level histograms
+    #                   2 - file level histograms
+    #                   3 - full program histogram
+    file_name = sys.argv[1]
+    plots_root_path = 'plots/'
+    plots_root_path = sys.argv[2] + '/'
+    plot_refinement_level = int(sys.argv[3])
+    histogram_data = load_report(fileName)
 
-    # json_formatted_obj = json.dumps(histogramData, indent=2)
+    # json_formatted_obj = json.dumps(histogram_data, indent=2)
     # print(json_formatted_obj)
 
-    # histogram_per_line(plotsRootPath, histogramData)
-    # histogram_per_file(plotsRootPath, histogramData)
-    histogram_per_program(plotsRootPath, histogramData)
+    if plot_refinement_level == 1:
+        histogram_per_line(plots_root_path, histogram_data)
+    elif plot_refinement_level == 2:
+        histogram_per_file(plots_root_path, histogram_data)
+    elif plot_refinement_level == 3:
+        histogram_per_program(plots_root_path, histogram_data)
