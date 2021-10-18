@@ -1,3 +1,4 @@
+import argparse
 import collections
 import glob
 import json
@@ -29,6 +30,7 @@ def accumulate_over_key(init_dict, data, key):
 # directory plots_root_path
 def histogram_per_program(plots_root_path, histogram_data):
     # Create a new directory if does not exist
+    plots_root_path += '/'
     if not os.path.isdir(plots_root_path):
         os.mkdir(plots_root_path)
 
@@ -76,6 +78,7 @@ def histogram_per_program(plots_root_path, histogram_data):
 # directory plots_root_path
 def histogram_per_file(plots_root_path, histogram_data):
     # Create a new directory if does not exist
+    plots_root_path += '/'
     if not os.path.isdir(plots_root_path):
         os.mkdir(plots_root_path)
 
@@ -134,6 +137,7 @@ def histogram_per_file(plots_root_path, histogram_data):
 # directory plots_root_path
 def histogram_per_line(plots_root_path, histogram_data):
     # Create a new directory if does not exist
+    plots_root_path += '/'
     if not os.path.isdir(plots_root_path):
         os.mkdir(plots_root_path)
 
@@ -182,22 +186,29 @@ def histogram_per_line(plots_root_path, histogram_data):
 
 
 if __name__ == '__main__':
-    # USAGE: python3 <histogram json file> <output directory> <refinement level>
-    # refinement level: 1 - line level histograms
-    #                   2 - file level histograms
-    #                   3 - full program histogram
-    file_name = sys.argv[1]
-    plots_root_path = 'plots/'
-    plots_root_path = sys.argv[2] + '/'
-    plot_refinement_level = int(sys.argv[3])
-    histogram_data = load_report(fileName)
+    parser = argparse.ArgumentParser(description='Plotting histogram of exponents')
+    parser.add_argument('-f', '--json_file',
+                        help='JSON format histogram file output by FPChecker containing exponent data',
+                        required=True)
+    parser.add_argument('-o', '--output_dir',
+                        help='Path to directory to create plots in',
+                        default='plots')
+    parser.add_argument('-l', '--refinement_level',
+                        help='1: Line level histograms. '
+                             '2: File level histograms. '
+                             '3: Full program histogram',
+                        type=int,
+                        default=1)
+    arguments = parser.parse_args()
+
+    histogram_data = load_report(arguments.json_file)
 
     # json_formatted_obj = json.dumps(histogram_data, indent=2)
     # print(json_formatted_obj)
 
-    if plot_refinement_level == 1:
-        histogram_per_line(plots_root_path, histogram_data)
-    elif plot_refinement_level == 2:
-        histogram_per_file(plots_root_path, histogram_data)
-    elif plot_refinement_level == 3:
-        histogram_per_program(plots_root_path, histogram_data)
+    if arguments.refinement_level == 1:
+        histogram_per_line(arguments.output_dir, histogram_data)
+    elif arguments.refinement_level == 2:
+        histogram_per_file(arguments.output_dir, histogram_data)
+    elif arguments.refinement_level == 3:
+        histogram_per_program(arguments.output_dir, histogram_data)
