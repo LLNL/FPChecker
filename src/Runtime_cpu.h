@@ -288,11 +288,7 @@ int _FPC_FP64_IS_SUBNORMAL(double x)
 {
   int ret = 0;
   uint64_t val = _FPC_FP64_GET_EXPONENT(x);
-  //memcpy((void *) &val, (void *) &x, sizeof(val));
-  //val = val << 1;   // get rid of sign bit
-  //val = val >> 53;  // get rid of the mantissa bits
-  if (x != 0.0 && x != -0.0)
-  {
+  if (x != 0.0 && x != -0.0) {
     if (val == 0)
       ret = 1;
   }
@@ -461,13 +457,18 @@ int _FPC_EVENT_OCURRED(_FPC_ITEM_T_ *item) {
 
 void _FPC_FP32_CHECK_(
     float x, float y, float z, int loc, char *file_name, int op, int cond) {
-  /*if (!inv) {
-    if (!cond) return;
-  } else {
-    if (cond) return;
-  }*/
   if (!cond)
     return;
+
+#ifdef FPC_FAST_CHECKING
+  // Check for NaN, infinity, or subnormals
+  uint64_t exponent = _FPC_FP32_GET_EXPONENT(x);
+  if (exponent != (uint64_t)(255) {
+    if ((exponent != 0) || (x == 0.0 || x == -0.0)) {
+      return;
+    }
+  }
+#endif
 
   _FPC_ITEM_T_ item;
   // Set file name and line
@@ -500,13 +501,18 @@ void _FPC_FP32_CHECK_(
 
 void _FPC_FP64_CHECK_(
     double x, double y, double z, int loc, char *file_name, int op, int cond) {
-  /*if (!inv) {
-    if (!cond) return;
-  } else {
-    if (cond) return;
-  }*/
   if (!cond)
     return;
+
+#ifdef FPC_FAST_CHECKING
+  // Check for NaN, infinity, or subnormals
+  uint64_t exponent = _FPC_FP64_GET_EXPONENT(x);
+  if (exponent != (uint64_t)(2047) {
+    if ((exponent != 0) || (x == 0.0 || x == -0.0)) {
+      return;
+    }
+  }
+#endif
 
   _FPC_ITEM_T_ item;
   // Set file name and line
@@ -536,6 +542,5 @@ void _FPC_FP64_CHECK_(
     _FPC_CHECK_AND_TRAP(&item, loc, file_name);
   }
 }
-
 
 #endif /* SRC_RUNTIME_CPU_H_ */
