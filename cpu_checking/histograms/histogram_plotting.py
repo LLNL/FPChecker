@@ -89,12 +89,6 @@ def histogram_per_program(plots_root_path, histogram_data):
     # Filling missing exponent records with 0s in fp32 and fp64 dictionaries for plotting purposes
     keys_set = merge_keys(accumulated_exponent_dict, ['fp32', 'fp64'])
 
-    return [keys_set,
-            clean_up_field(accumulated_exponent_dict, 'fp32', keys_set),
-            clean_up_field(accumulated_exponent_dict, 'fp64', keys_set),
-            plots_root_path,
-            plot_name + '.png']
-
     # Saving figure as the input name
     plot_exponent_histogram(list(keys_set),
                             list(clean_up_field(accumulated_exponent_dict, 'fp32', keys_set).values()),
@@ -134,12 +128,6 @@ def histogram_per_file(plots_root_path, histogram_data):
         # Filling missing exponent records with 0s in fp32 and fp64 dictionaries for plotting purposes
         keys_set = merge_keys(file_data, ['fp32', 'fp64'])
 
-        return [keys_set,
-                clean_up_field(file_data, 'fp32', keys_set),
-                clean_up_field(file_data, 'fp64', keys_set),
-                plots_root_path,
-                plot_name + '.png']
-
         # Saving figure as the source file name
         plot_exponent_histogram(list(keys_set),
                                 list(clean_up_field(file_data, 'fp32', keys_set).values()),
@@ -169,18 +157,14 @@ def histogram_per_line(plots_root_path, histogram_data):
         # Filling missing exponent records with 0s in fp32 and fp64 dictionaries for plotting purposes
         keys_set = merge_keys(line_data, ['fp32', 'fp64'])
 
-        return [keys_set,
-                clean_up_field(line_data, 'fp32', keys_set),
-                clean_up_field(line_data, 'fp64', keys_set),
-                plots_root_path,
-                plot_name + '.png']
-
         # Plotting histogram as the line number in directory corresponding to source file
         plot_exponent_histogram(list(keys_set),
                                 list(clean_up_field(line_data, 'fp32', keys_set).values()),
                                 list(clean_up_field(line_data, 'fp64', keys_set).values()),
                                 plots_root_path + '/' + plots_for_file_directory,
                                 str(line_data['line']) + '.png')
+
+    return histogram_data
 
 
 if __name__ == '__main__':
