@@ -44,7 +44,9 @@ char ** _FPC_PROG_ARGS;
 /*----------------------------------------------------------------------------*/
 
 void _FPC_INIT_HASH_TABLE_() {
+#ifndef FPC_QUIET
   printf("#FPCHECKER: Initializing...\n");
+#endif
   int64_t size = 1000;
   _FPC_HTABLE_ = _FPC_HT_CREATE_(size);
 
@@ -68,7 +70,9 @@ void _FPC_INIT_ARGS_FPCHECKER(int argc, char **argv) {
 
 void _FPC_PRINT_LOCATIONS_()
 {
+#ifndef FPC_QUIET
   printf("#FPCHECKER: Finalizing and writing traces...\n");
+#endif
   _FPC_PRINT_HASH_TABLE_(_FPC_HTABLE_);
 }
 
@@ -463,7 +467,7 @@ void _FPC_FP32_CHECK_(
 #ifdef FPC_FAST_CHECKING
   // Check for NaN, infinity, or subnormals
   uint64_t exponent = _FPC_FP32_GET_EXPONENT(x);
-  if (exponent != (uint64_t)(255) {
+  if (exponent != (uint64_t)(255)) {
     if ((exponent != 0) || (x == 0.0 || x == -0.0)) {
       return;
     }
@@ -507,7 +511,7 @@ void _FPC_FP64_CHECK_(
 #ifdef FPC_FAST_CHECKING
   // Check for NaN, infinity, or subnormals
   uint64_t exponent = _FPC_FP64_GET_EXPONENT(x);
-  if (exponent != (uint64_t)(2047) {
+  if (exponent != (uint64_t)(2047)) {
     if ((exponent != 0) || (x == 0.0 || x == -0.0)) {
       return;
     }
