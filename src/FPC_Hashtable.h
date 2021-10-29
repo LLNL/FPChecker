@@ -244,7 +244,7 @@ void _FPC_PRINT_HASH_TABLE_(_FPC_HTABLE_T *hashtable)
   int str_size = 0;
   for (int i=0; i < _FPC_PROG_INPUTS; ++i)
     str_size += strlen(_FPC_PROG_ARGS[i]) + 1;
-  char *prog_input = (char *)malloc((sizeof(char) * str_size) + 1);
+  char *prog_input = (char *)malloc((sizeof(char) * (size_t)str_size) + 1);
   prog_input[0] = '\0';
   for (int i=0; i < _FPC_PROG_INPUTS; ++i) {
     strcat(prog_input, _FPC_PROG_ARGS[i]);

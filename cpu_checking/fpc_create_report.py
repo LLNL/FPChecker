@@ -425,7 +425,7 @@ def removeTraces():
           shutil.rmtree(full_path)
         except Exception as e:
           prRed(e)
- 
+
 if __name__ == '__main__':
   parser = argparse.ArgumentParser(description='FPChecker report generator')
   parser.add_argument('-r', '--remove', action='store_true', help='Remove report dir.')

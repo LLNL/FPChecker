@@ -1,5 +1,5 @@
 
-OP = 	-O2 -W -Wall -Werror 
+OP = 	-O2 -W -Wall -Werror -Wcast-qual -Wsign-conversion -Wshorten-64-to-32
 #OP = 	-O2 -Wall -Wshadow -Wconversion -W -Wpointer-arith -Wreturn-type -Wcast-qual -Wwrite-strings -Wswitch -Wunused-parameter -Wcast-align -Wchar-subscripts -Winline -Wredundant-decls
 CXX = FPC_INSTRUMENT=1 clang++-fpchecker 
 

@@ -381,8 +381,8 @@ void _FPC_TRAP_HERE(const char *trap_name, int loc, char *file_name) {
 }
 
 int _FPC_STRING_ENDS_WITH(const char *str, const char *substr) {
-  int len_str = strlen(str);
-  int len_substr = strlen(substr);
+  int len_str = (int)strlen(str);
+  int len_substr = (int)strlen(substr);
   if (len_str < len_substr)
     return 0;
   
