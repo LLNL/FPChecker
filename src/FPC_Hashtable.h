@@ -178,6 +178,9 @@ int _FPC_ITEMS_EQUAL_(_FPC_ITEM_T_ *x, _FPC_ITEM_T_ *y)
 
 void _FPC_HT_SET_(_FPC_HTABLE_T *hashtable, _FPC_ITEM_T_ *newVal)
 {
+  if (hashtable == NULL)
+    return;
+
   int bin = 0;
   _FPC_ITEM_T_ *newpair = NULL;
   _FPC_ITEM_T_ *next    = NULL;
