@@ -1,5 +1,5 @@
 
-OP = 	-O2
+OP = 	-O2 -DFPC_HISTOGRAMS
 CXX = FPC_INSTRUMENT=1 clang++-fpchecker
 
 all:

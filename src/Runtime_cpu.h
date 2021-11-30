@@ -44,7 +44,9 @@ char ** _FPC_PROG_ARGS;
 /*----------------------------------------------------------------------------*/
 
 void _FPC_INIT_HASH_TABLE_() {
+#ifndef FPC_QUIET
   printf("#FPCHECKER: Initializing...\n");
+#endif
   int64_t size = 1000;
   _FPC_HTABLE_ = _FPC_HT_CREATE_(size);
 
@@ -68,7 +70,9 @@ void _FPC_INIT_ARGS_FPCHECKER(int argc, char **argv) {
 
 void _FPC_PRINT_LOCATIONS_()
 {
+#ifndef FPC_QUIET
   printf("#FPCHECKER: Finalizing and writing traces...\n");
+#endif
   _FPC_PRINT_HASH_TABLE_(_FPC_HTABLE_);
 }
 
@@ -288,11 +292,7 @@ int _FPC_FP64_IS_SUBNORMAL(double x)
 {
   int ret = 0;
   uint64_t val = _FPC_FP64_GET_EXPONENT(x);
-  //memcpy((void *) &val, (void *) &x, sizeof(val));
-  //val = val << 1;   // get rid of sign bit
-  //val = val >> 53;  // get rid of the mantissa bits
-  if (x != 0.0 && x != -0.0)
-  {
+  if (x != 0.0 && x != -0.0) {
     if (val == 0)
       ret = 1;
   }
@@ -459,13 +459,11 @@ int _FPC_EVENT_OCURRED(_FPC_ITEM_T_ *item) {
  * -------------------------
  **/
 
+/* ==================== Histograms ===================== */
+#ifdef FPC_HISTOGRAMS
+
 void _FPC_FP32_CHECK_(
     float x, float y, float z, int loc, char *file_name, int op, int cond) {
-  /*if (!inv) {
-    if (!cond) return;
-  } else {
-    if (cond) return;
-  }*/
   if (!cond)
     return;
 
@@ -475,6 +473,67 @@ void _FPC_FP32_CHECK_(
     item.fp64_exponent_count[i] = 0;
   }
 
+  // Set file name and line
+  item.file_name = file_name;
+  item.line = (uint64_t)loc;
+ 
+  // Set histogram count
+  item.fp32_exponent_count[ (int)_FPC_FP32_GET_EXPONENT(x) ] = (uint64_t)1;
+
+#ifdef FPC_MULTI_THREADED
+   pthread_mutex_lock(&fpc_lock);
+#endif
+   _FPC_HT_SET_(_FPC_HTABLE_, &item);
+#ifdef FPC_MULTI_THREADED
+   pthread_mutex_unlock(&fpc_lock);
+#endif
+}
+
+void _FPC_FP64_CHECK_(
+    double x, double y, double z, int loc, char *file_name, int op, int cond) {
+  if (!cond)
+    return;
+
+  _FPC_ITEM_T_ item;
+  for (int i = 0; i < FPC_HISTOGRAM_LEN; ++i) {
+    item.fp32_exponent_count[i] = 0;
+    item.fp64_exponent_count[i] = 0;
+  }
+
+  // Set file name and line
+  item.file_name = file_name;
+  item.line = (uint64_t)loc;
+
+  // Set histogram count
+  item.fp64_exponent_count[ (int)_FPC_FP64_GET_EXPONENT(x) ] = (uint64_t)1;
+#ifdef FPC_MULTI_THREADED
+   pthread_mutex_lock(&fpc_lock);
+#endif
+   _FPC_HT_SET_(_FPC_HTABLE_, &item);
+#ifdef FPC_MULTI_THREADED
+   pthread_mutex_unlock(&fpc_lock);
+#endif
+
+}
+/* ==================================================== */
+#else
+
+void _FPC_FP32_CHECK_(
+    float x, float y, float z, int loc, char *file_name, int op, int cond) {
+  if (!cond)
+    return;
+
+#ifdef FPC_FAST_CHECKING
+  // Check for NaN, infinity, or subnormals
+  uint64_t exponent = _FPC_FP32_GET_EXPONENT(x);
+  if (exponent != (uint64_t)(255)) {
+    if ((exponent != 0) || (x == 0.0 || x == -0.0)) {
+      return;
+    }
+  }
+#endif
+
+  _FPC_ITEM_T_ item;
   // Set file name and line
   item.file_name = file_name;
   item.line = (uint64_t)loc;
@@ -491,10 +550,7 @@ void _FPC_FP32_CHECK_(
   item.latent_infinity_neg  = (uint64_t)_FPC_FP32_IS_LATENT_INFINITY_NEG(x);
   item.latent_underflow     = (uint64_t)_FPC_FP32_IS_LATENT_SUBNORMAL(x);
   
-  // Set histogram count
-  item.fp32_exponent_count[ (int)_FPC_FP32_GET_EXPONENT(x) ] = (uint64_t)1;
-
-// if (_FPC_EVENT_OCURRED(&item)) {
+ if (_FPC_EVENT_OCURRED(&item)) {
 #ifdef FPC_MULTI_THREADED
     pthread_mutex_lock(&fpc_lock);
 #endif
@@ -503,25 +559,25 @@ void _FPC_FP32_CHECK_(
     pthread_mutex_unlock(&fpc_lock);
 #endif
     _FPC_CHECK_AND_TRAP(&item, loc, file_name);
-//  }
+  }
 }
 
 void _FPC_FP64_CHECK_(
     double x, double y, double z, int loc, char *file_name, int op, int cond) {
-  /*if (!inv) {
-    if (!cond) return;
-  } else {
-    if (cond) return;
-  }*/
   if (!cond)
     return;
 
-  _FPC_ITEM_T_ item;
-  for (int i = 0; i < FPC_HISTOGRAM_LEN; ++i) {
-    item.fp32_exponent_count[i] = 0;
-    item.fp64_exponent_count[i] = 0;
+#ifdef FPC_FAST_CHECKING
+  // Check for NaN, infinity, or subnormals
+  uint64_t exponent = _FPC_FP64_GET_EXPONENT(x);
+  if (exponent != (uint64_t)(2047)) {
+    if ((exponent != 0) || (x == 0.0 || x == -0.0)) {
+      return;
+    }
   }
+#endif
 
+  _FPC_ITEM_T_ item;
   // Set file name and line
   item.file_name = file_name;
   item.line = (uint64_t)loc;
@@ -538,10 +594,7 @@ void _FPC_FP64_CHECK_(
   item.latent_infinity_neg  = (uint64_t)_FPC_FP64_IS_LATENT_INFINITY_NEG(x);
   item.latent_underflow     = (uint64_t)_FPC_FP64_IS_LATENT_SUBNORMAL(x);
 
-  // Set histogram count
-  item.fp64_exponent_count[ (int)_FPC_FP64_GET_EXPONENT(x) ] = (uint64_t)1;
-
-//   if (_FPC_EVENT_OCURRED(&item)) {
+  if (_FPC_EVENT_OCURRED(&item)) {
 #ifdef FPC_MULTI_THREADED
     pthread_mutex_lock(&fpc_lock);
 #endif
@@ -550,8 +603,9 @@ void _FPC_FP64_CHECK_(
     pthread_mutex_unlock(&fpc_lock);
 #endif
     _FPC_CHECK_AND_TRAP(&item, loc, file_name);
-//  }
+  }
 }
 
+#endif
 
 #endif /* SRC_RUNTIME_CPU_H_ */
