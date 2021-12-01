@@ -268,7 +268,6 @@ void _FPC_PRINT_HASH_TABLE_(_FPC_HTABLE_T *hashtable)
   strcat(fileName, executionId);
   strcat(histogramFileName, executionId);
 
-
   // Get program name and input
   int str_size = 0;
   for (int i=0; i < _FPC_PROG_INPUTS; ++i)
@@ -287,10 +286,11 @@ void _FPC_PRINT_HASH_TABLE_(_FPC_HTABLE_T *hashtable)
   FILE *fp;
   FILE *fph;
   fp = fopen(fileName, "w");
-  fph = fopen(histogramFileName, "w");
-
   fprintf(fp, "[\n");
+#ifdef FPC_HISTOGRAMS
+  fph = fopen(histogramFileName, "w");
   fprintf(fph, "[\n");
+#endif
 
   for (int i=0; (uint64_t)i < hashtable->size; ++i) {
     _FPC_ITEM_T_ *next;
@@ -314,6 +314,7 @@ void _FPC_PRINT_HASH_TABLE_(_FPC_HTABLE_T *hashtable)
       fprintf(fp, "\t\"latent_infinity_neg\": %lu,\n", next->latent_infinity_neg);
       fprintf(fp, "\t\"latent_underflow\": %lu\n", next->latent_underflow);
 
+#ifdef FPC_HISTOGRAMS
       // Writing exponent histogram data
       fprintf(fph, "  {\n");
       fprintf(fph, "\t\"input\": \"%s\",\n", prog_input);
@@ -345,24 +346,32 @@ void _FPC_PRINT_HASH_TABLE_(_FPC_HTABLE_T *hashtable)
         }
       }
       fprintf(fph, "\n\t}\n");
+#endif
 
       next = next->next;
       printed++;
 
       if (printed == n) {
         fprintf(fp, "  }\n");
-        fprintf(fph, "  }\n");
       } else {
         fprintf(fp, "  },\n");
+      }
+#ifdef FPC_HISTOGRAMS
+      if (printed == n) {
+        fprintf(fph, "  }\n");
+      } else {
         fprintf(fph, "  },\n");
       }
+#endif
     }
   }
 
   fprintf(fp, "]\n");
-  fprintf(fph, "]\n");
   fclose(fp);
+#ifdef FPC_HISTOGRAMS
+  fprintf(fph, "]\n");
   fclose(fph);
+#endif
 }
 
 #endif /* SRC_FPC_HASHTABLE_H_ */
