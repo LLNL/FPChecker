@@ -8,6 +8,10 @@ import os
 import sys
 import matplotlib.pyplot as plt
 
+# Globals
+FP32_EXPONENT_SIZE = 15
+FP64_EXPONENT_SIZE = 100
+
 
 def load_report(file_name):
     f = open(file_name, 'r')
@@ -73,7 +77,51 @@ def plot_exponent_histogram(x_axis_values, y_axis_fp32_values, y_axis_fp64_value
 
     plt.savefig(destination_directory + '/' + plot_name)
 
+# Generator, which yields successive n-sized chunks from lst.
+def chunks(lst, n):
+    for i in range(0, len(lst), n):
+        yield lst[i:i + n]
 
+# Multibar plotting of exponent histogram with ranges
+# Returns: nothing
+def plot_exponent_histogram_ranges(x_axis_values, y_axis_fp32_values, y_axis_fp64_values, destination_directory, plot_name):
+    # Get counts for each range in FP32
+    x_fp32 = []
+    y_fp32 = []
+    for r in chunks(list(range(-127, 130)), FP32_EXPONENT_SIZE):
+        count = 0
+        for i in r:
+            for j in range(len(x_axis_values)):
+                if int(x_axis_values[j])==i:
+                    count += y_axis_fp32_values[j]
+        x_fp32.append('['+str(r[0])+","+str(r[-1:][0])+']')
+        y_fp32.append(count)
+    
+    # Get counts for each range in FP64
+    x_fp64 = []
+    y_fp64 = []
+    for r in chunks(list(range(-1023, 1026)), FP64_EXPONENT_SIZE):
+        count = 0
+        for i in r:
+            for j in range(len(x_axis_values)):
+                if int(x_axis_values[j])==i:
+                    count += y_axis_fp64_values[j]
+        x_fp64.append('['+str(r[0])+","+str(r[-1:][0])+']')
+        y_fp64.append(count)
+    
+    # Plot data
+    fig, axs = plt.subplots(2, 1)
+    axs[0].bar(x_fp64, y_fp64)
+    axs[0].set_xticklabels(x_fp64, rotation=60)
+    axs[0].set_title('FP64')
+    
+    axs[1].bar(x_fp32, y_fp32)
+    axs[1].set_xticklabels(x_fp32, rotation=60)
+    axs[1].set_xlabel('Exponent Range')
+    axs[1].set_title('FP32')
+    fig.tight_layout()
+    plt.show()
+        
 # Generates exponent plots for each source code line recorded in the histogram_data in the
 # directory plots_root_path
 # Returns: nothing
@@ -92,11 +140,11 @@ def histogram_per_program(plots_root_path, histogram_data):
     keys_set = merge_keys(accumulated_exponent_dict, ['fp32', 'fp64'])
 
     # Saving figure as the input name
-    plot_exponent_histogram(list(keys_set),
-                            list(clean_up_field(accumulated_exponent_dict, 'fp32', keys_set).values()),
-                            list(clean_up_field(accumulated_exponent_dict, 'fp64', keys_set).values()),
-                            plots_root_path,
-                            plot_name + '.png')
+    plot_exponent_histogram_ranges(list(keys_set),
+                                   list(clean_up_field(accumulated_exponent_dict, 'fp32', keys_set).values()),
+                                   list(clean_up_field(accumulated_exponent_dict, 'fp64', keys_set).values()),
+                                   plots_root_path,
+                                   plot_name + '.png')
 
     return accumulated_exponent_dict
 
