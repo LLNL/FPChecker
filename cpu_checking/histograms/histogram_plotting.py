@@ -111,11 +111,15 @@ def plot_exponent_histogram_ranges(x_axis_values, y_axis_fp32_values, y_axis_fp6
     # Plot data
     fig, axs = plt.subplots(2, 1)
     axs[0].bar(x_fp64, y_fp64)
-    axs[0].set_xticklabels(x_fp64, rotation=60)
+    axs[0].xaxis.set_ticks(x_fp64)
+    axs[0].tick_params(axis='x', labelrotation=60)
+    #axs[0].set_xticklabels(x_fp64, rotation=60)
     axs[0].set_title('FP64')
     
     axs[1].bar(x_fp32, y_fp32, color=(0.2, 0.8, 0.2))
-    axs[1].set_xticklabels(x_fp32, rotation=60)
+    #axs[1].set_xticklabels(x_fp32, rotation=60)
+    axs[1].xaxis.set_ticks(x_fp32)
+    axs[1].tick_params(axis='x', labelrotation=60)
     axs[1].set_xlabel('Exponent Range')
     axs[1].set_title('FP32')
     fig.tight_layout()
