@@ -4,7 +4,8 @@
 	"file": "/usr/workspace/wsa/laguna/fpchecker/cpu_checking/apps/LULESH/lulesh.cc",
 	"line": 319,
 	"fp32": {
-
+    "-10": 300,
+    "25": 400
 	},
 	"fp64": {
 		"-4": 2489,

@@ -12,7 +12,6 @@ import matplotlib.pyplot as plt
 FP32_EXPONENT_SIZE = 15
 FP64_EXPONENT_SIZE = 100
 
-
 def load_report(file_name):
     f = open(file_name, 'r')
     data = json.load(f)
@@ -115,12 +114,15 @@ def plot_exponent_histogram_ranges(x_axis_values, y_axis_fp32_values, y_axis_fp6
     axs[0].set_xticklabels(x_fp64, rotation=60)
     axs[0].set_title('FP64')
     
-    axs[1].bar(x_fp32, y_fp32)
+    axs[1].bar(x_fp32, y_fp32, color=(0.2, 0.8, 0.2))
     axs[1].set_xticklabels(x_fp32, rotation=60)
     axs[1].set_xlabel('Exponent Range')
     axs[1].set_title('FP32')
     fig.tight_layout()
-    plt.show()
+    #plt.show()
+    
+    # Save plot
+    plt.savefig(destination_directory + '/' + plot_name.replace(" ", "_"))
         
 # Generates exponent plots for each source code line recorded in the histogram_data in the
 # directory plots_root_path
@@ -140,10 +142,12 @@ def histogram_per_program(plots_root_path, histogram_data):
     keys_set = merge_keys(accumulated_exponent_dict, ['fp32', 'fp64'])
 
     # Saving figure as the input name
+    program_plot_path = plots_root_path+'/program'
+    create_directory(program_plot_path)
     plot_exponent_histogram_ranges(list(keys_set),
                                    list(clean_up_field(accumulated_exponent_dict, 'fp32', keys_set).values()),
                                    list(clean_up_field(accumulated_exponent_dict, 'fp64', keys_set).values()),
-                                   plots_root_path,
+                                   program_plot_path,
                                    plot_name + '.png')
 
     return accumulated_exponent_dict
@@ -173,17 +177,20 @@ def histogram_per_file(plots_root_path, histogram_data):
     # Looping through each record which corresponds to a file
     for file_name, file_data in accumulated_exponent_dict.items():
         split_file_name = os.path.splitext(file_name)
-        plot_name = split_file_name[0] + split_file_name[1].split('.')[1].capitalize()
+        #plot_name = split_file_name[0] + split_file_name[1].split('.')[1].capitalize()
+        plot_name = split_file_name[0] + split_file_name[1]
 
         # Filling missing exponent records with 0s in fp32 and fp64 dictionaries for plotting purposes
         keys_set = merge_keys(file_data, ['fp32', 'fp64'])
 
         # Saving figure as the source file name
-        plot_exponent_histogram(list(keys_set),
-                                list(clean_up_field(file_data, 'fp32', keys_set).values()),
-                                list(clean_up_field(file_data, 'fp64', keys_set).values()),
-                                plots_root_path,
-                                plot_name + '.png')
+        file_plot_path = plots_root_path+'/files'
+        create_directory(file_plot_path)
+        plot_exponent_histogram_ranges(list(keys_set),
+                                       list(clean_up_field(file_data, 'fp32', keys_set).values()),
+                                       list(clean_up_field(file_data, 'fp64', keys_set).values()),
+                                       file_plot_path,
+                                       plot_name + '.png')
 
     return accumulated_exponent_dict
 
