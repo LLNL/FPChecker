@@ -159,7 +159,7 @@ def histogram_per_program(plots_root_path, histogram_data):
 
 # Generates exponent plots for each source code line recorded in the histogram_data in the
 # directory plots_root_path
-# Returns: nothing
+# Returns: dict with meta data of plots
 def histogram_per_file(plots_root_path, histogram_data):
     create_directory(plots_root_path)
 
@@ -177,11 +177,10 @@ def histogram_per_file(plots_root_path, histogram_data):
         accumulated_exponent_dict[file_name] = accumulate_over_key(accumulated_exponent_dict[file_name], line_data,
                                                                    'fp64')
 
-
+    plot_meta_data = {} # dictionary with key: plot_name, value: application file
     # Looping through each record which corresponds to a file
     for file_name, file_data in accumulated_exponent_dict.items():
         split_file_name = os.path.splitext(file_name)
-        #plot_name = split_file_name[0] + split_file_name[1].split('.')[1].capitalize()
         plot_name = split_file_name[0] + split_file_name[1]
 
         # Filling missing exponent records with 0s in fp32 and fp64 dictionaries for plotting purposes
@@ -195,8 +194,9 @@ def histogram_per_file(plots_root_path, histogram_data):
                                        list(clean_up_field(file_data, 'fp64', keys_set).values()),
                                        file_plot_path,
                                        plot_name + '.png')
+        plot_meta_data[plot_name + '.png'] = file_name
 
-    return accumulated_exponent_dict
+    return plot_meta_data
 
 
 # Generates exponent plots for each source code line recorded in the histogram_data in the

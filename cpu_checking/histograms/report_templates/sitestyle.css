@@ -1,0 +1,186 @@
+@charset "UTF-8";
+
+#heading {
+    color: #1C75BC;
+    font-family: "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", "DejaVu Sans", Verdana, sans-serif;
+    text-align: center;
+}
+#box {
+    width: 50%;
+    text-shadow: 0px 0px #D8D8D8;
+    border-color: #1F53D2;
+}
+.report_box {
+    width: 700px;
+    color: #5D5D5D;
+    height: 375px;
+    border-style: solid;
+    -webkit-box-shadow: 3px 3px 3px #D5D5D5;
+    box-shadow: 3px 3px 3px #D5D5D5;
+    background-color: #FFFFFF;
+    margin-left: auto;
+    margin-right: auto;
+    font-family: "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", "DejaVu Sans", Verdana, sans-serif;
+    border-collapse: collapse;
+}
+.report_box_files {
+    width: 700px;
+    color: #5D5D5D;
+    border-style: solid;
+    -webkit-box-shadow: 4px 4px 5px #D5D5D5;
+    box-shadow: 4px 4px 5px #D5D5D5;
+    background-color: #FFFFFF;
+    margin-left: auto;
+    margin-right: auto;
+    font-family: "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", "DejaVu Sans", Verdana, sans-serif;
+    border-collapse: collapse;
+}
+.report_box_source {
+    width: 700px;
+    color: #000000;
+    border-style: solid;
+    background-color: #FFFFFF;
+    margin-left: auto;
+    margin-right: auto;
+    font-family: Consolas, "Andale Mono", "Lucida Console", "Lucida Sans Typewriter", Monaco, "Courier New", monospace;
+    border-collapse: collapse;
+    white-space: pre;
+    tab-size: 4;
+    border-width: thin;
+}
+.report_box_stats {
+    width: 700px;
+    color: #000000;
+    border-left-style: solid;
+    border-right-style: solid;
+    border-top-style: solid;
+    -webkit-box-shadow: 3px 3px 3px #D5D5D5;
+    box-shadow: 3px 3px 3px #D5D5D5;
+    background-color: #FFFFFF;
+    margin-left: auto;
+    margin-right: auto;
+    font-family: "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", "DejaVu Sans", Verdana, sans-serif;
+    border-collapse: collapse;
+    height: 200px;
+    font-style: normal;
+    text-align: center;
+    font-size: small;
+    max-width: 700px;
+}
+.body_class {
+    background-color: #F2F2F2;
+    font-family: "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", "DejaVu Sans", Verdana, sans-serif;
+}
+.icon_class {
+    height: 60px;
+    position: relative;
+    text-align: center;
+}
+.files_class {
+    height: 30px;
+    position: relative;
+    text-align: left;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+.code_line_class {
+    position: relative;
+    text-align: left;
+    padding-left: 10px;
+    padding-right: 10px;
+    width: 50px;
+}
+.body_class header .header_class {
+    background-color: #FFFFFF;
+    width: 100%;
+    -webkit-box-shadow: 3px 3px 3px #D5D5D5;
+    box-shadow: 3px 3px 3px #D5D5D5;
+}
+.body_class .hierarchy_class {
+    height: 40px;
+    line-height: 40px;
+    background-color: #FFFFFF;
+    padding-left: 10px;
+    -webkit-box-shadow: 3px 3px 3px #D5D5D5;
+    box-shadow: 3px 3px 3px #D5D5D5;
+}
+.body_class .separation_class {
+    height: 7px;
+}
+a {
+    color: #1C75BC;
+    font-family: "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", "DejaVu Sans", Verdana, sans-serif;
+	position: relative;
+}
+a:hover {
+    color: #EC6663;
+}
+a:hover span {
+	display: block; 
+	text-align: center;
+}
+.report_frame {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+
+.tooltip {
+  position: relative;
+  display: inline-block;
+  border-bottom: 1px dotted black;
+}
+
+.tooltip .tooltiptext {
+    visibility: hidden;
+    width: 200px;
+    background-color: antiquewhite;
+    color: black;
+    text-align: left;
+    border-radius: 6px;
+    padding: 10px;
+    font-family: "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", "DejaVu Sans", Verdana, sans-serif;
+    /* Position the tooltip */
+    position: absolute;
+    z-index: 1;
+    top: -5px;
+    left: 110%;
+    font-size: small;
+}
+
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+}
+.td_class {
+    padding-left: 10px;
+    padding-top: 10px;
+    padding-right: 10px;
+    padding-bottom: 10px;
+    text-align: center;
+    max-width: 400px;
+    overflow-x: auto;
+}
+code {
+	font-family: Consolas, "Andale Mono", "Lucida Console", "Lucida Sans Typewriter", Monaco, "Courier New", "monospace";
+	white-space: pre;
+}
+.highlightme { 
+	background-color:#FFFF00; 
+}
+.th_class {
+    text-align: left;
+    height: 40px;
+}
+.tr_class {
+    border-bottom: thin solid #E5E5E5;
+}
+.report_title {
+    height: 40px;
+    line-height: 40px;
+    background-color: #FFFFFF;
+    padding-left: 10px;
+    -webkit-box-shadow: 3px 3px 3px #D5D5D5;
+    box-shadow: 3px 3px 3px #D5D5D5;
+    font-family: Consolas, "Andale Mono", "Lucida Console", "Lucida Sans Typewriter", Monaco, "Courier New", monospace;
+    color: #1234DF;
+}
