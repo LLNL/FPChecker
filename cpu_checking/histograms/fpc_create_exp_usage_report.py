@@ -6,11 +6,24 @@ import glob
 import json
 import os
 import sys
+import shutil
 import matplotlib.pyplot as plt
 
+# -------------------------------------------------------- #
 # Globals
+# -------------------------------------------------------- #
+
 FP32_EXPONENT_SIZE = 15
 FP64_EXPONENT_SIZE = 100
+
+# -------------------------------------------------------- #
+# PATHS
+# -------------------------------------------------------- #
+
+ROOT_REPORT_NAME = 'index.html'
+THIS_DIR = os.path.dirname(os.path.abspath(__file__))
+ROOT_REPORT_TEMPLATE_DIR = THIS_DIR+'/../../cpu_checking/histograms/report_templates'
+ROOT_REPORT_TEMPLATE = ROOT_REPORT_TEMPLATE_DIR+'/'+ROOT_REPORT_NAME
 
 def load_report(file_name):
     f = open(file_name, 'r')
@@ -227,31 +240,93 @@ def histogram_per_line(plots_root_path, histogram_data):
 
     return histogram_data
 
+# Creates the HTML report with plots
+# Returns: None
+def create_report(report_title, plots_root_path, file_metadata):   
+    # Load template
+    fd = open(ROOT_REPORT_TEMPLATE, 'r')
+    templateLines = fd.readlines()
+    fd.close()
+    
+    # Copy style and other files
+    shutil.copy2(ROOT_REPORT_TEMPLATE_DIR+'/sitestyle.css', plots_root_path+'/sitestyle.css')
+    if not os.path.exists(plots_root_path+'/icons'):
+        shutil.copytree(ROOT_REPORT_TEMPLATE_DIR+'/icons', plots_root_path+'/icons')
+        
+    # Get program and file plot paths
+    files_list = glob.glob(plots_root_path+'/program/*')
+    program_plot_path = './program/'+os.path.basename(files_list[0])
+    files_list = glob.glob(plots_root_path+'/files/*')
+    file_plot_paths = []
+    for f in files_list:
+        file_plot_paths.append('./files/'+os.path.basename(f))
+    
+    # Write the report using the template
+    report_full_name = plots_root_path+'/'+ROOT_REPORT_NAME 
+    fd = open(report_full_name, 'w')
+    for i in range(len(templateLines)):
+        if '<!-- REPORT_TITLE -->' in templateLines[i]:
+            fd.write(report_title+'\n')
+        elif '<!-- FPC_PROGRAM_PLOT -->' in templateLines[i]:
+            fd.write('<img src="'+program_plot_path+'" height="300" alt=""/>')
+        elif '<!-- FPC_FILE_PLOT -->' in templateLines[i]:
+            for f in file_plot_paths:
+                application_file = file_metadata[os.path.basename(f)]
+                fd.write('<tr class="tr_class"> <td class="td_class"> File: '+application_file+' </td></tr>\n')
+                fd.write('<tr class="tr_class"> <td class="td_class"> <img src="'+f+'" height="300" alt=""/></td></tr>\n')
+        else:
+          fd.write(templateLines[i])
+    fd.close()
+    print('Report created: ' + report_full_name)
+
+# Gets the paths for histogram traces
+def getHistogramTracePaths(p):
+    fileList = []
+    for root, dirs, files in os.walk(p):
+        for file in files:
+            fileName = os.path.split(file)[1]
+            if fileName.startswith('histogram_') and fileName.endswith(".json"):
+                f = str(os.path.join(root, file))
+                fileList.append(f)
+    return fileList
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Plotting histogram of exponents')
-    parser.add_argument('-f', '--json_file',
-                        help='JSON format histogram file output by FPChecker containing exponent data',
-                        required=True)
+    parser.add_argument('-t', '--title', nargs=1, type=str, help='Title of report.')
+    #parser.add_argument('-f', '--json_file',
+    #                    help='JSON format histogram file output by FPChecker containing exponent data',
+    #                    required=True)
     parser.add_argument('-o', '--output_dir',
-                        help='Path to directory to create plots in',
-                        default='plots')
-    parser.add_argument('-l', '--refinement_level',
-                        help='1: Line level histograms. '
-                             '2: File level histograms. '
-                             '3: Full program histogram',
-                        type=int,
-                        default=1)
+                        help='Path to directory to create report in',
+                        default='./fpc-report')
+    parser.add_argument('dir', nargs='?', default=os.getcwd())
+    #parser.add_argument('-l', '--refinement_level',
+    #                    help='1: Line level histograms. '
+    #                         '2: File level histograms. '
+    #                         '3: Full program histogram',
+    #                    type=int,
+    #                    default=1)
     arguments = parser.parse_args()
 
-    json_data = load_report(arguments.json_file)
-
-    # json_formatted_obj = json.dumps(histogram_data, indent=2)
-    # print(json_formatted_obj)
-
-    if arguments.refinement_level == 1:
-        histogram_per_line(arguments.output_dir, json_data)
-    elif arguments.refinement_level == 2:
-        histogram_per_file(arguments.output_dir, json_data)
-    elif arguments.refinement_level == 3:
-        histogram_per_program(arguments.output_dir, json_data)
+    #if arguments.refinement_level == 1:
+    #    histogram_per_line(arguments.output_dir, json_data)
+    #elif arguments.refinement_level == 2:
+    #    histogram_per_file(arguments.output_dir, json_data)
+    #elif arguments.refinement_level == 3:
+    #    histogram_per_program(arguments.output_dir, json_data)
+    
+    # Get paths of histogram traces
+    reports_path = arguments.dir
+    fileList = getHistogramTracePaths(reports_path)
+    print('Trace files found:', len(fileList))
+    
+    # Create plots
+    json_data = load_report(fileList[0])
+    histogram_per_program(arguments.output_dir, json_data)
+    file_metadata = histogram_per_file(arguments.output_dir, json_data)
+    
+    # Create report
+    report_title = ''
+    if (arguments.title):
+      report_title = arguments.title[0]
+    create_report(report_title, arguments.output_dir, file_metadata)
