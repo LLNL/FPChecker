@@ -22,7 +22,7 @@ FP64_EXPONENT_SIZE = 100
 
 ROOT_REPORT_NAME = 'index.html'
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
-ROOT_REPORT_TEMPLATE_DIR = THIS_DIR+'/../../cpu_checking/histograms/report_templates'
+ROOT_REPORT_TEMPLATE_DIR = THIS_DIR+'/../cpu_checking/histograms/report_templates'
 ROOT_REPORT_TEMPLATE = ROOT_REPORT_TEMPLATE_DIR+'/'+ROOT_REPORT_NAME
 
 def load_report(file_name):
@@ -209,7 +209,7 @@ def histogram_per_file(plots_root_path, histogram_data):
                                        plot_name + '.png')
         plot_meta_data[plot_name + '.png'] = file_name
 
-    return plot_meta_data
+    return accumulated_exponent_dict, plot_meta_data
 
 
 # Generates exponent plots for each source code line recorded in the histogram_data in the
@@ -325,7 +325,7 @@ if __name__ == '__main__':
     # Create plots
     json_data = load_report(fileList[0])
     histogram_per_program(arguments.output_dir, json_data)
-    file_metadata = histogram_per_file(arguments.output_dir, json_data)
+    data, file_metadata = histogram_per_file(arguments.output_dir, json_data)
     
     # Create report
     report_title = ''

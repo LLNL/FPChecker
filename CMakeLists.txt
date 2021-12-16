@@ -148,12 +148,13 @@ install(FILES
         "cpu_checking/fpc_logging.py"
         "cpu_checking/line_highlighting.py"
         "cpu_checking/mpicc_fpchecker.py"
-		"cpu_checking/histograms/histogram_plotting.py"
+        "cpu_checking/histograms/fpc_create_exp_usage_report.py"
         DESTINATION cpu_checking
         PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_WRITE GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
 )
 
 install(DIRECTORY "cpu_checking/report_templates/" DESTINATION cpu_checking/report_templates)
+install(DIRECTORY "cpu_checking/histograms/report_templates/" DESTINATION cpu_checking/histograms/report_templates)
 
 install(DIRECTORY
         DESTINATION ${CMAKE_INSTALL_PREFIX}/bin
@@ -234,7 +235,7 @@ install(CODE "execute_process( COMMAND ${CMAKE_COMMAND} -E create_symlink \
 )
 
 install(CODE "execute_process( COMMAND ${CMAKE_COMMAND} -E create_symlink \
-        ${CMAKE_INSTALL_PREFIX}/cpu_checking/histogram_plotting.py ${CMAKE_INSTALL_PREFIX}/bin/fpc-create-histogram )"
+        ${CMAKE_INSTALL_PREFIX}/cpu_checking/fpc_create_exp_usage_report.py ${CMAKE_INSTALL_PREFIX}/bin/fpc-create-usage-report )"
 )
 
 # Tests

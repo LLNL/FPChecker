@@ -9,7 +9,7 @@ from dynamic import report
 
 sys.path.insert(1, os.path.dirname(os.path.realpath(__file__)) + '/../../../../cpu_checking/histograms')
 
-import histogram_plotting
+import fpc_create_exp_usage_report as histogram_plotting
 
 
 def setup_module(module):
@@ -76,7 +76,7 @@ def test_2():
     # --- test data ---
     fileName = report.findHistogramFile('.fpc_logs')
     json_data = report.loadReport(fileName)
-    data = histogram_plotting.histogram_per_file('plots', json_data)
+    data, meta_data = histogram_plotting.histogram_per_file('plots', json_data)
 
     for file, file_data in data.items():
         if 'compute.cpp' in file:
