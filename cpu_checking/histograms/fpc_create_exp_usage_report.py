@@ -268,12 +268,14 @@ def create_report(report_title, plots_root_path, file_metadata):
         if '<!-- REPORT_TITLE -->' in templateLines[i]:
             fd.write(report_title+'\n')
         elif '<!-- FPC_PROGRAM_PLOT -->' in templateLines[i]:
-            fd.write('<img src="'+program_plot_path+'" height="300" alt=""/>')
+            #fd.write('<img src="'+program_plot_path+'" height="400" alt=""/>')
+            fd.write('<a href="'+program_plot_path+'"><img src="'+program_plot_path+'" height="400" alt=""/></a>')
         elif '<!-- FPC_FILE_PLOT -->' in templateLines[i]:
             for f in file_plot_paths:
                 application_file = file_metadata[os.path.basename(f)]
                 fd.write('<tr class="tr_class"> <td class="td_class"> File: '+application_file+' </td></tr>\n')
-                fd.write('<tr class="tr_class"> <td class="td_class"> <img src="'+f+'" height="300" alt=""/></td></tr>\n')
+                #fd.write('<tr class="tr_class"> <td class="td_class"> <img src="'+f+'" height="300" alt=""/></td></tr>\n')
+                fd.write('<tr class="tr_class"> <td class="td_class"> <a href="'+f+'"><img src="'+f+'" height="300" alt=""/></a></td></tr>\n')
         else:
           fd.write(templateLines[i])
     fd.close()
