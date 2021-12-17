@@ -459,8 +459,8 @@ int _FPC_EVENT_OCURRED(_FPC_ITEM_T_ *item) {
  * -------------------------
  **/
 
-/* ==================== Histograms ===================== */
-#ifdef FPC_HISTOGRAMS
+/* ==================== Exponent Usage Histograms ===================== */
+#ifdef FPC_EXPONENT_USAGE
 
 void _FPC_FP32_CHECK_(
     float x, float y, float z, int loc, char *file_name, int op, int cond) {

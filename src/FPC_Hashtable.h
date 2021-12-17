@@ -287,7 +287,7 @@ void _FPC_PRINT_HASH_TABLE_(_FPC_HTABLE_T *hashtable)
   FILE *fph;
   fp = fopen(fileName, "w");
   fprintf(fp, "[\n");
-#ifdef FPC_HISTOGRAMS
+#ifdef FPC_EXPONENT_USAGE
   fph = fopen(histogramFileName, "w");
   fprintf(fph, "[\n");
 #endif
@@ -314,7 +314,7 @@ void _FPC_PRINT_HASH_TABLE_(_FPC_HTABLE_T *hashtable)
       fprintf(fp, "\t\"latent_infinity_neg\": %lu,\n", next->latent_infinity_neg);
       fprintf(fp, "\t\"latent_underflow\": %lu\n", next->latent_underflow);
 
-#ifdef FPC_HISTOGRAMS
+#ifdef FPC_EXPONENT_USAGE
       // Writing exponent histogram data
       fprintf(fph, "  {\n");
       fprintf(fph, "\t\"input\": \"%s\",\n", prog_input);
@@ -356,7 +356,7 @@ void _FPC_PRINT_HASH_TABLE_(_FPC_HTABLE_T *hashtable)
       } else {
         fprintf(fp, "  },\n");
       }
-#ifdef FPC_HISTOGRAMS
+#ifdef FPC_EXPONENT_USAGE
       if (printed == n) {
         fprintf(fph, "  }\n");
       } else {
@@ -368,7 +368,7 @@ void _FPC_PRINT_HASH_TABLE_(_FPC_HTABLE_T *hashtable)
 
   fprintf(fp, "]\n");
   fclose(fp);
-#ifdef FPC_HISTOGRAMS
+#ifdef FPC_EXPONENT_USAGE
   fprintf(fph, "]\n");
   fclose(fph);
 #endif
