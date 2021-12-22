@@ -15,7 +15,12 @@ import matplotlib.pyplot as plt
 
 FP32_EXPONENT_SIZE = 15
 FP64_EXPONENT_SIZE = 100
-
+# Contains accumulated data (Useful for openMP and MPI programs wherein multiple traces can be generated)
+accumulated_data = []
+# These sets track traces recorded in accumulated data. Useful to identify existing/new traces
+input_set = set()
+file_set = set()
+line_set = set()
 # -------------------------------------------------------- #
 # PATHS
 # -------------------------------------------------------- #
@@ -25,16 +30,44 @@ THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 ROOT_REPORT_TEMPLATE_DIR = THIS_DIR+'/../cpu_checking/histograms/report_templates'
 ROOT_REPORT_TEMPLATE = ROOT_REPORT_TEMPLATE_DIR+'/'+ROOT_REPORT_NAME
 
-def load_report(file_name):
+# Loads a single json trace file (histogram trace)
+# Returns a dictionary
+def loadReport(file_name):
     f = open(file_name, 'r')
     data = json.load(f)
     f.close()
     return data
 
 
+# Loads all the json trace files (histogram traces) and merges them
+# Returns nothing
+def loadTraces(files):
+    for f in files:
+        data = loadReport(f)
+        for i in range(len(data)):
+            if data[i]['input'] not in input_set or data[i]['file'] not in file_set or data[i]['line'] not in line_set:
+                accumulated_data.append(data[i])
+                input_set.add(data[i]['input'])
+                file_set.add(data[i]['file'])
+                line_set.add(data[i]['line'])
+            else:
+                for j in range(len(accumulated_data)):
+                    if data[i]['input'] == accumulated_data[j]['input'] and data[i]['file'] == accumulated_data[j]['file'] and data[i]['line'] == accumulated_data[j]['line']:
+                        for (exp, count) in data[i]['fp32'].items():
+                            if exp in accumulated_data[j]['fp32']:
+                                accumulated_data[j]['fp32'][exp] = accumulated_data[j]['fp32'][exp] + count
+                            else:
+                                accumulated_data[j]['fp32'][exp] = count
+                        for (exp, count) in data[i]['fp64'].items():
+                            if exp in accumulated_data[j]['fp64']:
+                                accumulated_data[j]['fp64'][exp] = accumulated_data[j]['fp64'][exp] + count
+                            else:
+                                accumulated_data[j]['fp64'][exp] = count
+
+
 # Create a new directory if does not exist
 # Returns: nothing
-def create_directory(directory):
+def createDirectory(directory):
     if not os.path.isdir(directory):
         os.mkdir(directory)
 
@@ -42,7 +75,7 @@ def create_directory(directory):
 # Accumulates quantity in data dictionary over specified key and adds to init_dict
 # init_dict and data need to have same structure
 # Returns: dictionary
-def accumulate_over_key(init_dict, data, key):
+def accumulateOverKey(init_dict, data, key):
     for exponent in data[key].keys():
         if exponent in init_dict[key]:
             init_dict[key][exponent] += data[key][exponent]
@@ -54,7 +87,7 @@ def accumulate_over_key(init_dict, data, key):
 
 # Merging keys from selected fields of a dictionary.
 # Returns: set
-def merge_keys(data_dictionary, fields_to_merge_from):
+def mergeKeys(data_dictionary, fields_to_merge_from):
     keys_set = set()
     for field in fields_to_merge_from:
         keys_set.update(data_dictionary[field].keys())
@@ -64,7 +97,7 @@ def merge_keys(data_dictionary, fields_to_merge_from):
 
 # Initializing missing values from keys_set in field to 0
 # Returns: dictionary
-def clean_up_field(data_dictionary, field, keys_set):
+def cleanUpField(data_dictionary, field, keys_set):
     cleaned_up_field = dict.fromkeys(keys_set, 0)
     cleaned_up_field.update(data_dictionary[field])
     return cleaned_up_field
@@ -72,7 +105,7 @@ def clean_up_field(data_dictionary, field, keys_set):
 
 # Multibar plotting of exponent histogram
 # Returns: nothing
-def plot_exponent_histogram(x_axis_values, y_axis_fp32_values, y_axis_fp64_values, destination_directory, plot_name):
+def plotExponentHistogram(x_axis_values, y_axis_fp32_values, y_axis_fp64_values, destination_directory, plot_name):
     x_axis_label_position = list(range(len(x_axis_values)))
     plt.clf()
     plt.xticks(x_axis_label_position, x_axis_values)
@@ -96,7 +129,7 @@ def chunks(lst, n):
 
 # Multibar plotting of exponent histogram with ranges
 # Returns: nothing
-def plot_exponent_histogram_ranges(x_axis_values, y_axis_fp32_values, y_axis_fp64_values, destination_directory, plot_name):
+def plotExponentHistogramRanges(x_axis_values, y_axis_fp32_values, y_axis_fp64_values, destination_directory, plot_name):
     # Get counts for each range in FP32
     x_fp32 = []
     y_fp32 = []
@@ -144,26 +177,26 @@ def plot_exponent_histogram_ranges(x_axis_values, y_axis_fp32_values, y_axis_fp6
 # Generates exponent plots for each source code line recorded in the histogram_data in the
 # directory plots_root_path
 # Returns: nothing
-def histogram_per_program(plots_root_path, histogram_data):
-    create_directory(plots_root_path)
+def histogramPerProgram(plots_root_path, histogram_data):
+    createDirectory(plots_root_path)
 
     accumulated_exponent_dict = {'fp32': {}, 'fp64': {}}
     plot_name = os.path.basename(histogram_data[0]['input'])
 
     # Looping through each line recorded in histogram json file and accumulating exponent data
     for line_data in histogram_data:
-        accumulated_exponent_dict = accumulate_over_key(accumulated_exponent_dict, line_data, 'fp32')
-        accumulated_exponent_dict = accumulate_over_key(accumulated_exponent_dict, line_data, 'fp64')
+        accumulated_exponent_dict = accumulateOverKey(accumulated_exponent_dict, line_data, 'fp32')
+        accumulated_exponent_dict = accumulateOverKey(accumulated_exponent_dict, line_data, 'fp64')
 
     # Filling missing exponent records with 0s in fp32 and fp64 dictionaries for plotting purposes
-    keys_set = merge_keys(accumulated_exponent_dict, ['fp32', 'fp64'])
+    keys_set = mergeKeys(accumulated_exponent_dict, ['fp32', 'fp64'])
 
     # Saving figure as the input name
     program_plot_path = plots_root_path+'/program'
-    create_directory(program_plot_path)
-    plot_exponent_histogram_ranges(list(keys_set),
-                                   list(clean_up_field(accumulated_exponent_dict, 'fp32', keys_set).values()),
-                                   list(clean_up_field(accumulated_exponent_dict, 'fp64', keys_set).values()),
+    createDirectory(program_plot_path)
+    plotExponentHistogramRanges(list(keys_set),
+                                   list(cleanUpField(accumulated_exponent_dict, 'fp32', keys_set).values()),
+                                   list(cleanUpField(accumulated_exponent_dict, 'fp64', keys_set).values()),
                                    program_plot_path,
                                    plot_name + '.png')
 
@@ -173,8 +206,8 @@ def histogram_per_program(plots_root_path, histogram_data):
 # Generates exponent plots for each source code line recorded in the histogram_data in the
 # directory plots_root_path
 # Returns: dict with meta data of plots
-def histogram_per_file(plots_root_path, histogram_data):
-    create_directory(plots_root_path)
+def histogramPerFile(plots_root_path, histogram_data):
+    createDirectory(plots_root_path)
 
     accumulated_exponent_dict = {}
     # Looping through each line recorded in histogram json file and accumulating exponent data per file
@@ -185,9 +218,9 @@ def histogram_per_file(plots_root_path, histogram_data):
         if file_name not in accumulated_exponent_dict:
             accumulated_exponent_dict[file_name] = {'fp32': {}, 'fp64': {}}
 
-        accumulated_exponent_dict[file_name] = accumulate_over_key(accumulated_exponent_dict[file_name], line_data,
+        accumulated_exponent_dict[file_name] = accumulateOverKey(accumulated_exponent_dict[file_name], line_data,
                                                                    'fp32')
-        accumulated_exponent_dict[file_name] = accumulate_over_key(accumulated_exponent_dict[file_name], line_data,
+        accumulated_exponent_dict[file_name] = accumulateOverKey(accumulated_exponent_dict[file_name], line_data,
                                                                    'fp64')
 
     plot_meta_data = {} # dictionary with key: plot_name, value: application file
@@ -197,14 +230,14 @@ def histogram_per_file(plots_root_path, histogram_data):
         plot_name = split_file_name[0] + split_file_name[1]
 
         # Filling missing exponent records with 0s in fp32 and fp64 dictionaries for plotting purposes
-        keys_set = merge_keys(file_data, ['fp32', 'fp64'])
+        keys_set = mergeKeys(file_data, ['fp32', 'fp64'])
 
         # Saving figure as the source file name
         file_plot_path = plots_root_path+'/files'
-        create_directory(file_plot_path)
-        plot_exponent_histogram_ranges(list(keys_set),
-                                       list(clean_up_field(file_data, 'fp32', keys_set).values()),
-                                       list(clean_up_field(file_data, 'fp64', keys_set).values()),
+        createDirectory(file_plot_path)
+        plotExponentHistogramRanges(list(keys_set),
+                                       list(cleanUpField(file_data, 'fp32', keys_set).values()),
+                                       list(cleanUpField(file_data, 'fp64', keys_set).values()),
                                        file_plot_path,
                                        plot_name + '.png')
         plot_meta_data[plot_name + '.png'] = file_name
@@ -215,8 +248,8 @@ def histogram_per_file(plots_root_path, histogram_data):
 # Generates exponent plots for each source code line recorded in the histogram_data in the
 # directory plots_root_path
 # Returns: nothing
-def histogram_per_line(plots_root_path, histogram_data):
-    create_directory(plots_root_path)
+def histogramPerLine(plots_root_path, histogram_data):
+    createDirectory(plots_root_path)
 
     # Looping through each line recorded in histogram json file
     for line_data in histogram_data:
@@ -226,15 +259,15 @@ def histogram_per_line(plots_root_path, histogram_data):
         split_file_name = os.path.splitext(file_name)
         plots_for_file_directory = split_file_name[0] + split_file_name[1].split('.')[1].capitalize()
 
-        create_directory(plots_root_path + '/' + plots_for_file_directory)
+        createDirectory(plots_root_path + '/' + plots_for_file_directory)
 
         # Filling missing exponent records with 0s in fp32 and fp64 dictionaries for plotting purposes
-        keys_set = merge_keys(line_data, ['fp32', 'fp64'])
+        keys_set = mergeKeys(line_data, ['fp32', 'fp64'])
 
         # Plotting histogram as the line number in directory corresponding to source file
-        plot_exponent_histogram(list(keys_set),
-                                list(clean_up_field(line_data, 'fp32', keys_set).values()),
-                                list(clean_up_field(line_data, 'fp64', keys_set).values()),
+        plotExponentHistogram(list(keys_set),
+                                list(cleanUpField(line_data, 'fp32', keys_set).values()),
+                                list(cleanUpField(line_data, 'fp64', keys_set).values()),
                                 plots_root_path + '/' + plots_for_file_directory,
                                 str(line_data['line']) + '.png')
 
@@ -242,7 +275,7 @@ def histogram_per_line(plots_root_path, histogram_data):
 
 # Creates the HTML report with plots
 # Returns: None
-def create_report(report_title, plots_root_path, file_metadata):   
+def createReport(report_title, plots_root_path, file_metadata):   
     # Load template
     fd = open(ROOT_REPORT_TEMPLATE, 'r')
     templateLines = fd.readlines()
@@ -311,11 +344,11 @@ if __name__ == '__main__':
     arguments = parser.parse_args()
 
     #if arguments.refinement_level == 1:
-    #    histogram_per_line(arguments.output_dir, json_data)
+    #    histogramPerLine(arguments.output_dir, json_data)
     #elif arguments.refinement_level == 2:
-    #    histogram_per_file(arguments.output_dir, json_data)
+    #    histogramPerFile(arguments.output_dir, json_data)
     #elif arguments.refinement_level == 3:
-    #    histogram_per_program(arguments.output_dir, json_data)
+    #    histogramPerProgram(arguments.output_dir, json_data)
     
     # Get paths of histogram traces
     reports_path = arguments.dir
@@ -323,12 +356,12 @@ if __name__ == '__main__':
     print('Trace files found:', len(fileList))
     
     # Create plots
-    json_data = load_report(fileList[0])
-    histogram_per_program(arguments.output_dir, json_data)
-    data, file_metadata = histogram_per_file(arguments.output_dir, json_data)
+    loadTraces(fileList)
+    histogramPerProgram(arguments.output_dir, accumulated_data)
+    data, file_metadata = histogramPerFile(arguments.output_dir, accumulated_data)
     
     # Create report
     report_title = ''
     if (arguments.title):
       report_title = arguments.title[0]
-    create_report(report_title, arguments.output_dir, file_metadata)
+    createReport(report_title, arguments.output_dir, file_metadata)
