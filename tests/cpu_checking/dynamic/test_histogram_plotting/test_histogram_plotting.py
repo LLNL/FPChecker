@@ -42,7 +42,7 @@ def test_1():
     # --- test data ---
     fileName = report.findHistogramFile('.fpc_logs')
     json_data = report.loadReport(fileName)
-    data = histogram_plotting.histogram_per_line('plots', json_data)
+    data = histogram_plotting.histogramPerLine('plots', json_data)
 
     for line_data in data:
         if line_data['line'] == 7:
@@ -76,7 +76,7 @@ def test_2():
     # --- test data ---
     fileName = report.findHistogramFile('.fpc_logs')
     json_data = report.loadReport(fileName)
-    data, meta_data = histogram_plotting.histogram_per_file('plots', json_data)
+    data, meta_data = histogram_plotting.histogramPerFile('plots', json_data)
 
     for file, file_data in data.items():
         if 'compute.cpp' in file:
@@ -106,7 +106,7 @@ def test_3():
     # --- test data ---
     fileName = report.findHistogramFile('.fpc_logs')
     json_data = report.loadReport(fileName)
-    data = histogram_plotting.histogram_per_program('plots', json_data)
+    data = histogram_plotting.histogramPerProgram('plots', json_data)
 
     assert data['fp32'] == {}
     assert data['fp64']['-1023'] == 1
