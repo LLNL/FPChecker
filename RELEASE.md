@@ -1,3 +1,7 @@
+## Release 0.4
+- Added histrograms of exponent usage
+- Fixed several bugs
+
 ## Release 0.3.5
 - Fixed various bugs
 - Better supporort for strings in compilation commands (e.g., -D\"string\")
