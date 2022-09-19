@@ -284,7 +284,9 @@ void _FPC_PRINT_HASH_TABLE_(_FPC_HTABLE_T *hashtable)
   uint64_t printed = 0;
 
   FILE *fp;
+#ifdef FPC_EXPONENT_USAGE
   FILE *fph;
+#endif
   fp = fopen(fileName, "w");
   fprintf(fp, "[\n");
 #ifdef FPC_EXPONENT_USAGE
