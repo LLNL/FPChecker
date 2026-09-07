@@ -413,6 +413,52 @@ static void _FPC_BF_WRITE_JSON_(void)
   printf("#FPCHECKER: Writing branch-flip JSON to: %s\n", path);
 }
 
+
+/* A freed address may be reused by an unrelated object; without this the old
+ * shadow is returned as a hit. Linked with -Wl,--wrap=free -Wl,--wrap=realloc. */
+#ifndef FPC_INVALIDATE_ON_FREE
+#define FPC_INVALIDATE_ON_FREE 1
+#endif
+#include <malloc.h>
+#ifdef __cplusplus
+#define _FPC_EXTC_ extern "C"
+#else
+#define _FPC_EXTC_
+#endif
+_FPC_EXTC_ void  __real_free(void *);
+_FPC_EXTC_ void *__real_realloc(void *, size_t);
+static void _FPC_FORGET_BLOCK_FP32(void *p)
+{
+  if (!p || !_FPC_ADDRESS_HT_ || !FPC_INVALIDATE_ON_FREE)
+    return;
+  size_t n = malloc_usable_size(p);
+  for (uintptr_t a = (uintptr_t)p; a + sizeof(float) <= (uintptr_t)p + n; a += sizeof(float))
+    _FPC_ADDRESS_HT_DELETE_(_FPC_ADDRESS_HT_, a);
+}
+_FPC_EXTC_ void __wrap_free(void *p)
+{
+  _FPC_FORGET_BLOCK_FP32(p);
+  __real_free(p);
+}
+_FPC_EXTC_ void *__wrap_realloc(void *p, size_t size)
+{
+  _FPC_FORGET_BLOCK_FP32(p);
+  return __real_realloc(p, size);
+}
+
+#ifdef __cplusplus
+/* C++ delete does not go through free() at link time; wrap the four
+ * operator delete symbols too (-Wl,--wrap=_ZdlPv etc.). */
+extern "C" void __real__ZdlPv(void *);
+extern "C" void __real__ZdaPv(void *);
+extern "C" void __real__ZdlPvm(void *, size_t);
+extern "C" void __real__ZdaPvm(void *, size_t);
+extern "C" void __wrap__ZdlPv(void *p)            { _FPC_FORGET_BLOCK_FP32(p); __real__ZdlPv(p); }
+extern "C" void __wrap__ZdaPv(void *p)            { _FPC_FORGET_BLOCK_FP32(p); __real__ZdaPv(p); }
+extern "C" void __wrap__ZdlPvm(void *p, size_t n) { _FPC_FORGET_BLOCK_FP32(p); __real__ZdlPvm(p, n); }
+extern "C" void __wrap__ZdaPvm(void *p, size_t n) { _FPC_FORGET_BLOCK_FP32(p); __real__ZdaPvm(p, n); }
+#endif
+
 static void _FPC_BF_SUMMARY_(void)
 {
   FILE *o = _FPC_BF_OUT_();

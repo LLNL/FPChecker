@@ -52,7 +52,7 @@ def build(precision, args, outdir):
     env = make_env(precision, args.opt)
     cxx = f"{fpcxx} -DUSE_MPI=0 {flag} {fallback_flag(args.shadow_fallback)}".strip()
     cxxflags = f"-g -{args.opt} -I. -std=c++11"
-    ldflags = f"-g -{args.opt} -Wl,--allow-multiple-definition"
+    ldflags = f"-g -{args.opt} -Wl,--wrap=free -Wl,--wrap=realloc -Wl,--wrap=_ZdlPv -Wl,--wrap=_ZdaPv -Wl,--wrap=_ZdlPvm -Wl,--wrap=_ZdaPvm -Wl,--allow-multiple-definition"
     cmd = ["make", f"-j{args.jobs}", f"CXX={cxx}",
            f"CXXFLAGS={cxxflags}", f"LDFLAGS={ldflags}"]
     print(f"  building ({precision}, -{args.opt}, {instr_var(precision)}=1)")

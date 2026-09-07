@@ -7,13 +7,6 @@ instrumentation and run them, fp32 and fp64 separately.
     ./run_nas_fpchecker.py -b lu sp bt ep -p fp32
     ./run_nas_fpchecker.py --bf-mode both
     ./run_nas_fpchecker.py --shadow-fallback zero
-
-Precision selection differs per tree: BT/CG/LU/SP take -DNAS_FP32, EP takes
--DWORKING_T=..., IS/MG bake it in; the sizeof probe and the objdump
-arithmetic profile catch a define that did not take. Problem size is
-compiled in (class S; CG is W). Compiled with direct clang-fpchecker
-invocations, two-step (compile, then link). See fpc_common.py for the
-environment and outputs.
 """
 
 import argparse
@@ -118,7 +111,7 @@ def build(bench, precision, args, outdir):
     defines = DEFINES[bench][precision]
     cflags = (f"-g -{args.opt} -I. -std=c99 -w {defines} "
               f"{fallback_flag(args.shadow_fallback)}").strip()
-    ldflags = "-lm -Wl,--allow-multiple-definition"
+    ldflags = "-lm -Wl,--wrap=free -Wl,--wrap=realloc -Wl,--allow-multiple-definition"
     print(f"  {bench:<4s} {precision:<5s} {instr_var(precision)}=1  "
           f"{defines or '(no define)'}")
 

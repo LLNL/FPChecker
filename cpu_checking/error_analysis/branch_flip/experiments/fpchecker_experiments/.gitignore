@@ -3,4 +3,6 @@ lulesh/
 nas/
 quicksilver/
 *.log
+*_metrics.json
+*_metrics.txt
 __pycache__/

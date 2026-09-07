@@ -81,7 +81,7 @@ def build(precision, args, outdir):
     cflags = (f"-g -{args.opt} -DHYPRE_SEQUENTIAL=1 -I../utilities "
               f"{PRECISION_FLAG[precision]} "
               f"{fallback_flag(args.shadow_fallback)}").strip()
-    lflags = "-lm -Wl,--allow-multiple-definition"
+    lflags = "-lm -Wl,--wrap=free -Wl,--wrap=realloc -Wl,--allow-multiple-definition"
     cmd = ["make", f"-j{args.jobs}", f"CC={fpcc}",
            f"INCLUDE_CFLAGS={cflags}", f"INCLUDE_LFLAGS={lflags}"]
     print(f"  building ({precision}, -{args.opt}, {instr_var(precision)}=1)")

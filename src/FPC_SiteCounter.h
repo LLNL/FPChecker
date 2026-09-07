@@ -21,6 +21,7 @@
 
 typedef struct {
   uint64_t key;       /* (module_id << 32) | (uint32)site_id; 0 = empty  */
+  uint8_t  used;      /* slot occupied                                   */
   uint64_t count;     /* executions of this site so far, this run        */
   uint64_t flagged;   /* reported UNSTABLE  (interval rule)              */
   uint64_t declined;  /* abstained: non-finite shadow (interval rule)    */
@@ -48,9 +49,8 @@ int _FPC_SITE_TAB_INIT_ = 0;
 uint64_t _FPC_SITE_TAB_USED_ = 0;
 uint64_t _FPC_SITE_TAB_OVERFLOW_ = 0;
 
-/* Top bit set so a live key is never 0 (empty). site_id -1 becomes 0xFFFFFFFF. */
 static inline uint64_t _FPC_SITE_KEY_(uint32_t mod, int32_t site) {
-  return (1ULL << 63) | ((uint64_t)mod << 32) | (uint64_t)(uint32_t)site;
+  return ((uint64_t)mod << 32) | (uint64_t)(uint32_t)site;
 }
 
 static inline uint32_t _FPC_SITE_HASH_(uint64_t k) {
@@ -72,9 +72,10 @@ static inline _FPC_SITE_ENT_T *_FPC_SITE_FIND_(uint32_t mod, int32_t site) {
   uint32_t i = _FPC_SITE_HASH_(key);
   for (uint32_t probe = 0; probe < _FPC_SITE_TAB_SIZE_; ++probe) {
     _FPC_SITE_ENT_T *e = &_FPC_SITE_TAB_[(i + probe) & _FPC_SITE_TAB_MASK_];
-    if (e->key == key)
+    if (e->used && e->key == key)
       return e;
-    if (e->key == 0) {
+    if (!e->used) {
+      e->used = 1;
       e->key = key;
       _FPC_SITE_TAB_USED_++;
       return e;
@@ -136,9 +137,9 @@ static inline void _FPC_SITE_DUMP_(FILE *out) {
   fprintf(out, "#FPC_SITES module_id\tsite_id\texecutions\tflagged\tdeclined\n");
   for (uint32_t i = 0; i < _FPC_SITE_TAB_SIZE_; ++i) {
     _FPC_SITE_ENT_T *e = &_FPC_SITE_TAB_[i];
-    if (e->key == 0)
+    if (!e->used)
       continue;
-    uint32_t mod = (uint32_t)((e->key >> 32) & 0x7FFFFFFFu);
+    uint32_t mod = (uint32_t)(e->key >> 32);
     int32_t site = (int32_t)(uint32_t)(e->key & 0xFFFFFFFFu);
     fprintf(out, "#FPC_SITE %u\t%d\t%llu\t%llu\t%llu\n",
             mod, site, (unsigned long long)e->count,
@@ -150,9 +151,9 @@ static inline void _FPC_SITE_DUMP_(FILE *out) {
     fprintf(out, "#FPC_SITES_S module_id\tsite_id\texecutions\tflagged\n");
     for (uint32_t i = 0; i < _FPC_SITE_TAB_SIZE_; ++i) {
       _FPC_SITE_ENT_T *e = &_FPC_SITE_TAB_[i];
-      if (e->key == 0)
+      if (!e->used)
         continue;
-      uint32_t mod = (uint32_t)((e->key >> 32) & 0x7FFFFFFFu);
+      uint32_t mod = (uint32_t)(e->key >> 32);
       int32_t site = (int32_t)(uint32_t)(e->key & 0xFFFFFFFFu);
       fprintf(out, "#FPC_SITE_S %u\t%d\t%llu\t%llu\n",
               mod, site, (unsigned long long)e->count,
@@ -176,9 +177,9 @@ static inline void _FPC_SITE_DUMP_JSON_(FILE *out) {
   if (_FPC_SITE_TAB_INIT_) {
     for (uint32_t i = 0; i < _FPC_SITE_TAB_SIZE_; ++i) {
       _FPC_SITE_ENT_T *e = &_FPC_SITE_TAB_[i];
-      if (e->key == 0)
+      if (!e->used)
         continue;
-      uint32_t mod = (uint32_t)((e->key >> 32) & 0x7FFFFFFFu);
+      uint32_t mod = (uint32_t)(e->key >> 32);
       int32_t site = (int32_t)(uint32_t)(e->key & 0xFFFFFFFFu);
       fprintf(out,
               "%s\n    {\"module_id\": %u, \"site_id\": %d, \"executions\": %llu, "

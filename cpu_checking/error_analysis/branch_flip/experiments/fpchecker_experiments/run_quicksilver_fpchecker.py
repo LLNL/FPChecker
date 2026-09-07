@@ -81,7 +81,7 @@ def build(precision, args, outdir):
     cxxf = (f"-std=c++11 -g -{args.opt} -include cstdint "
             f"{PRECISION_FLAG[precision]} "
             f"{fallback_flag(args.shadow_fallback)}").strip()
-    ldf = f"-g -{args.opt} -Wl,--allow-multiple-definition"
+    ldf = f"-g -{args.opt} -Wl,--wrap=free -Wl,--wrap=realloc -Wl,--wrap=_ZdlPv -Wl,--wrap=_ZdaPv -Wl,--wrap=_ZdlPvm -Wl,--wrap=_ZdaPvm -Wl,--allow-multiple-definition"
     cmd = ["make", f"-j{args.jobs}", f"CXX={fpcxx}",
            f"CXXFLAGS={cxxf}", "CPPFLAGS=", f"LDFLAGS={ldf}"]
     print(f"  building ({precision}, -{args.opt}, {instr_var(precision)}=1)")
