@@ -74,10 +74,8 @@ Tables can be rebuilt without rerunning:
 ## What the tables show
 
 TP/FP/TN/FN are counted per branch execution, joined on
-(module_id, site_id, execution index) with the census. FPChecker abstains on
-comparisons whose shadow state is non-finite; abstentions are excluded from
-its counts, so its row totals can be smaller than the other tools' (see paper
-Appendix C.2). `Crashed` marks EFTSanitizer's build failure on QuickSilver
+(module_id, site_id, execution index) with the census. 
+`Crashed` marks EFTSanitizer's build failure on QuickSilver
 FP32. NAS IS has no floating-point-controlled branches and is all zeros.
 
 ## Layout inside the container
