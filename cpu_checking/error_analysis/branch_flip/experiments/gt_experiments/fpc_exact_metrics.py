@@ -9,14 +9,6 @@ individual branch executions on the occurrence index both sides emit.
     ./fpc_exact_metrics.py --declined silence
     ./fpc_exact_metrics.py --json out.json --latex out.tex --text out.txt
 
-Join key is (module_id, site_id, k), window is k <= E_S, universe is
-window.csv with E_S == 0 sites dropped. Path equivalence is checked per
-site; disagreeing sites and n_fcmp > 1 sites are excluded from event scoring.
-
-The interval rule can abstain (DECLINED): --declined exclude (default) scores
-only executions it judged; --declined silence counts an abstention as a
-stability verdict. The shadow rule (SFLIP/SFLIPNF) never abstains.
-
 Inputs:
     <gt>/<bench>/results/O0/<pair>/{window.csv|sites.txt,flips.csv,report.txt}
     <fpc>/<bench>/results/O0/<prec>[_rule-both|_rule-shadow]/summary.json
@@ -366,9 +358,14 @@ def main():
                 skip = check_path_equivalence(sites, totals, coverage, overflow)
                 skip |= {v[2] for k, v in win.items() if v[3] > 1}
                 for rule in rules:
-                    rows[(prec, bench)][eta][rule] = score(
+                    # the shadow rule has no threshold: one row per cell,
+                    # taken from the first eta run
+                    key_eta = "--" if rule == "shadow" else eta
+                    if key_eta in rows[(prec, bench)] and rule in rows[(prec, bench)][key_eta]:
+                        continue
+                    rows[(prec, bench)][key_eta][rule] = score(
                         sites, flips, evs[rule][1], rule, args.declined, skip)
-                etas_seen[prec].add(eta)
+                    etas_seen[prec].add(key_eta)
                 if (prec, bench) not in order:
                     order.append((prec, bench))
 

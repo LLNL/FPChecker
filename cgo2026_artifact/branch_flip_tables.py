@@ -136,11 +136,13 @@ def build_full(res, prec):
                      "cell": get(res["eftsan"], b, prec)})
         rows.append({"benchmark": b, "tool": "NSan", "rule": "", "eta": "",
                      "cell": get(res["nsan"], b, prec)})
-        for rule in ("interval", "shadow"):
-            for eta in ETAS[prec]:
-                rows.append({"benchmark": b, "tool": "FPChecker", "rule": rule,
-                             "eta": eta,
-                             "cell": get(res["fpc"], b, prec, rule, eta)})
+        for eta in ETAS[prec]:
+            rows.append({"benchmark": b, "tool": "FPChecker", "rule": "interval",
+                         "eta": eta,
+                         "cell": get(res["fpc"], b, prec, "interval", eta)})
+        rows.append({"benchmark": b, "tool": "FPChecker", "rule": "shadow",
+                     "eta": "",
+                     "cell": get(res["fpc"], b, prec, "shadow", "")})
     return rows
 
 
@@ -266,7 +268,7 @@ def render_tex_full(rows, prec):
             v = row_values(r["cell"])
             body = (" & ".join(tex_num(x) for x in v) if v is not None
                     else "\\multicolumn{8}{c}{--}")
-            T.append(f"{lead} & {r['rule'].capitalize()} & {r['eta']} & {body} \\\\")
+            T.append(f"{lead} & {r['rule'].capitalize()} & {r['eta'] or '--'} & {body} \\\\")
         T.append("\\midrule")
     T[-1] = "\\bottomrule"
     T.append("\\end{tabular}")
