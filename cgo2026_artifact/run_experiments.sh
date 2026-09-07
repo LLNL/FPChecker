@@ -1,12 +1,15 @@
 #!/usr/bin/env bash
 # run_experiments.sh -- ground truth, then NSan, EFTSan, FPChecker, each scored; then tables.
 #
-#   bash run_experiments.sh                       # everything (QuickSilver dominates)
-#   bash run_experiments.sh --quick               # no QuickSilver, no NAS SP
+#   bash run_experiments.sh --main                # paper Table 4: EFTSan + FPChecker, FP32, interval rule at 1e-6
+#   bash run_experiments.sh --full                # appendix Tables 11/12: all tools, both precisions, all rules
+#   bash run_experiments.sh --quick               # --full without QuickSilver and NAS SP
 #   bash run_experiments.sh --tools fpchecker,nsan
 #   bash run_experiments.sh --bench amg           # one benchmark: lulesh amg quicksilver bt cg ep is lu mg sp
 #   bash run_experiments.sh --skip-gt             # reuse an existing census
 #
+# Terminal shows one progress line per step; full harness output goes to
+# $OUT/run.log. Per-tool results stay under $EXP/*_experiments/.
 set -uo pipefail
 export PYTHONUNBUFFERED=1
 
@@ -16,14 +19,16 @@ EXPECTED="$FPC_SRC/cpu_checking/error_analysis/branch_flip/expected"
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 OUT="${OUT:-$HERE/results}"
 
-QUICK=0; SKIP_GT=0; TOOLS="nsan,eftsan,fpchecker"; BENCH=""
+QUICK=0; SKIP_GT=0; TOOLS="nsan,eftsan,fpchecker"; BENCH=""; MODE=full
 while [ $# -gt 0 ]; do
   case "$1" in
+    --main)    MODE=main; TOOLS="eftsan,fpchecker" ;;
+    --full)    MODE=full ;;
     --quick)   QUICK=1 ;;
     --skip-gt) SKIP_GT=1 ;;
     --tools)   shift; TOOLS="$1" ;;
     --bench)   shift; BENCH="$1" ;;
-    -h|--help) sed -n '2,10p' "$0"; exit 0 ;;
+    -h|--help) sed -n '2,11p' "$0"; exit 0 ;;
     *) echo "unknown argument: $1"; exit 2 ;;
   esac
   shift
@@ -53,6 +58,11 @@ check() { printf '   %-42s' "$1"; if eval "$2"; then printf 'ok\n'; else printf 
 
 NAS="bt cg ep is lu mg sp"
 [ "$QUICK" = 1 ] && NAS="bt cg ep is lu mg"
+if [ "$MODE" = main ]; then
+  PREC="-p fp32"; FPC_OPTS="-p fp32 -e 1e-6 --bf-mode interval"; SCORE_RULE=interval; TABLES="--main"
+else
+  PREC=""; FPC_OPTS="--bf-mode both"; SCORE_RULE=both; TABLES="--main --full"
+fi
 DO_LULESH=1; DO_AMG=1; DO_QS=$(( QUICK == 0 ))
 if [ -n "$BENCH" ]; then
   DO_LULESH=0; DO_AMG=0; DO_QS=0; NAS=""
@@ -107,10 +117,10 @@ if want eftsan; then
   section "EFTSanitizer  ($(elapsed) elapsed)"
   source activate_eftsan_env.sh >/dev/null
   cd "$EXP/eftsan_experiments"
-  [ "$DO_LULESH" = 1 ] && step "LULESH"         python3 run_lulesh_eftsan.py
-  [ "$DO_AMG" = 1 ] && step "AMG"            python3 run_amg_eftsan.py
-  [ "$DO_QS" = 1 ] && step "QuickSilver" python3 run_quicksilver_eftsan.py
-  for b in $NAS; do step "NAS $b" python3 run_nas_eftsan.py "$b"; done
+  [ "$DO_LULESH" = 1 ] && step "LULESH"         python3 run_lulesh_eftsan.py $PREC
+  [ "$DO_AMG" = 1 ] && step "AMG"            python3 run_amg_eftsan.py $PREC
+  [ "$DO_QS" = 1 ] && step "QuickSilver" python3 run_quicksilver_eftsan.py $PREC
+  for b in $NAS; do step "NAS $b" python3 run_nas_eftsan.py "$b" $PREC; done
   cd "$EXP/gt_experiments"
   step "scoring" python3 eftsan_exact_metrics.py --json "$OUT/eftsan_metrics.json" --text "$OUT/eftsan_metrics.txt"
 fi
@@ -119,16 +129,16 @@ if want fpchecker; then
   section "FPChecker  ($(elapsed) elapsed)"
   source activate_fpchecker_env.sh >/dev/null
   cd "$EXP/fpchecker_experiments"
-  [ "$DO_LULESH" = 1 ] && step "LULESH (interval + shadow, eta sweep)" python3 run_lulesh_fpchecker.py --bf-mode both
-  [ "$DO_AMG" = 1 ] && step "AMG"            python3 run_amg_fpchecker.py --bf-mode both
-  [ "$DO_QS" = 1 ] && step "QuickSilver" python3 run_quicksilver_fpchecker.py --bf-mode both
-  for b in $NAS; do step "NAS $b" python3 run_nas_fpchecker.py --bf-mode both -b "$b"; done
+  [ "$DO_LULESH" = 1 ] && step "LULESH"         python3 run_lulesh_fpchecker.py $FPC_OPTS
+  [ "$DO_AMG" = 1 ] && step "AMG"            python3 run_amg_fpchecker.py $FPC_OPTS
+  [ "$DO_QS" = 1 ] && step "QuickSilver" python3 run_quicksilver_fpchecker.py $FPC_OPTS
+  for b in $NAS; do step "NAS $b" python3 run_nas_fpchecker.py $FPC_OPTS -b "$b"; done
   cd "$EXP/gt_experiments"
-  step "scoring" python3 fpc_exact_metrics.py --rule both --json "$OUT/fpc_metrics.json" --text "$OUT/fpc_metrics.txt"
+  step "scoring" python3 fpc_exact_metrics.py --rule $SCORE_RULE --json "$OUT/fpc_metrics.json" --text "$OUT/fpc_metrics.txt"
 fi
 
 section "tables and comparison with expected  ($(elapsed) elapsed)"
 source activate_fpchecker_env.sh >/dev/null
-python3 "$HERE/branch_flip_tables.py" --main --full --pdf --results "$OUT" --expected "$EXPECTED" $TABLE_ARGS 2>&1 | tee -a "$LOG"
+python3 "$HERE/branch_flip_tables.py" $TABLES --pdf --results "$OUT" --expected "$EXPECTED" $TABLE_ARGS 2>&1 | tee -a "$LOG"
 echo
 echo "results: $OUT   log: $LOG   total $(elapsed)"
