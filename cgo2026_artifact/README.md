@@ -1,82 +1,107 @@
-# CGO 2026 artifact: floating-point branch-flip detection
+# CGO 2026 artifact:
 
 Scores three detectors (FPChecker, EFTSanitizer, NSan) against a brtrace
 ground-truth census on LULESH, AMG, QuickSilver and the NAS Parallel Benchmarks,
 and reproduces Table 4 and Appendix Tables 11-12 of the paper.
 
+Requirements: Docker or Podman, x86-64 Linux host, ~15 GB disk, network access
+during the build (GitHub, conda-forge, repo.anaconda.com). Everything runs single-threaded; more cores do not help.
+
 ## 1. Build the image (~30 min)
 
-    cd cgo2026_artifact
+    git clone --branch v0.7_new_runtime_branch_flip --single-branch https://github.com/llnl/FPChecker.git
+    cd FPChecker/cgo2026_artifact
     docker build -t cgo2026-artifact .
-    # Podman:
+    # Podman (the --format flag is required):
     podman build --format docker -t cgo2026-artifact .
 
-The image is Rocky Linux 8 (glibc 2.28). The build clones FPChecker
-(branch `v0.7_new_runtime_branch_flip`) and EFTSanitizer (pinned commit,
-patched), creates three conda environments (LLVM 19.1.7 for FPChecker,
+The build clones FPChecker and EFTSanitizer (pinned commit, patched) inside
+the image, creates three conda environments (LLVM 19.1.7 for FPChecker,
 brtrace and NSan; LLVM 10 for EFTSanitizer), builds the four tools and the
-NSan compiler-rt runtime, and runs an NSan self-test.
+NSan compiler-rt runtime, and ends with `Successfully tagged`. The base image
+is Rocky Linux 8.
 
-Alternatively load the prebuilt image: `docker load -i cgo2026-artifact.tar.gz`.
+Podman troubleshooting:
+- `SHELL is not supported`: add `--format docker`.
+- `setgroups failed` or ownership errors during the build (rootless Podman
+  without subordinate UIDs): put
 
-Podman notes: `--format docker` is required (the Dockerfile uses `SHELL`).
-Rootless Podman without subordinate UIDs needs
-`ignore_chown_errors = "true"` under `[storage.options.overlay]` in
-`~/.config/containers/storage.conf`. Behind a TLS-inspecting proxy add
-`-v /etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem:/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem:ro`
-to the build command.
+        [storage.options.overlay]
+        ignore_chown_errors = "true"
 
-## 2. Run the experiments
+  in `~/.config/containers/storage.conf`.
+- `Peer certificate cannot be authenticated` (TLS-inspecting proxy): add
+  `-v /etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem:/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem:ro`
+  to the build command.
 
-    mkdir results
+## 2. Start a container
+
+    mkdir -p results
     docker run -it --rm -v $PWD/results:/opt/cgo2026_artifact/branch_flip/results cgo2026-artifact
-    # Podman: add :Z to the volume
+    # Podman: append :Z to the volume, i.e. ...results:Z
 
-Inside the container (`/opt/cgo2026_artifact/branch_flip`):
+This opens a shell inside the container in `/opt/cgo2026_artifact/branch_flip`.
+`results/` on the host is mounted there, so everything the run writes survives
+after the container exits. `--rm` removes the container itself on exit; the
+image stays.
 
-    bash run_experiments.sh --main      # paper Table 4, compared row by row with the reference (~3 h)
-    bash run_experiments.sh --full      # appendix Tables 11-12 (+ Table 4), compared the same way (~10 h)
+## 3. Run
 
-Both run the brtrace census first, then each tool (EFTSanitizer + FPChecker
-for `--main`; NSan too for `--full`), score it, print the table(s) with a
-`match`/`MISMATCH` status per row, and end with `RESULT: OK` when every row
-matches. The terminal shows one line per step; full output is in
-`results/run.log`.
+Inside the container:
+
+    bash run_experiments.sh --main      # paper Table 4  (~3 h)
+    bash run_experiments.sh --full      # appendix Tables 11-12, plus Table 4  (~10 h)
+
+Each run: checks that the four tools are built, runs the brtrace census,
+runs each tool (EFTSanitizer and FPChecker for `--main`; NSan as well for
+`--full`), scores it, and prints the table(s) with a `match`/`MISMATCH`
+status per row. The terminal shows one line per step, e.g.
+
+    == FPChecker  (0h16m elapsed)
+       LULESH                                    done   147s
+       AMG                                       done   168s
+       ...
+    RESULT: OK -- all results match expected
+
+Full output of every step is in `results/run.log`. To leave a long run
+unattended, start the container under `tmux`/`screen`, or use
+`docker run -d` and `docker logs -f`.
 
 If you want something else:
 
     bash run_experiments.sh --full --quick          # skip QuickSilver and NAS SP (~2 h)
     bash run_experiments.sh --full --bench amg      # one benchmark: lulesh amg quicksilver bt cg ep is lu mg sp
-    bash run_experiments.sh --tools fpchecker --skip-gt   # one tool, reuse an existing census
+    bash run_experiments.sh --main --bench lu       # quickest end-to-end check (~1 min)
+    bash run_experiments.sh --tools fpchecker --skip-gt   # one tool, reuse the census of a previous run
 
-## 3. Compare with the paper
+## 4. Compare with the paper
 
-The last step prints the table(s) and writes to `results/`:
+Files in `results/` after a run:
 
 | file | content |
 |---|---|
-| `table_main.{txt,tex,json}` | Table 4 (FP32, EFTSanitizer and FPChecker interval rule at eta=1e-6) |
+| `table_main.{txt,tex,json}` | Table 4: EFTSanitizer and FPChecker (interval rule, eta=1e-6), FP32 |
 | `table_full.{txt,tex,json}` | Tables 11 (FP32) and 12 (FP64): EFTSanitizer, NSan, FPChecker interval rule at three eta and shadow rule |
 | `{fpc,eftsan,nsan}_metrics.json` | scorer output per tool |
-| `compare.txt` | row-by-row check against the committed reference |
+| `compare.txt` | the row-by-row check |
+| `run.log` | everything the harnesses printed |
 
-Every row carries a status: `match` (all four counts identical to the
-reference in `fpchecker_bf/.../branch_flip/expected/`) or `MISMATCH`.
-The run ends with
+Every table row is compared with the reference results committed in
+`fpchecker_bf/cpu_checking/error_analysis/branch_flip/expected/`: `match`
+means all four counts (TP, FP, TN, FN) are identical; anything else is
+`MISMATCH`. The `.tex` files are the tables in the paper's column order.
 
-    RESULT: OK -- all results match expected
+To rebuild the tables from the JSONs without rerunning anything:
 
-Tables can be rebuilt without rerunning:
-
-    python3 branch_flip_tables.py --main --full     # from results/
-    python3 branch_flip_tables.py --score --full    # rerun the scorers first
+    python3 branch_flip_tables.py --main --full          # reads results/
+    python3 branch_flip_tables.py --score --full         # rerun the scorers first
 
 ## What the tables show
 
 TP/FP/TN/FN are counted per branch execution, joined on
-(module_id, site_id, execution index) with the census. 
-`Crashed` marks EFTSanitizer's build failure on QuickSilver
-FP32. NAS IS has no floating-point-controlled branches and is all zeros.
+(module_id, site_id, execution index) with the census. `Crashed` marks
+EFTSanitizer's build failure on QuickSilver FP32. NAS IS has no
+floating-point-controlled branches and is all zeros.
 
 ## Layout inside the container
 
