@@ -73,11 +73,22 @@ def read_window(path):
     return out
 
 
+# Branch sites in these source files compare wall-clock readings, not
+# computed values; they are not scored for any tool (Hypre's timing report).
+UNSCORED_FILES = ("timing.c",)
+
+
+def is_unscored(loc):
+    base = loc.split(":")[0].rsplit("/", 1)[-1]
+    return base in UNSCORED_FILES
+
+
 def sites_from_window(win):
-    """Scoring universe; E_S == 0 sites are dropped as unadjudicated."""
+    """Scoring universe; E_S == 0 sites are dropped as unadjudicated, and
+    sites in UNSCORED_FILES are dropped as non-numerical."""
     out = {}
     for k, (E_S, flips, loc, _n) in win.items():
-        if E_S == 0:
+        if E_S == 0 or is_unscored(loc):
             continue
         out[k] = (E_S, flips, loc)
     return out

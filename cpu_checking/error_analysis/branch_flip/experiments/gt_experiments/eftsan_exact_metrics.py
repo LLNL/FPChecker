@@ -8,15 +8,6 @@ individual branch executions on the occurrence index both sides emit.
     ./eftsan_exact_metrics.py --site-level          # ignore k entirely
     ./eftsan_exact_metrics.py --json out.json --latex out.tex --text out.txt
 
-Counterpart of fpc_exact_metrics.py / nsan_exact_metrics.py. Differences are
-properties of the tool: EFTSan walks one llvm-linked module, so sites are
-joined on source location (file, line, column order) rather than site_id;
-EFTSan is built with Clang 10, so per-site execution counts are compared
-against brtrace's first and a cell whose counts drift widely is scored at
-site level instead of event level; EFTSan has no abstention -- FLIP and
-FLIP_NONFINITE are both detections (--nonfinite exclude drops non-finite
-executions from both detections and denominator as a scoring choice).
-
 Inputs:
     <gt>/<bench>/results/O0/<pair>/{window.csv|sites.txt,flips.csv,report.txt}
     <eft>/<bench>/results/O0/<prec>/{eftsan_sites.csv,eftsan_events.csv,
@@ -66,6 +57,16 @@ def read_brtrace_sites(path):
                 continue
             out[(int(p[1]), int(p[2]))] = (int(p[4]), int(p[3]), p[6].strip())
     return out
+
+
+# Branch sites in these source files compare wall-clock readings, not
+# computed values; they are not scored for any tool (Hypre's timing report).
+UNSCORED_FILES = ("timing.c",)
+
+
+def is_unscored(loc):
+    base = loc.split(":")[0].rsplit("/", 1)[-1]
+    return base in UNSCORED_FILES
 
 
 def read_window(path, kind="branch"):
@@ -417,6 +418,7 @@ def main():
                 continue
 
             win = read_window(window_p, args.kind)
+            win = {k: v for k, v in win.items() if not is_unscored(v[2])}
             nfcmp = {k: v[3] for k, v in win.items()}
             if win:
                 brt = {k: (v[0], v[1], v[2]) for k, v in win.items()}

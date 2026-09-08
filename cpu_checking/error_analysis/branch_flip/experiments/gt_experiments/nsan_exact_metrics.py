@@ -6,16 +6,6 @@ branch executions on the occurrence index both sides emit.
     ./nsan_exact_metrics.py -b LULESH AMG
     ./nsan_exact_metrics.py --json out.json --latex out.tex --text out.txt
 
-Counterpart of fpc_exact_metrics.py: same join, same window (k < E_S), same
-universe (window.csv), same path-equivalence gate. Differences are properties
-of the tool: NSan has no DECLINED verdict (its check is an exact boolean
-disagreement, so every verdict is FLIP); policy variants (resume-discard,
-eq-truncated) replace the eta sweep and appear as separate rows; select and
-oos events are not scored against the branch census.
-
-Occurrence indices are 0-based on both sides. A cell with k >= E_S at full
-coverage is refused, since that is the signature of a one-based tick.
-
 Inputs:
     <gt>/<bench>/results/O0/<pair>/{window.csv,flips.csv,report.txt}
     <nsan>/<bench>/results/O0/<prec>[_<policy>]/events_O0.log
@@ -63,13 +53,26 @@ def read_window(path):
     return out
 
 
+# Branch sites in these source files compare wall-clock readings, not
+# computed values; they are not scored for any tool (Hypre's timing report).
+UNSCORED_FILES = ("timing.c",)
+
+
+def is_unscored(loc):
+    base = loc.split(":")[0].rsplit("/", 1)[-1]
+    return base in UNSCORED_FILES
+
+
 def sites_from_window(win):
     """Scoring universe {(mod, site): (E_S, flips, loc)}; E_S == 0 sites are
-    dropped as unadjudicated, as in the FPChecker and EFTSan scorers."""
+    dropped as unadjudicated and UNSCORED_FILES sites as non-numerical, as in
+    the FPChecker and EFTSan scorers."""
     out, dead = {}, 0
     for k, (E_S, flips, loc, _n) in win.items():
         if E_S == 0:
             dead += 1
+            continue
+        if is_unscored(loc):
             continue
         out[k] = (E_S, flips, loc)
     return out, dead
