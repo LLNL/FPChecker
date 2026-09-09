@@ -29,7 +29,10 @@ RUN curl -fsSL "https://repo.anaconda.com/miniconda/${MINICONDA}" -o /tmp/minico
     && conda clean -afy
 
 # ---------- FPChecker source ----------
-RUN mkdir -p "$ARTIFACT_ROOT" \
+# The clone must not come from the build cache: pass a fresh value to force it
+# (podman build --build-arg CACHE_BUST=$(date +%s) ...), or use --no-cache.
+ARG CACHE_BUST=0
+RUN echo "cache-bust $CACHE_BUST" && mkdir -p "$ARTIFACT_ROOT" \
     && git clone --branch "$FPC_BRANCH" --single-branch "$FPC_REPO" "$FPC_SRC" \
     && cd "$FPC_SRC" && git log -1 --oneline \
     && chmod +x "$ENV_SETUP"/*.sh \
